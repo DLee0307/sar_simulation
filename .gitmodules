@@ -1,0 +1,3 @@
+[submodule "sar_gazebo"]
+  path = sar_gazebo
+  url = https://github.com/DLee0307/sar_gazebo.git

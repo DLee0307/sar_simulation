@@ -14,7 +14,7 @@ Controller::Controller()
     subscriber_Vicon = this->create_subscription<sar_msgs::msg::ViconData>("Vicon/data", 1, std::bind(&Controller::Vicon_Update_Callback, this, std::placeholders::_1));
     
     // INTERNAL SENSOR SUBSCRIBERS
-    subscriber_IMU = this->create_subscription<sar_msgs::msg::IMUData>("imu/data", 1, std::bind(&Controller::IMU_Update_Callback, this, std::placeholders::_1));
+    subscriber_IMU = this->create_subscription<sar_msgs::msg::IMUData>("Imu/data", 1, std::bind(&Controller::IMU_Update_Callback, this, std::placeholders::_1));
 
     // MISC SERVICES/PUBLISHERS
     CTRL_Data_Publisher = this->create_publisher<sar_msgs::msg::CtrlData>("/CTRL/data", 1);

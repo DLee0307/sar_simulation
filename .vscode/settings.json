@@ -84,6 +84,8 @@
         "semaphore": "cpp",
         "stop_token": "cpp",
         "stack": "cpp",
-        "dense": "cpp"
+        "dense": "cpp",
+        "csetjmp": "cpp",
+        "valarray": "cpp"
     }
 }

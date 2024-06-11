@@ -1,0 +1,7 @@
+# Request
+string file_path
+uint8 logging_cmd
+string error_string
+---
+# Response
+bool srv_success

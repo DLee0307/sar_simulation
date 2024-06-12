@@ -203,7 +203,7 @@ void Motor_PluginPrivate::Update(const UpdateInfo &_info,
   else // Thrust_input < prev_thrust
   {
       // x(k) = alpha*x(k-1) + (1-alpha)*u(k)
-      double alpha_down = exp(-0.000001 * this->Sampling_time / this->Tau_down);
+      double alpha_down = exp(-0.000001 * this->Sampling_time / this->Tau_down);//!!!!! need to analyze
       this->Thrust = alpha_down * this->Prev_Thrust + (1-alpha_down)*this->Thrust_input;
 
       //std::cout << "alpha_down: " << alpha_down << std::endl;

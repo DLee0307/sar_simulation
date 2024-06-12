@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<sdf version="1.7">
+  <model name="sand_link">
+    <link name="link">
+      <visual name="visual">
+        <geometry>
+          <box>
+            <size>1 1 0.1</size>
+          </box>
+        </geometry>
+        <material>
+          <pbr>
+            <metal>
+              <albedo_map>models/Checkerboard_L02.jpg</albedo_map>
+            </metal>
+          </pbr>
+          <ambient>1 1 1 1</ambient> <!-- 주변광 조정 -->
+          <diffuse>1 1 1 1</diffuse> <!-- 확산광 조정 -->
+          <specular>1 1 1 1</specular> <!-- 반사광 조정 -->
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

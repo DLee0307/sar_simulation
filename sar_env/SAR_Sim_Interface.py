@@ -25,8 +25,8 @@ class SAR_Sim_Interface(SAR_Base_Interface):
     def __init__(self, GZ_Timeout=False):
         super().__init__()
         #self.loadSimParams()
-        self.node = self
-        self.SAR_Config = "default_config"
+        self.node = self # If remove this cannot send command?
+        #self.SAR_Config = "default_config"
 
         self.GZ_Sim_process = None
         self.SAR_DC_process = None

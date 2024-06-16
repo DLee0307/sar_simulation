@@ -118,7 +118,9 @@ class SAR_Base_Interface(Node):
         #self.r_B_O = [0,0,0]
         self.StateData_subscriber = self.create_subscription(SARStateData,'/SAR_DC/StateData',self._SAR_StateDataCallback,1)
         self.TriggerData_subscriber = self.create_subscription(SARTriggerData,'/SAR_DC/TriggerData',self._SAR_TriggerDataCallback,1)
-
+        self.ImpactData_subscriber = self.create_subscription(SARImpactData,'/SAR_DC/ImpactData',self._SAR_ImpactDataCallback,1)
+        self.MiscData_subscriber = self.create_subscription(SARMiscData,'/SAR_DC/MiscData',self._SAR_MiscDataCallback,1)
+        
         self.ROSParams_subscriber = self.create_subscription(ROSParams,'/ROS2/PARAMETER',self._ROS_PARAMETERCallback,1)
 
     def loadBaseParams(self):
@@ -195,7 +197,60 @@ class SAR_Base_Interface(Node):
             self.Ang_Acc_range = Ang_Acc_range
 
     def startPos_ImpactTraj(self,V_B_P,Acc=None,Tau_CR_start=None):
-        print()
+
+        ## DESIRED RELATIVE VELOCITY VALUES
+        V_tx,_,V_perp = V_B_P
+        # print("V_tx value : ", V_tx)
+        # print("V_perp value : ", V_perp)
+
+        ## CALCULATE STARTING TAU VALUE
+        if Tau_CR_start == None:
+            t_rot_max = np.sqrt(np.radians(360)/np.max(np.abs(self.Ang_Acc_range))) # Allow enough time for a full rotation [s]
+            # print("Ang_Acc_range : ", self.Ang_Acc_range)
+            # print("t_rot_max : ", t_rot_max)
+            Tau_CR_start = t_rot_max*np.random.uniform(1.9,2.1) # Add noise to starting condition
+            # print("Collision_Radius : ", self.Collision_Radius)
+            Tau_Body_start = (Tau_CR_start + self.Collision_Radius/V_perp) # Tau read by body
+            # print("Tau_Body_start : ", Tau_Body_start)
+            Tau_Accel_start = 1.0 # Acceleration time to desired velocity conditions [s]
+
+        ## CALC STARTING POSITION IN GLOBAL COORDS
+        # (Derivation: Research_Notes_Book_3.pdf (9/17/23))
+        r_P_O = np.array(self.r_P_O)                        # Plane Position wrt to Origin - {X_W,Y_W,Z_W}
+        # print("r_P_O : ", r_P_O)
+        r_P_B = np.array([(Tau_CR_start + Tau_Accel_start)*V_tx,
+                          0,
+                          (Tau_Body_start + Tau_Accel_start)*V_perp])             # Body Position wrt to Plane - {t_x,t_y,n_p}
+        # print("r_P_B : ", r_P_B)
+        r_B_O = r_P_O - self.R_PW(r_P_B,self.Plane_Angle_rad)   # Body Position wrt to Origin - {X_W,Y_W,Z_W}
+        # print("r_B_O : ", r_B_O)
+
+
+        ## DESIRED GLOBAL VELOCITY VALUES
+        V_B_O = self.R_PW(V_B_P,self.Plane_Angle_rad)           # Body Velocity wrt to Origin - {X_W,Y_W,Z_W}
+
+
+        ## DESIRED ACCELERATION VALUES
+        if Acc == None:
+            Acc = self.TrajAcc_Max
+            #print("Acc : ", Acc)
+    
+
+        a_x = Acc[0]
+        a_z = Acc[2]
+
+
+        ## CALC OFFSET POSITIONS
+        t_x = V_B_O[0]/a_x    # Time required to reach Vx
+        #print("t_x : ", t_x)
+        t_z = V_B_O[2]/a_z    # Time required to reach Vz
+        #print("t_z : ", t_z)
+
+        x_0 = r_B_O[0] - V_B_O[0]**2/(2*a_x) - V_B_O[0]*t_z     # X-position Vel reached
+        y_0 = r_B_O[1]                                          # Y-position Vel reached
+        z_0 = r_B_O[2] - V_B_O[2]**2/(2*a_z)                    # Z-position Vel reached    
+
+        return [x_0,y_0,z_0]
 
     def _setPlanePose(self,Position=[0,0,2.0],Plane_Angle=180):
         print()
@@ -312,12 +367,17 @@ class SAR_Base_Interface(Node):
 
         ## CALC RELATIVE VELOCITIES
         V_tx = V_mag*np.cos(np.radians(V_angle))
+        #print("V_tx value : ", V_tx)
         V_ty = 0
         V_perp = V_mag*np.sin(np.radians(V_angle))
+        #print("V_perp value : ", V_perp)
         V_B_P = np.array([V_tx,V_ty,V_perp])
+        #print("V_B_P value : ", V_B_P)
 
         ## CALCULATE GLOBAL VELOCITIES
         V_B_O = self.R_PW(V_B_P,self.Plane_Angle_rad)
+        #print("Plane_Angle_rad value : ", self.Plane_Angle_rad)
+        
 
         ## POS VELOCITY CONDITIONS MET
         r_B_O = self.startPos_ImpactTraj(V_B_P,Acc=None,Tau_CR_start=None)
@@ -329,23 +389,23 @@ class SAR_Base_Interface(Node):
             self.sendCmd('P2P_traj',cmd_vals=[np.nan,r_B_O[0],0.5],cmd_flag=0)
             self.sendCmd('P2P_traj',cmd_vals=[np.nan,r_B_O[1],0.5],cmd_flag=1)
             self.sendCmd('P2P_traj',cmd_vals=[np.nan,r_B_O[2],0.5],cmd_flag=2)
-            self.sendCmd('Activate_traj',cmd_vals=[1,1,1])
+            self.sendCmd('Activate_traj',cmd_vals=[1.0,1.0,1.0])
         else:
             raise Exception("Start position not approved")
-        
-        ## POLICY SENDING
-        cmd_vals = self.userInput("Set desired (Tau,AngAcc) Policy: ",float)
-        cmd_vals.append(-100) # Append extra value to match framework
-        self.sendCmd('Policy',cmd_vals,cmd_flag=0)
 
-        ## APPROVE FLIGHT
-        str_input = self.userInput("Approve flight (y/n): ",str)
-        if str_input == 'y':
-            self.sendCmd('Const_Vel_traj',cmd_vals=[V_B_O[0],self.TrajAcc_Max[0],self.TrajJerk_Max[0]],cmd_flag=0)
-            self.sendCmd('Const_Vel_traj',cmd_vals=[V_B_O[2],self.TrajAcc_Max[2],self.TrajJerk_Max[2]],cmd_flag=2)
-            self.sendCmd('Activate_traj',cmd_vals=[1,0,1])
-        else:
-            raise Exception("Flight not approved")
+        # ## POLICY SENDING
+        # cmd_vals = self.userInput("Set desired (Tau,AngAcc) Policy: ",float)
+        # cmd_vals.append(-100) # Append extra value to match framework
+        # self.sendCmd('Policy',cmd_vals,cmd_flag=0)
+
+        # ## APPROVE FLIGHT
+        # str_input = self.userInput("Approve flight (y/n): ",str)
+        # if str_input == 'y':
+        #     self.sendCmd('Const_Vel_traj',cmd_vals=[V_B_O[0],self.TrajAcc_Max[0],self.TrajJerk_Max[0]],cmd_flag=0)
+        #     self.sendCmd('Const_Vel_traj',cmd_vals=[V_B_O[2],self.TrajAcc_Max[2],self.TrajJerk_Max[2]],cmd_flag=2)
+        #     self.sendCmd('Activate_traj',cmd_vals=[1,0,1])
+        # else:
+        #     raise Exception("Flight not approved")
             
 
     ## ========== SYSTEM FUNCTIONS ========== 
@@ -451,6 +511,7 @@ class SAR_Base_Interface(Node):
 
             'P2P_traj':10,
             'Const_Vel_traj':11,
+            'Impact_traj':13,
             'Activate_traj':19,
 
             'Tumble_Detect':20,

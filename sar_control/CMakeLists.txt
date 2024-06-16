@@ -28,7 +28,10 @@ add_executable(SAR_Controller
     src/stabilizer.cpp
     src/Controller_GTC.cpp
     src/Shared_Lib.cpp
-    src/Traj_Funcs.cpp)
+    src/Traj_Funcs.cpp
+    src/ML_Funcs.cpp
+    src/nml.c
+    src/nml_util.c)
 ament_target_dependencies(SAR_Controller rclcpp std_msgs sar_msgs std_srvs yaml-cpp)
 
 target_link_libraries(SAR_Controller yaml-cpp)

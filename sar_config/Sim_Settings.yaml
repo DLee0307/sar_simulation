@@ -5,17 +5,17 @@ SAR_Controller:
     SAR_SETTINGS:
       SAR_Type: "Crazyflie"
       SAR_Config: "A30_L25"
-      Policy_Type: "PARAM_OPTIM"
+      # Policy_Type: "PARAM_OPTIM"
       # Policy_Type: "DEEP_RL_SB3" 
-      # Policy_Type: "DEEP_RL_ONBOARD" 
+      Policy_Type: "DEEP_RL_ONBOARD" 
 
     PLANE_SETTINGS: # INITIAL PLANE POSE SETTINGS
       Plane_Type: "Landing_Surface"
       Plane_Config: "Checkerboard_L02"
       
-      Pos_X_init: 2.7    # [m]
+      Pos_X_init: 3.0    # [m]
       Pos_Y_init: 0.0    # [m]
-      Pos_Z_init: 1.0    # [m]
+      Pos_Z_init: 2.5    # [m]
       Plane_Angle_init: 0.0 # [deg]
 
     CAM_SETTINGS:

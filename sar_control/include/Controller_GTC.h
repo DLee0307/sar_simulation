@@ -15,6 +15,7 @@
 
 // CUSTOM LIBRARIES
 #include "Shared_Lib.h"
+#include "nml.h"
 //#include "Traj_Funcs.h"
 //#include "stabilizer.h"
 

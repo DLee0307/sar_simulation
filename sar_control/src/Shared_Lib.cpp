@@ -270,9 +270,9 @@ bool CamActive_Flag = false;
 
 // DEFINE POLICY TYPE ACTIVATED
 PolicyType Policy = PARAM_OPTIM;
-//nml_mat* X_input;       // STATE MATRIX TO BE INPUT INTO POLICY
-//nml_mat* Y_output;      // POLICY OUTPUT MATRIX
-//float Y_output_trg[4];  // POLICY OUTPUT MATRIX
+nml_mat* X_input;       // STATE MATRIX TO BE INPUT INTO POLICY
+nml_mat* Y_output;      // POLICY OUTPUT MATRIX
+float Y_output_trg[4];  // POLICY OUTPUT MATRIX
 
 // POLICY FLAGS
 bool Policy_Armed_Flag = false;
@@ -288,7 +288,7 @@ float a_Rot_bounds[2] = {-1.0f,1.0f};
 //  DEEP RL POLICY INITIALIZATION
 // ===============================
 
-//NN NN_DeepRL;
+NN NN_DeepRL;
 
 // ==========================================
 //  RECORD SYSTEM STATES AT POLICY TRIGGER
@@ -606,3 +606,15 @@ void controlOutput(const state_t *state, const sensorData_t *sensors)
 float firstOrderFilter(float newValue, float prevValue, float alpha) {
     return alpha * newValue + (1 - alpha) * prevValue;
 }
+
+void updateRotationMatrices()
+{
+    // printf("Updating Rotation Matrices\n");
+    struct vec temp_a = {cosf(radians(Plane_Angle_deg)),0.0f,-sinf(radians(Plane_Angle_deg))};
+    struct vec temp_b = {0.0f,1.0f,0.0f};
+    struct vec temp_c = {sinf(radians(Plane_Angle_deg)),0.0f, cosf(radians(Plane_Angle_deg))};
+
+    R_WP = mrows(temp_a,temp_b,temp_c);
+    R_PW = mtranspose(R_WP);
+}
+

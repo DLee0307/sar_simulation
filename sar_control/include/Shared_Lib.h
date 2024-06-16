@@ -6,12 +6,22 @@
 
 #include "sar_msgs/srv/ctrl_cmd_srv.hpp"
 
+//#include "stabilizer_types.h"
+//#include "console.h"
+//#include "pm.h"
+//#include "quatcompress.h"
 #include "math3d.h"
 #include <cmath>
+#include "nml.h"
 
 #include "Controller_GTC.h"
+//#include "aideck_uart_comm.h"
 #include "Traj_Funcs.h"
 #include "stabilizer.h"
+#include "ML_Funcs.h"
+//#include "Compress_States.h"
+
+#include "ML_Params/NN_Params_DeepRL.h"
 
 #define PWM_MAX 60000
 #define g2Newton (9.81f/1000.0f)
@@ -285,15 +295,15 @@ typedef enum {
 }PolicyType;
 extern PolicyType Policy;
 
-//extern nml_mat* X_input;        // STATE MATRIX TO BE INPUT INTO POLICY
-//extern nml_mat* Y_output;       // POLICY OUTPUT MATRIX
-//extern float Y_output_trg[4];   // POLICY OUTPUT ARRAY
+extern nml_mat* X_input;        // STATE MATRIX TO BE INPUT INTO POLICY
+extern nml_mat* Y_output;       // POLICY OUTPUT MATRIX
+extern float Y_output_trg[4];   // POLICY OUTPUT ARRAY
 
 // ===============================
 //  DEEP RL POLICY INITIALIZATION
 // ===============================
 
-//extern NN NN_DeepRL;
+extern NN NN_DeepRL;
 
 // POLICY FLAGS
 extern bool Policy_Armed_Flag;
@@ -390,6 +400,10 @@ extern struct CTRL_CmdPacket CTRL_Cmd;
 
 void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd);
 void controlOutput(const state_t *state, const sensorData_t *sensors);
+//uint16_t thrust2Motor_CMD(float f);
+void updateRotationMatrices();
+//bool updateOpticalFlowEst();
+//bool updateOpticalFlowAnalytic(const state_t *state, const sensorData_t *sensors);
 float firstOrderFilter(float newValue, float prevValue, float alpha);
 
 

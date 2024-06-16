@@ -54,7 +54,6 @@ bool controllerOutOfTreeTest() {
   return true;
 }
 
-
 void controllerOutOfTreeReset() {
 
     RCLCPP_INFO(rclcpp::get_logger("GTC_Controller"), "GTC Controller Reset");
@@ -117,10 +116,10 @@ void controllerOutOfTreeReset() {
     Tau_trg = 0.0f;
     Tau_CR_trg = 0.0f;
 
-    //Y_output_trg[0] = 0.0f;
-    //Y_output_trg[1] = 0.0f;
-    //Y_output_trg[2] = 0.0f;
-    //Y_output_trg[3] = 0.0f;
+    Y_output_trg[0] = 0.0f;
+    Y_output_trg[1] = 0.0f;
+    Y_output_trg[2] = 0.0f;
+    Y_output_trg[3] = 0.0f;
 
     a_Trg_trg = 0.0f;
     a_Rot_trg = 0.0f;
@@ -154,11 +153,11 @@ void controllerOutOfTreeInit() {
     controllerOutOfTreeTest();
 
     // INIT DEEP RL NN POLICY
-    //X_input = nml_mat_new(3,1);
-    //Y_output = nml_mat_new(4,1);
+    X_input = nml_mat_new(3,1);
+    Y_output = nml_mat_new(4,1);
 
     // INIT DEEP RL NN POLICY
-    // NN_init(&NN_DeepRL,NN_Params_DeepRL);
+    NN_init(&NN_DeepRL,NN_Params_DeepRL);
 
     RCLCPP_INFO(rclcpp::get_logger("GTC_Controller"), "GTC Controller Initiated");
 }
@@ -170,6 +169,92 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                                             const state_t *state, 
                                             const uint32_t tick) 
 {
+/*
+    // CHECK FOR CRAZYSWARM SIGNAL
+    #ifdef CONFIG_SAR_EXP
+    if (RATE_DO_EXECUTE(RATE_100_HZ, tick))
+    {
+        uint32_t now = xTaskGetTickCount();
+        if (now - PrevCrazyswarmTick > 1000)
+        {
+            Armed_Flag = false;
+        }
+    }
+    #endif
+*/
+
+    if (isOFUpdated == true) {
+
+        isOFUpdated = false;
+
+                if(Policy_Armed_Flag == true){
+
+            switch (Policy)
+            {
+
+                case DEEP_RL_ONBOARD:
+
+                    // PASS OBSERVATION THROUGH POLICY NN
+                   /* NN_forward(X_input,Y_output,&NN_DeepRL);
+
+                    // printf("X_input: %.5f %.5f %.5f %.5f\n",X_input->data[0][0],X_input->data[1][0],X_input->data[2][0],X_input->data[3][0]);
+                    // printf("Y_output: %.5f %.5f %.5f %.5f\n\n",Y_output->data[0][0],Y_output->data[1][0],Y_output->data[2][0],Y_output->data[3][0]);
+
+
+                    // SAMPLE POLICY TRIGGER ACTION
+                    a_Trg = GaussianSample(Y_output->data[0][0],Y_output->data[2][0]);
+                    a_Rot = GaussianSample(Y_output->data[1][0],Y_output->data[3][0]);
+
+                    // SCALE ACTIONS
+                    a_Trg = scaleValue(tanhf(a_Trg),-1.0f,1.0f,-1.0f,1.0f);
+                    a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,a_Rot_bounds[0],a_Rot_bounds[1]);
+
+                    // EXECUTE POLICY IF TRIGGERED
+                    if(a_Trg >= 0.5f && onceFlag == false && abs(Tau_CR) <= 1.0f)
+                    {
+                        onceFlag = true;
+
+                        // UPDATE AND RECORD TRIGGER VALUES
+                        Trg_Flag = true;  
+                        Pos_B_O_trg = Pos_B_O;
+                        Vel_B_O_trg = Vel_B_O;
+                        Quat_B_O_trg = Quat_B_O;
+                        Omega_B_O_trg = Omega_B_O;
+
+                        Pos_P_B_trg = Pos_P_B;
+                        Vel_B_P_trg = Vel_B_P;
+                        Quat_P_B_trg = Quat_P_B;
+                        Omega_B_P_trg = Omega_B_P;
+
+                        Tau_trg = Tau;
+                        Tau_CR_trg = Tau_CR;
+                        Theta_x_trg = Theta_x;
+                        Theta_y_trg = Theta_y;
+                        D_perp_trg = D_perp;
+                        D_perp_CR_trg = D_perp_CR;
+
+                        Y_output_trg[0] = Y_output->data[0][0];
+                        Y_output_trg[1] = Y_output->data[1][0];
+                        Y_output_trg[2] = Y_output->data[2][0];
+                        Y_output_trg[3] = Y_output->data[3][0];
+
+                        a_Trg_trg = a_Trg;
+                        a_Rot_trg = a_Rot;
+
+                        M_d.x = 0.0f;
+                        M_d.y = a_Rot*Iyy;
+                        M_d.z = 0.0f;
+                    }*/
+                        
+                    break;
+
+                
+                    
+            default:
+                break;
+            }                    
+        }
+    }
 
     // STATE UPDATES
     if (RATE_DO_EXECUTE(RATE_100_HZ, tick)) {

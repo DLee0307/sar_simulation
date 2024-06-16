@@ -256,6 +256,13 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         }
     }
 
+
+    if (RATE_DO_EXECUTE(RATE_25_HZ, tick))
+    {
+        updateRotationMatrices();
+    }
+
+
     // STATE UPDATES
     if (RATE_DO_EXECUTE(RATE_100_HZ, tick)) {
 
@@ -263,9 +270,9 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
         // CALC STATES WRT ORIGIN
         Pos_B_O = mkvec(state->position.x-0.0325, state->position.y+0.0325, state->position.z);          // [m]
-        Vel_B_O = mkvec(state->velocity.x, state->velocity.y, state->velocity.z);          // [m/s]
-        Accel_B_O = mkvec(sensors->acc.x*9.81f, sensors->acc.y*9.81f, sensors->acc.z*9.81f); // [m/s^2]
-        Accel_B_O_Mag = firstOrderFilter(vmag(Accel_B_O),Accel_B_O_Mag,0.5f);
+        Vel_B_O = mkvec(state->velocity.x, state->velocity.y, state->velocity.z);               // [m/s]
+        Accel_B_O = mkvec(sensors->acc.x*9.81f, sensors->acc.y*9.81f, sensors->acc.z*9.81f);    // [m/s^2]
+        Accel_B_O_Mag = firstOrderFilter(vmag(Accel_B_O),Accel_B_O_Mag,1.0f) - 9.81f;           // [m/s^2]
 
 
 
@@ -282,34 +289,82 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                         state->attitudeQuaternion.z,
                         state->attitudeQuaternion.w);
 
+        // CALC STATES WRT PLANE
+        Pos_P_B = mvmul(R_WP,vsub(r_P_O,Pos_B_O));  ///=!! r_P_O plane position vector.
+        Vel_B_P = mvmul(R_WP,Vel_B_O);
+        Vel_mag_B_P = vmag(Vel_B_P);
+        Vel_angle_B_P = atan2f(Vel_B_P.z,Vel_B_P.x)*Rad2Deg;
+        Omega_B_P = Omega_B_O;
+
+
+/*
+        // LAGGING STATES TO RECORD IMPACT VALUES
+        // NOTE: A circular buffer would be a true better option if time allows
+        if (cycleCounter % 5 == 0)
+        {
+            Vel_mag_B_P_prev_N = Vel_mag_B_P;
+            Vel_angle_B_P_prev_N = Vel_angle_B_P;
+            Quat_B_O_prev_N = Quat_B_O;
+            Omega_B_O_prev_N = Omega_B_O;
+            dOmega_B_O_prev_N = dOmega_B_O;
+        }
+        cycleCounter++;
         
 
+        // ONBOARD IMPACT DETECTION
+        if (dOmega_B_O.y > 300.0f && Impact_Flag_OB == false)
+        {
+            Impact_Flag_OB = true;
+            Vel_mag_B_P_impact_OB = Vel_mag_B_P_prev_N;
+            Vel_angle_B_P_impact_OB = Vel_angle_B_P_prev_N;
+            Quat_B_O_impact_OB = Quat_B_O_prev_N;
+            Omega_B_O_impact_OB = Omega_B_O_prev_N;
+            dOmega_B_O_impact_OB.y = dOmega_B_O_prev_N.y;
 
-        // CALC STATES WRT PLANE
-        //Pos_P_B = mvmul(R_WP,vsub(r_P_O,Pos_B_O)); ///=!! r_P_O plane position vector.
-        //Vel_B_P = mvmul(R_WP,Vel_B_O);
-        //Vel_mag_B_P = vmag(Vel_B_P);
-        //Vel_angle_B_P = atan2f(Vel_B_P.z,Vel_B_P.x)*Rad2Deg;
-        //Omega_B_P = Omega_B_O;
-
-
-
-        // if (Accel_B_O_Mag > 10.0f && Impact_Flag_OB == false)
-        // {
-        //     Impact_Flag_OB = true;
-        //     Pos_B_O_impact_OB = Pos_B_O;
-        //     Vel_B_P_impact_OB = Vel_B_P;
-        //     Quat_B_O_impact_OB = Quat_B_O;
-        //     Omega_B_P_impact_OB = Omega_B_P;
-        //     Accel_B_O_Mag_impact_OB = Accel_B_O_Mag;
-        // }
-
+            // TURN ON IMPACT LEDS
+            #ifdef CONFIG_SAR_EXP
+            ledSet(LED_GREEN_R, 1);
+            ledSet(LED_BLUE_NRF, 1);
+            #endif
+        }
+*/
 
         // SAVE PREVIOUS VALUES
-        //Omega_B_O_prev = Omega_B_O;
+        Omega_B_O_prev = Omega_B_O;
         prev_tick = tick;
     }
+/*
+    // OPTICAL FLOW UPDATES
+    if (RATE_DO_EXECUTE(RATE_100_HZ, tick))
+    {
+        // UPDATE GROUND TRUTH OPTICAL FLOW
+        updateOpticalFlowAnalytic(state,sensors);
 
+        // POLICY VECTOR UPDATE
+        if (CamActive_Flag == true)
+        {
+            // ONLY UPDATE WITH NEW OPTICAL FLOW DATA
+            // isOFUpdated = updateOpticalFlowEst();
+
+            // UPDATE POLICY VECTOR
+            // X_input->data[0][0] = Tau_Cam;
+            // X_input->data[1][0] = Theta_x_Cam;
+            // X_input->data[2][0] = D_perp; 
+            // X_input->data[3][0] = Plane_Angle_deg; 
+        }
+        else
+        {
+            // UPDATE AT THE ABOVE FREQUENCY
+            isOFUpdated = true;
+
+            // UPDATE POLICY VECTOR
+            X_input->data[0][0] = scaleValue(Tau_CR,-5.0f,5.0f,-1.0f,1.0f);
+            X_input->data[1][0] = scaleValue(Theta_x,-20.0f,20.0f,-1.0f,1.0f);
+            X_input->data[2][0] = scaleValue(D_perp_CR,-0.5f,2.0f,-1.0f,1.0f); 
+            X_input->data[3][0] = scaleValue(Plane_Angle_deg,0.0f,180.0f,-1.0f,1.0f);
+        }
+    }
+*/
     // TRAJECTORY UPDATES
     if (RATE_DO_EXECUTE(RATE_100_HZ, tick)) {
 
@@ -364,7 +419,42 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         //std::cout << "M4_thrust: " << M4_thrust << std::endl;
         
         //std::cout << "controlOutput is executed" << std::endl;
+/*
+         // TUMBLE DETECTION
+        if(b3.z <= 0 && TumbleDetect_Flag == true){ // If b3 axis has a negative z-component (Quadrotor is inverted)
+            Tumbled_Flag = true;
+        }
+
         
+        if(CustomThrust_Flag) // REPLACE THRUST VALUES WITH CUSTOM VALUES
+        {
+            M1_thrust = thrust_override[0];
+            M2_thrust = thrust_override[1];
+            M3_thrust = thrust_override[2];
+            M4_thrust = thrust_override[3];
+
+            // CONVERT THRUSTS TO M_CMD SIGNALS
+            M1_CMD = (int32_t)thrust2Motor_CMD(M1_thrust); 
+            M2_CMD = (int32_t)thrust2Motor_CMD(M2_thrust);
+            M3_CMD = (int32_t)thrust2Motor_CMD(M3_thrust);
+            M4_CMD = (int32_t)thrust2Motor_CMD(M4_thrust);
+        }
+        else if(CustomMotorCMD_Flag)
+        {
+            M1_CMD = M_CMD_override[0]; 
+            M2_CMD = M_CMD_override[1];
+            M3_CMD = M_CMD_override[2];
+            M4_CMD = M_CMD_override[3];
+        }
+        else 
+        {
+            // CONVERT THRUSTS TO M_CMD SIGNALS
+            M1_CMD = (int32_t)thrust2Motor_CMD(M1_thrust); 
+            M2_CMD = (int32_t)thrust2Motor_CMD(M2_thrust);
+            M3_CMD = (int32_t)thrust2Motor_CMD(M3_thrust);
+            M4_CMD = (int32_t)thrust2Motor_CMD(M4_thrust);
+        }
+*/
         if (!Armed_Flag || MotorStop_Flag || Tumbled_Flag || Impact_Flag_OB || Impact_Flag_Ext)
         {
             #ifndef CONFIG_SAR_EXP

@@ -386,6 +386,15 @@ void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd)
             MotorStop_Flag = !MotorStop_Flag;
             break;
 
+        case 8: // Arm Policy Maneuver
+            a_Trg = CTRL_Cmd->cmd_val1;
+            a_Rot = CTRL_Cmd->cmd_val2;
+            a_Rot_bounds[0] = CTRL_Cmd->cmd_val3;
+            a_Rot_bounds[1] = CTRL_Cmd->cmd_flag;
+
+            Policy_Armed_Flag = !Policy_Armed_Flag;
+            break;
+
         case 10: // Upload Point-to-Point Trajectory Values
 
             Traj_Type = P2P;

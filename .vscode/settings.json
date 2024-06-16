@@ -86,6 +86,7 @@
         "stack": "cpp",
         "dense": "cpp",
         "csetjmp": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "*.ipp": "c"
     }
 }

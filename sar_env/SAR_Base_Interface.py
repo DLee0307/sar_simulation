@@ -393,19 +393,19 @@ class SAR_Base_Interface(Node):
         else:
             raise Exception("Start position not approved")
 
-        # ## POLICY SENDING
-        # cmd_vals = self.userInput("Set desired (Tau,AngAcc) Policy: ",float)
-        # cmd_vals.append(-100) # Append extra value to match framework
-        # self.sendCmd('Policy',cmd_vals,cmd_flag=0)
+        ## POLICY SENDING
+        cmd_vals = self.userInput("Set desired (Tau,AngAcc) Policy: ",float)
+        cmd_vals.append(-100.0) # Append extra value to match framework
+        self.sendCmd('Policy',cmd_vals,cmd_flag=0)
 
-        # ## APPROVE FLIGHT
-        # str_input = self.userInput("Approve flight (y/n): ",str)
-        # if str_input == 'y':
-        #     self.sendCmd('Const_Vel_traj',cmd_vals=[V_B_O[0],self.TrajAcc_Max[0],self.TrajJerk_Max[0]],cmd_flag=0)
-        #     self.sendCmd('Const_Vel_traj',cmd_vals=[V_B_O[2],self.TrajAcc_Max[2],self.TrajJerk_Max[2]],cmd_flag=2)
-        #     self.sendCmd('Activate_traj',cmd_vals=[1,0,1])
-        # else:
-        #     raise Exception("Flight not approved")
+        ## APPROVE FLIGHT
+        str_input = self.userInput("Approve flight (y/n): ",str)
+        if str_input == 'y':
+            self.sendCmd('Const_Vel_traj',cmd_vals=[V_B_O[0],self.TrajAcc_Max[0],self.TrajJerk_Max[0]],cmd_flag=0)
+            self.sendCmd('Const_Vel_traj',cmd_vals=[V_B_O[2],self.TrajAcc_Max[2],self.TrajJerk_Max[2]],cmd_flag=2)
+            self.sendCmd('Activate_traj',cmd_vals=[1.0,0.0,1.0])
+        else:
+            raise Exception("Flight not approved")
             
 
     ## ========== SYSTEM FUNCTIONS ========== 

@@ -187,13 +187,14 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
         isOFUpdated = false;
 
-                if(Policy_Armed_Flag == true){
+        if(Policy_Armed_Flag == true){
 
             switch (Policy)
             {
 
                 case DEEP_RL_ONBOARD:
 
+                    std::cout << "Policy_Armed_Flag: " << Policy_Armed_Flag << std::endl;
                     // PASS OBSERVATION THROUGH POLICY NN
                    /* NN_forward(X_input,Y_output,&NN_DeepRL);
 
@@ -333,13 +334,13 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         Omega_B_O_prev = Omega_B_O;
         prev_tick = tick;
     }
-/*
+
     // OPTICAL FLOW UPDATES
     if (RATE_DO_EXECUTE(RATE_100_HZ, tick))
     {
         // UPDATE GROUND TRUTH OPTICAL FLOW
         updateOpticalFlowAnalytic(state,sensors);
-
+/*
         // POLICY VECTOR UPDATE
         if (CamActive_Flag == true)
         {
@@ -362,9 +363,9 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
             X_input->data[1][0] = scaleValue(Theta_x,-20.0f,20.0f,-1.0f,1.0f);
             X_input->data[2][0] = scaleValue(D_perp_CR,-0.5f,2.0f,-1.0f,1.0f); 
             X_input->data[3][0] = scaleValue(Plane_Angle_deg,0.0f,180.0f,-1.0f,1.0f);
-        }
+        }*/
     }
-*/
+
     // TRAJECTORY UPDATES
     if (RATE_DO_EXECUTE(RATE_100_HZ, tick)) {
 

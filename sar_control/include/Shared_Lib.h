@@ -403,7 +403,7 @@ void controlOutput(const state_t *state, const sensorData_t *sensors);
 //uint16_t thrust2Motor_CMD(float f);
 void updateRotationMatrices();
 //bool updateOpticalFlowEst();
-//bool updateOpticalFlowAnalytic(const state_t *state, const sensorData_t *sensors);
+bool updateOpticalFlowAnalytic(const state_t *state, const sensorData_t *sensors);
 float firstOrderFilter(float newValue, float prevValue, float alpha);
 
 

@@ -830,7 +830,8 @@ void Controller::stabilizerLoop() // MAIN CONTROLLER LOOP
     //std::cout << "stabilizerLoop is executed" << std::endl;
 
     // INITIATE CONTROLLER
-    //controllerOutOfTreeInit(); //!! In Controller_GTC.c
+    controllerOutOfTreeInit();
+    Armed_Flag = true;
 
     // RUN STABILIZER LOOP
     while (rclcpp::ok())

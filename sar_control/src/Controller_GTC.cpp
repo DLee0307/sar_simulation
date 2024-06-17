@@ -57,8 +57,8 @@ bool controllerOutOfTreeTest() {
 void controllerOutOfTreeReset() {
 
     RCLCPP_INFO(rclcpp::get_logger("GTC_Controller"), "GTC Controller Reset");
-    RCLCPP_INFO(rclcpp::get_logger("GTC_Controller"), "SAR_Type: %d\n",SAR_Type);
-    RCLCPP_INFO(rclcpp::get_logger("GTC_Controller"), "Policy_Type: %d\n", Policy);
+    RCLCPP_INFO(rclcpp::get_logger("GTC_Controller"), "SAR_Type: %s",SAR_Type);
+    RCLCPP_INFO(rclcpp::get_logger("GTC_Controller"), "Policy_Type: %d", Policy);
     
     J = mdiag(Ixx,Iyy,Izz);
 
@@ -153,7 +153,7 @@ void controllerOutOfTreeInit() {
     controllerOutOfTreeTest();
 
     // INIT DEEP RL NN POLICY
-    X_input = nml_mat_new(3,1);
+    X_input = nml_mat_new(4,1);
     Y_output = nml_mat_new(4,1);
 
     // INIT DEEP RL NN POLICY
@@ -194,9 +194,9 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
                 case DEEP_RL_ONBOARD:
 
-                    std::cout << "Policy_Armed_Flag: " << Policy_Armed_Flag << std::endl;
+                    //std::cout << "Policy_Armed_Flag: " << Policy_Armed_Flag << std::endl;
                     // PASS OBSERVATION THROUGH POLICY NN
-                   /* NN_forward(X_input,Y_output,&NN_DeepRL);
+                    NN_forward(X_input,Y_output,&NN_DeepRL);
 
                     // printf("X_input: %.5f %.5f %.5f %.5f\n",X_input->data[0][0],X_input->data[1][0],X_input->data[2][0],X_input->data[3][0]);
                     // printf("Y_output: %.5f %.5f %.5f %.5f\n\n",Y_output->data[0][0],Y_output->data[1][0],Y_output->data[2][0],Y_output->data[3][0]);
@@ -214,6 +214,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                     if(a_Trg >= 0.5f && onceFlag == false && abs(Tau_CR) <= 1.0f)
                     {
                         onceFlag = true;
+                        //std::cout << "Trigger is generated." << std::endl;
 
                         // UPDATE AND RECORD TRIGGER VALUES
                         Trg_Flag = true;  
@@ -245,7 +246,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                         M_d.x = 0.0f;
                         M_d.y = a_Rot*Iyy;
                         M_d.z = 0.0f;
-                    }*/
+                    }/**/
                         
                     break;
 
@@ -340,7 +341,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
     {
         // UPDATE GROUND TRUTH OPTICAL FLOW
         updateOpticalFlowAnalytic(state,sensors);
-/*
+
         // POLICY VECTOR UPDATE
         if (CamActive_Flag == true)
         {
@@ -353,17 +354,23 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
             // X_input->data[2][0] = D_perp; 
             // X_input->data[3][0] = Plane_Angle_deg; 
         }
-        else
+      else
         {
             // UPDATE AT THE ABOVE FREQUENCY
             isOFUpdated = true;
+
+            //std::cout << "Tau_CR: " << Tau_CR << std::endl;
+            //std::cout << "Theta_x: " << Theta_x << std::endl;
+            //std::cout << "D_perp_CR: " << D_perp_CR << std::endl;
+            //std::cout << "Plane_Angle_deg: " << Plane_Angle_deg << std::endl;
+
 
             // UPDATE POLICY VECTOR
             X_input->data[0][0] = scaleValue(Tau_CR,-5.0f,5.0f,-1.0f,1.0f);
             X_input->data[1][0] = scaleValue(Theta_x,-20.0f,20.0f,-1.0f,1.0f);
             X_input->data[2][0] = scaleValue(D_perp_CR,-0.5f,2.0f,-1.0f,1.0f); 
             X_input->data[3][0] = scaleValue(Plane_Angle_deg,0.0f,180.0f,-1.0f,1.0f);
-        }*/
+        }
     }
 
     // TRAJECTORY UPDATES
@@ -393,13 +400,13 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
         controlOutput(state,sensors);
         F_thrust = clamp(F_thrust,0.0f,Thrust_max*g2Newton*4*0.85f);
-/*
+
         if(AngAccel_Flag == true || Trg_Flag == true)
         {
             F_thrust = 0.0f;
             M = vscl(2.0f,M_d);
         }
-*/
+
         
         // MOTOR MIXING (GTC_Derivation_V2.pdf) 
         M1_thrust = F_thrust * Prop_23_x/(Prop_14_x + Prop_23_x) - M.x * 1/(Prop_14_y + Prop_23_y) - M.y * 1/(Prop_14_x + Prop_23_x) - M.z * Prop_23_y/(C_tf*(Prop_14_y + Prop_23_y));
@@ -420,12 +427,12 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         //std::cout << "M4_thrust: " << M4_thrust << std::endl;
         
         //std::cout << "controlOutput is executed" << std::endl;
-/*
+
          // TUMBLE DETECTION
         if(b3.z <= 0 && TumbleDetect_Flag == true){ // If b3 axis has a negative z-component (Quadrotor is inverted)
             Tumbled_Flag = true;
         }
-
+/*
         
         if(CustomThrust_Flag) // REPLACE THRUST VALUES WITH CUSTOM VALUES
         {

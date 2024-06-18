@@ -30,7 +30,25 @@ Controller::Controller()
     appThread = std::thread(&Controller::appLoop, this);
     controllerThread = std::thread(&Controller::stabilizerLoop, this);
 }
+/*
+void Controller::SAR_DC_ExtImpact_Callback(sar_msgs::SAR_ImpactData::ConstPtr const &msg)
+{
+    Impact_Flag_Ext = msg->Impact_Flag_Ext;
+}
 
+bool Controller::Get_Obs_Resp(sar_msgs::CTRL_Get_Obs::Request &req, sar_msgs::CTRL_Get_Obs::Response &res)
+{
+    res.Tick = tick;
+    res.Tau = Tau;
+    res.Tau_CR = Tau_CR;
+    res.Theta_x = Theta_x;
+    res.D_perp = D_perp;
+    res.D_perp_CR = D_perp_CR;
+    res.Plane_Angle_deg = Plane_Angle_deg;
+
+    return 1;
+}
+*/
 //From : SAR_DataConverter.h TO : CTRL_Command(&CTRL_Cmd);
 void Controller::CMD_Service_Resp(const sar_msgs::srv::CTRLCmdSrv::Request::SharedPtr request,
                      sar_msgs::srv::CTRLCmdSrv::Response::SharedPtr response) {
@@ -595,7 +613,7 @@ void Controller::publishCtrlData()
     CtrlData_msg.optical_flow_cam.z = Tau_Cam;
 
     // POLICY ACTIONS
-    //CtrlData_msg.NN_Output = {tanhf(Y_output->data[0][0]),tanhf(Y_output->data[1][0]),Y_output->data[2][0],Y_output->data[3][0]};
+    CtrlData_msg.nn_output = {tanhf(Y_output->data[0][0]),tanhf(Y_output->data[1][0]),Y_output->data[2][0],Y_output->data[3][0]};
     CtrlData_msg.a_trg = a_Trg;
     CtrlData_msg.a_rot = a_Rot;
 
@@ -673,7 +691,7 @@ void Controller::publishCtrlData()
     CtrlData_msg.tau_cr_trg = Tau_CR_trg;
 
     // POLICY ACTIONS (TRIGGER)
-    //CtrlData_msg.NN_Output_trg = {tanhf(Y_output_trg[0]),tanhf(Y_output_trg[1]),Y_output_trg[2],Y_output_trg[3]};
+    CtrlData_msg.nn_output_trg = {tanhf(Y_output_trg[0]),tanhf(Y_output_trg[1]),Y_output_trg[2],Y_output_trg[3]};
     CtrlData_msg.a_trg_trg = a_Trg_trg;
     CtrlData_msg.a_rot_trg = a_Rot_trg;
 

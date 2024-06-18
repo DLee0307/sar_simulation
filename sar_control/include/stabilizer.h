@@ -25,10 +25,9 @@
 #include "Traj_Funcs.h"
 #include "Controller_GTC.h"
 
-#include "sar_msgs/msg/ms.hpp"
-
-#include "sar_msgs/msg/motor_thrust.hpp"
-#include "sar_msgs/srv/set_trigger.hpp"
+//#include "sar_msgs/msg/ms.hpp"
+//#include "sar_msgs/msg/motor_thrust.hpp"
+//#include "sar_msgs/srv/set_trigger.hpp"
 
 
 #define PWM_MAX 60000
@@ -92,26 +91,28 @@ public:
     void loadParametersFromModel_TypesFile(const std::string &file_path);
 
 private:
-
-    sar_msgs::msg::IMUData::SharedPtr Imu_Data;
-    sar_msgs::msg::ViconData::SharedPtr Vicon_Data;
-
+    // ROS2 Topic Publisher
     rclcpp::Publisher<sar_msgs::msg::CtrlData>::SharedPtr CTRL_Data_Publisher;
     rclcpp::Publisher<sar_msgs::msg::CtrlDebug>::SharedPtr CTRL_Debug_Publisher;
     rclcpp::Publisher<sar_msgs::msg::ROSParams>::SharedPtr ROS_Parmas_Publisher;
 
+    // ROS2 Topic Subscriber
     rclcpp::Subscription<sar_msgs::msg::ViconData>::SharedPtr subscriber_Vicon;
     rclcpp::Subscription<sar_msgs::msg::IMUData>::SharedPtr subscriber_IMU;
 
+    // ROS2 Service
     rclcpp::Service<sar_msgs::srv::CTRLCmdSrv>::SharedPtr CMD_Output_Service;
 
 
-
     // MESSAGES
+    // MESSAGES for Publisher
     sar_msgs::msg::CtrlData CtrlData_msg;
     sar_msgs::msg::CtrlDebug CtrlDebug_msg;
     sar_msgs::msg::ROSParams ROSParams_msg;
 
+    // MESSAGES for Subscriber
+    sar_msgs::msg::IMUData::SharedPtr Imu_Data;
+    sar_msgs::msg::ViconData::SharedPtr Vicon_Data;
 
 };
 

@@ -299,12 +299,6 @@ extern nml_mat* X_input;        // STATE MATRIX TO BE INPUT INTO POLICY
 extern nml_mat* Y_output;       // POLICY OUTPUT MATRIX
 extern float Y_output_trg[4];   // POLICY OUTPUT ARRAY
 
-// ===============================
-//  DEEP RL POLICY INITIALIZATION
-// ===============================
-
-extern NN NN_DeepRL;
-
 // POLICY FLAGS
 extern bool Policy_Armed_Flag;
 extern bool Trg_Flag;
@@ -314,6 +308,12 @@ extern bool onceFlag;
 extern float a_Trg;  
 extern float a_Rot;
 extern float a_Rot_bounds[2];
+
+// ===============================
+//  DEEP RL POLICY INITIALIZATION
+// ===============================
+
+extern NN NN_DeepRL;
 
 // ==========================================
 //  RECORD SYSTEM STATES AT POLICY TRIGGER
@@ -384,6 +384,8 @@ extern struct vec r_P_O;        // Plane Position Vector        [m]
 // =================================
 extern struct mat33 R_WP;       // Rotation matrix from world to plane
 extern struct mat33 R_PW;       // Rotation matrix from plane to world
+
+
 
 // CTRL COMMAND PACKETS
 struct CTRL_CmdPacket{

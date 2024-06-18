@@ -246,7 +246,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                         M_d.x = 0.0f;
                         M_d.y = a_Rot*Iyy;
                         M_d.z = 0.0f;
-                    }/**/
+                    }
                         
                     break;
 

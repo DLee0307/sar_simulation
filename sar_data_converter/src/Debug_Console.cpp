@@ -82,6 +82,7 @@ void SAR_DataConverter::ConsoleLoop()
         mvprintw(24, 42,"Rot_Act_trg: % 6.3f",a_Rot_trg);
 
         mvprintw(25, 0,"V_B_O_trg:  (% 5.2f % 6.2f)",Vel_mag_B_O_trg,Vel_angle_B_O_trg);
+        mvprintw(25, 0,"Eul_P_B_trg [deg]:   % 6.2f",Eul_P_B_trg.y);
         mvprintw(25, 42,"V_B_P_trg: (% 5.2f % 6.2f)",Vel_mag_B_P_trg,Vel_angle_B_P_trg);
 
         mvprintw(27, 0,"============= Impact States ============");
@@ -124,7 +125,7 @@ void SAR_DataConverter::ConsoleLoop()
         refresh();
 
         // Sleep for the desired delay time
-        usleep(delay_time_us);
+        rclcpp::sleep_for(std::chrono::microseconds(delay_time_us));
     }
 
     // Clean up and close the ncurses library

@@ -120,9 +120,9 @@ private:
     float SIM_SPEED = 0.5; 
     float SIM_SLOWDOWN_SPEED = 0.5;
 
-        // =======================
-        //     GAZEBO CALLBACKS
-        // =======================
+    // =======================
+    //     GAZEBO CALLBACKS
+    // =======================
     rclcpp::Subscription<sar_msgs::msg::CtrlData>::SharedPtr CTRL_Data_Sub;
     rclcpp::Subscription<sar_msgs::msg::CtrlDebug>::SharedPtr CTRL_Debug_Sub;
 
@@ -136,6 +136,19 @@ private:
     // ===========================
     rclcpp::Service<sar_msgs::srv::CTRLCmdSrv>::SharedPtr cmd_input_service_;
     rclcpp::Client<sar_msgs::srv::CTRLCmdSrv>::SharedPtr cmd_output_client_;
+
+    // ============================
+    //     DATA PUBLISH OBJECTS
+    // ============================
+    rclcpp::Publisher<sar_msgs::msg::SARStateData>::SharedPtr StateData_Pub;
+    rclcpp::Publisher<sar_msgs::msg::SARTriggerData>::SharedPtr TriggerData_Pub;
+    rclcpp::Publisher<sar_msgs::msg::SARImpactData>::SharedPtr ImpactData_Pub;
+    rclcpp::Publisher<sar_msgs::msg::SARMiscData>::SharedPtr MiscData_Pub;
+
+    sar_msgs::msg::SARStateData StateData_msg;
+    sar_msgs::msg::SARTriggerData TriggerData_msg;
+    sar_msgs::msg::SARImpactData ImpactData_msg;
+    sar_msgs::msg::SARMiscData MiscData_msg;
 
     // ===================
     //     FLIGHT DATA
@@ -179,7 +192,13 @@ private:
     geometry_msgs::msg::Vector3 v_d;
     geometry_msgs::msg::Vector3 a_d;
 
+/*
+    boost::array<double,4> FM{0,0,0,0};
+    boost::array<double,4> MotorThrusts{0,0,0,0};
+    boost::array<uint16_t,4> Motor_CMD{0,0,0,0};
 
+    boost::array<double,4> NN_Output{NAN,NAN,NAN,NAN};
+*/
     //!!!!! Need to compare with Boost!
     std::array<double, 4> FM{0, 0, 0, 0};
     std::array<double, 4> MotorThrusts{0, 0, 0, 0};
@@ -289,19 +308,6 @@ private:
     uint8_t Pad4_Contact = 0;
 
     uint8_t Pad_Connections = 0;
-
-    // ============================
-    //     DATA PUBLISH OBJECTS
-    // ============================
-    rclcpp::Publisher<sar_msgs::msg::SARStateData>::SharedPtr StateData_Pub;
-    rclcpp::Publisher<sar_msgs::msg::SARTriggerData>::SharedPtr TriggerData_Pub;
-    rclcpp::Publisher<sar_msgs::msg::SARImpactData>::SharedPtr ImpactData_Pub;
-    rclcpp::Publisher<sar_msgs::msg::SARMiscData>::SharedPtr MiscData_Pub;
-
-    sar_msgs::msg::SARStateData StateData_msg;
-    sar_msgs::msg::SARTriggerData TriggerData_msg;
-    sar_msgs::msg::SARImpactData ImpactData_msg;
-    sar_msgs::msg::SARMiscData MiscData_msg;
     
     // ====================
     //     DEBUG VALUES

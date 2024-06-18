@@ -112,7 +112,8 @@ void SAR_DataConverter::MainInit()
 {
     //loadInitParams();
     //adjustSimSpeed(SIM_SPEED);
-
+    rclcpp::Clock::SharedPtr clock = this->get_clock();
+    Time_start = clock->now();    
 
 }
 
@@ -120,17 +121,13 @@ void SAR_DataConverter::MainLoop()
 {
 
     MainInit();
-    int loopRate = 1000; // [Hz]
-    rclcpp::Rate rate(loopRate);
+    const int refresh_rate = 50; // 20 Hz
+    const int delay_time_us = 1000000 / refresh_rate;
 
-    rclcpp::Clock::SharedPtr clock = this->get_clock();
-    Time_start = clock->now();
+
     
     while (rclcpp::ok())
     { 
-        rclcpp::Clock::SharedPtr clock = this->get_clock();
-        Time = clock->now();
-
         //checkSlowdown();
         
         // PUBLISH ORGANIZED DATA
@@ -139,7 +136,7 @@ void SAR_DataConverter::MainLoop()
         Publish_ImpactData();
         Publish_MiscData();
 
-        rate.sleep();
+        rclcpp::sleep_for(std::chrono::microseconds(delay_time_us));
     }
 
 

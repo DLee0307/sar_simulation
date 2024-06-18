@@ -266,8 +266,6 @@ void SAR_DataConverter::CtrlData_Callback(const sar_msgs::msg::CtrlData::SharedP
 
     }
 
-/*
-*/
 
 }
 //!!!!! Completed

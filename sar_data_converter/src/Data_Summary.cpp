@@ -1,5 +1,30 @@
 #include "SAR_DataConverter.h"
 
+
+/*
+void SAR_DataConverter::RL_Data_Callback(const sar_msgs::RL_Data::ConstPtr &msg)
+{
+
+    K_ep = msg->K_ep;
+    K_run = msg->K_run;
+    n_rollouts = msg->n_rollouts;
+
+    mu = msg->mu;
+    sigma = msg->sigma;
+    // policy = msg->policy;
+
+    reward = msg->reward;
+    reward_vals = msg->reward_vals;
+
+    // vel_d = msg->vel_d;
+
+
+    if(msg->trialComplete_flag == true)
+    {
+        Time_start = ros::Time::now();
+    }
+}
+*/
 void SAR_DataConverter::Publish_StateData()
 {
 

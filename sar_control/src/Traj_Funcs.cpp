@@ -9,7 +9,7 @@ float s_0_t[3] = {0.0f, 0.0f, 0.0f};        // Traj Start Point [m]
 float s_f_t[3] = {0.0f, 0.0f, 0.0f};        // Traj End Point [m]
 float v_t[3] = {0.0f, 0.0f, 0.0f};          // Traj Vel [m/s]
 float a_t[3] = {0.0f, 0.0f, 0.0f};          // Traj Accel [m/s^2]
-float j_t[3] = {20.0f, 20.0f, 20.0f};    // Traj Jerk [m/s^3]
+float j_t[3] = {20.0f, 20.0f, 20.0f};       // Traj Jerk [m/s^3]
 float T[3] = {0.0f, 0.0f, 0.0f};            // Traj completion time [s]
 float t_traj[3] = {0.0f, 0.0f, 0.0f};       // Traj time counter [s]
 

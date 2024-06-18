@@ -24,8 +24,11 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
     def __init__(self, GZ_Timeout=False):
         super().__init__()
-        #self.loadSimParams()
+        #self.loadSimParams()\
+
+        ##!! Need to analyze
         self.node = self # If remove this cannot send command?
+        self.Clock_Check_Flag = Event() # Stops clock monitoring during launch process
         #self.SAR_Config = "default_config"
 
         self.GZ_Sim_process = None
@@ -42,7 +45,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
 
         ## START SIMULATION
-        self.Clock_Check_Flag = Event() # Stops clock monitoring during launch process
+        self._kill_Sim()
         self._restart_Sim()
 
     def loadSimParams(self):
@@ -160,25 +163,6 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         print()
 
     def _kill_Sim(self):
-        print()
-
-    def _restart_Sim(self):
-        self.Clock_Check_Flag.clear()
-        '''
-        try:
-            # Terminate all processes containing the string 'gz sim'
-            subprocess.run(['pkill', '-f', 'gz sim'], check=True)
-        except subprocess.CalledProcessError as e:
-            print(f"Failed to kill processes or nodes: {e}")
-
-        try:
-            # Terminate ROS2 nodes using pkill
-            subprocess.run(['pkill', '-f', 'SAR_Controller_Node'], check=True)
-            subprocess.run(['pkill', '-f', 'SAR_DataConverter_Node'], check=True)
-            time.sleep(1.0)
-        except subprocess.CalledProcessError as e:
-            print(f"Failed to kill processes or nodes: {e}")
-        '''
         ## KILL ALL POTENTIAL NODE/SUBPROCESSES
         try:
             # Terminate all processes containing the string 'gz sim'
@@ -200,7 +184,18 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         except subprocess.CalledProcessError as e:
             print(f"Failed to kill processes or nodes: {e}")
 
-                ## LAUNCH CONTROLLER
+    def _restart_Sim(self):
+        self.Clock_Check_Flag.clear()
+
+        # ## LAUNCH GAZEBO
+        # self._launch_GZ_Sim()
+
+        # if rospy.get_param(f"/SIM_SETTINGS/GUI_Flag") == True:
+        #     self._wait_for_node(node_name="gazebo_gui",timeout=60,interval=2)
+        # else:
+        #     self._wait_for_node(node_name="gazebo",timeout=60,interval=2)
+
+        ## LAUNCH CONTROLLER
         self._launch_Controller()
         self._wait_for_node(node_name="SAR_Controller_Node",timeout=5,interval=0.25)
 

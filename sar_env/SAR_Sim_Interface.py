@@ -31,6 +31,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         self.GZ_Sim_process = None
         self.SAR_DC_process = None
         self.SAR_Ctrl_process = None
+        self.pause_simulation_process = None # For pausing simulation
 
         self.GZ_ping_ok = False
         self.SAR_DC_ping_ok = False
@@ -231,8 +232,13 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         return True
 
     def pausePhysics(self,pause_flag=True):
-        print()
+        if pause_flag == True:
+            cmd = f"gz service -s /world/sar_world/control --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --timeout 3000 --req 'pause: true'"
+            self.pause_simulation_process = subprocess.Popen(cmd, shell=True)
 
+        else:
+            cmd = f"gz service -s /world/sar_world/control --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --timeout 3000 --req 'pause: false'"
+            self.pause_simulation_process = subprocess.Popen(cmd, shell=True)
 
 
 

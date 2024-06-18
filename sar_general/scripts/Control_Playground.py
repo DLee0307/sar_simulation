@@ -76,7 +76,7 @@ def main(args=None):
     
     ## INIT GAZEBO ENVIRONMENT
     env = SAR_Sim_Interface(GZ_Timeout=False)
-    #env.pausePhysics(False)
+    env.pausePhysics(False)
     
     ## INITIALIZE LOGGING DATA
     #trial_num = 24

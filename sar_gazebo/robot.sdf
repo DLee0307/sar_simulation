@@ -39,7 +39,7 @@ https://gazebosim.org/api/gazebo/4.2/createsystemplugins.html
 https://gazebosim.org/api/gazebo/4.2/migrationplugins.html
 -->
 
-    <world name="sar_world3">
+    <world name="sar_world">
         <physics name="1ms" type="ignored">
             <max_step_size>0.001</max_step_size>
             <real_time_factor>1.0</real_time_factor>
@@ -234,7 +234,7 @@ https://gazebosim.org/api/gazebo/4.2/migrationplugins.html
         <model name='Plane_Base_Model'>
             <static>1</static>
             <link name='Surface_Link'>
-            <pose>0 0 3 0 3.14 0</pose>
+            <pose>3.0 0 2.58 0 3.14 0</pose>
             <inertial>
                 <inertia>
                 <ixx>1000</ixx>

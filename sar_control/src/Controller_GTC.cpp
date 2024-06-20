@@ -404,7 +404,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         if(AngAccel_Flag == true || Trg_Flag == true)
         {
             F_thrust = 0.0f;
-            M = vscl(2.0f,M_d);
+            M = vscl(2.0f,M_d); // divide a vector by a scalar.
         }
 
         

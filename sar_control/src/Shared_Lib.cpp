@@ -542,7 +542,7 @@ void controlOutput(const state_t *state, const sensorData_t *sensors)
     clamp = (A min max) if A < min, then min. if A > max, then max
     veltmul = element-wise vector multiply.
     vneg = -1 * vector
-    vscl = scalar * vector
+    vscl = // divide a vector by a scalar.
     vadd3 = Adding three vector
     mvmul = multiply a matrix by a vector.
     mmul = multiply two matrice.

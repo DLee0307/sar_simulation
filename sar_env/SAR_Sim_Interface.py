@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 import numpy as np
-import sys
+
 import os
+import time
+import subprocess
+from threading import Thread,Event
 import rclpy
 from rclpy.node import Node
+import sys
 
-from threading import Thread,Event
-import subprocess
-import time
+
+
 
 #SET PYTHONPATH 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -88,51 +91,51 @@ class SAR_Sim_Interface(SAR_Base_Interface):
     # ============================
         
     ## ========== GAZEBO FUNCTIONS ==========
-    def handle_Load_Params(self):
+    # def handle_Load_Params(self):
 
-        print("Reset ROS Parameters\n")
-        self.loadBaseParams()
-        self.loadSimParams()
-        self.sendCmd("Load_Params")
+    #     print("Reset ROS Parameters\n")
+    #     self.loadBaseParams()
+    #     self.loadSimParams()
+    #     self.sendCmd("Load_Params")
         
-    def handle_GZ_StickyPads(self):
-        cmd_flag = self.userInput("Turn sticky pads On/Off (1,0): ",int)
-        self.sendCmd("GZ_StickyPads",cmd_flag=cmd_flag)
+    # def handle_GZ_StickyPads(self):
+    #     cmd_flag = self.userInput("Turn sticky pads On/Off (1,0): ",int)
+    #     self.sendCmd("GZ_StickyPads",cmd_flag=cmd_flag)
 
-    def handle_GZ_Pose_Reset(self):
-        print("Reset Pos/Vel -- Sticky off -- Controller Reset\n")
-        self.resetPose()
-        self.pausePhysics(pause_flag=False)
+    # def handle_GZ_Pose_Reset(self):
+    #     print("Reset Pos/Vel -- Sticky off -- Controller Reset\n")
+    #     self.resetPose()
+    #     self.pausePhysics(pause_flag=False)
 
-    def handle_GZ_Global_Vel_traj(self):
+    # def handle_GZ_Global_Vel_traj(self):
 
-        ## GET GLOBAL VEL CONDITIONS 
-        V_mag,V_angle = self.userInput("Flight Velocity (V_mag,V_angle):",float)
+    #     # GET GLOBAL VEL CONDITIONS 
+    #     V_mag,V_angle = self.userInput("Flight Velocity (V_mag,V_angle):",float)
 
-        ## CALC GLOBAL VELOCITIES
-        Vx = V_mag*np.cos(np.radians(V_angle))
-        Vy = 0
-        Vz = V_mag*np.sin(np.radians(V_angle))
-        V_B_O = [Vx,Vy,Vz]
+    #     # CALC GLOBAL VELOCITIES
+    #     Vx = V_mag*np.cos(np.radians(V_angle))
+    #     Vy = 0
+    #     Vz = V_mag*np.sin(np.radians(V_angle))
+    #     V_B_O = [Vx,Vy,Vz]
 
-        self.Sim_VelTraj(self.r_B_O,V_B_O)
-        self.pausePhysics(False)
+    #     self.Sim_VelTraj(self.r_B_O,V_B_O)
+    #     self.pausePhysics(False)
 
-    def handle_GZ_Rel_Vel_traj(self):
+    # def handle_GZ_Rel_Vel_traj(self):
 
-        ## GET RELATIVE VEL CONDITIONS 
-        V_mag,V_angle = self.userInput("Flight Velocity (V_mag,V_angle):",float)
+    #     # GET RELATIVE VEL CONDITIONS 
+    #     V_mag,V_angle = self.userInput("Flight Velocity (V_mag,V_angle):",float)
 
-        ## CALC RELATIVE VELOCITIES
-        V_tx = V_mag*np.cos(np.radians(V_angle))
-        V_ty = 0
-        V_perp = V_mag*np.sin(np.radians(V_angle))
+    #     # CALC RELATIVE VELOCITIES
+    #     V_tx = V_mag*np.cos(np.radians(V_angle))
+    #     V_ty = 0
+    #     V_perp = V_mag*np.sin(np.radians(V_angle))
 
-        ## CALCULATE GLOBAL VELOCITIES
-        V_B_O = self.R_PW(np.array([V_tx,V_ty,V_perp]),self.Plane_Angle_rad)
+    #     # CALCULATE GLOBAL VELOCITIES
+    #     V_B_O = self.R_PW(np.array([V_tx,V_ty,V_perp]),self.Plane_Angle_rad)
 
-        self.Sim_VelTraj(self.r_B_O,V_B_O)
-        self.pausePhysics(False)
+    #     self.Sim_VelTraj(self.r_B_O,V_B_O)
+    #     self.pausePhysics(False)
 
     # ================================
     ##     SIM MONITORING/LAUNCH

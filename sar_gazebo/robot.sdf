@@ -274,7 +274,7 @@ https://gazebosim.org/api/gazebo/4.2/migrationplugins.html
                 <pose>0 0 0.025 0 0 0</pose>
                 <geometry>
                 <box>
-                    <size>4 1 0.05</size>
+                    <size>4 4 0.05</size>
                 </box>
                 </geometry>
             </collision>
@@ -301,7 +301,7 @@ https://gazebosim.org/api/gazebo/4.2/migrationplugins.html
                 <pose>0 0 0.005 0 0 0</pose>
                 <geometry>
                 <box>
-                    <size>4 4 0.01</size>
+                    <size>4 4 0.05</size>
                 </box>
                 </geometry>
                 <material>

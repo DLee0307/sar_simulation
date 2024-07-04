@@ -998,17 +998,17 @@ https://gazebosim.org/api/gazebo/4.2/migrationplugins.html
             </joint>
 
 
-            
+<!--  -->            
             <plugin
                 filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libImu_Plugin.so"
                 name="gz::sim::systems::Imu_Plugin">
             </plugin>
-            
+          
             <plugin
                 filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libVicon_Plugin.so"
                 name="gz::sim::systems::Vicon_Plugin">
-                <link_name>Prop_1</link_name>
-                <!--<link_name>SAR_Body</link_name>-->
+                <!--<link_name>Prop_1</link_name>-->
+                <link_name>SAR_Body</link_name>
             </plugin>
 <!---->
             <plugin

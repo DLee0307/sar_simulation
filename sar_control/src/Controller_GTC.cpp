@@ -35,7 +35,7 @@ void appMain() {
 
     while (1)
     {
-        //std::cout << "CTRL_Cmd.cmd_rx: " << CTRL_Cmd.cmd_rx <<  std::endl;
+        std::cout << "CTRL_Cmd.cmd_rx: " << CTRL_Cmd.cmd_rx <<  std::endl;//!!! If remove this part, cannot run.
 
         if (CTRL_Cmd.cmd_rx == true)
         {
@@ -271,7 +271,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
         float time_delta = (tick-prev_tick)/1000.0f;
 
         // CALC STATES WRT ORIGIN
-        Pos_B_O = mkvec(state->position.x-0.0325, state->position.y+0.0325, state->position.z);          // [m]
+        Pos_B_O = mkvec(state->position.x, state->position.y, state->position.z);               // [m]
         Vel_B_O = mkvec(state->velocity.x, state->velocity.y, state->velocity.z);               // [m/s]
         Accel_B_O = mkvec(sensors->acc.x*9.81f, sensors->acc.y*9.81f, sensors->acc.z*9.81f);    // [m/s^2]
         Accel_B_O_Mag = firstOrderFilter(vmag(Accel_B_O),Accel_B_O_Mag,1.0f) - 9.81f;           // [m/s^2]

@@ -87,6 +87,8 @@
         "dense": "cpp",
         "csetjmp": "cpp",
         "valarray": "cpp",
-        "*.ipp": "c"
+        "*.ipp": "c",
+        "ranges": "cpp",
+        "*.txx": "cpp"
     }
 }

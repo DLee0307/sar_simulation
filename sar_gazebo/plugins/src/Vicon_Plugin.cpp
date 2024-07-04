@@ -63,20 +63,20 @@ void Vicon_Plugin::Configure(const Entity &_entity,
     std::shared_ptr<sdf::Element> sdfCopy = std::const_pointer_cast<sdf::Element>(_sdf);
     sdf::ElementPtr elem = sdfCopy->GetElement("link_name");
     //std::cout << "linkName1: " << elem << std::endl;
-    auto linkName = elem->Get<std::string>();
-    //std::cout << "linkName2: " << linkName << std::endl;
-    auto entities = entitiesFromScopedName(linkName, _ecm, this->dataPtr->model.Entity());
-    //std::cout << "linkName3: " << linkName << std::endl;
+    this->dataPtr->linkName = elem->Get<std::string>();
+    //std::cout << "linkName2: " << this->dataPtr->linkName << std::endl;
+    auto entities = entitiesFromScopedName(this->dataPtr->linkName, _ecm, this->dataPtr->model.Entity());
+    //std::cout << "linkName3: " << this->dataPtr->linkName << std::endl;
     // CHECK IF ENTITY TYPE IS EMPTY
     if (entities.empty()){
-      gzerr << "Link with name[" << linkName << "] not found. ";
+      gzerr << "Link with name[" << this->dataPtr->linkName << "] not found. ";
       //this->dataPtr->validConfig = false;
       return;
     }
 
     // CHECK IF ENTITY TYPE'S SIZE IS ONLY ONE
     else if (entities.size() > 1){
-      gzwarn << "Multiple link entities with name[" << linkName << "] found. "
+      gzwarn << "Multiple link entities with name[" << this->dataPtr->linkName << "] found. "
              << "Using the first one.\n";
     }
     //std::cout << "linkName4: " << linkName << std::endl;
@@ -89,14 +89,35 @@ void Vicon_Plugin::Configure(const Entity &_entity,
     if (!_ecm.EntityHasComponentType(this->dataPtr->linkEntity,
                                      components::Link::typeId)){
       this->dataPtr->linkEntity = kNullEntity;
-      gzerr << "Entity with name[" << linkName << "] is not a link\n";
+      gzerr << "Entity with name[" << this->dataPtr->linkName << "] is not a link\n";
+      //std::cout << "linkName5: " << this->dataPtr->linkName << std::endl;
       //this->dataPtr->validConfig = false;
       return;
     }
+    // Checking Pose Component
+    auto poseComp = _ecm.Component<components::WorldPose>(this->dataPtr->linkEntity);
+    if (poseComp == nullptr) {
+      gzerr << "Pose component not found for entity: " << this->dataPtr->linkEntity << std::endl;
+      // Adding Pose Cmoponent
+      _ecm.CreateComponent(this->dataPtr->linkEntity, components::WorldPose());
+      std::cout << "Added Pose component for entity: " << this->dataPtr->linkEntity << std::endl;
+    } else {
+      std::cout << "Pose component found for entity: " << this->dataPtr->linkEntity << std::endl;
+    }
+  
+    // Checking Velocity Component
+    auto velComp = _ecm.Component<components::WorldLinearVelocity>(this->dataPtr->linkEntity);
+    if (velComp == nullptr) {
+      gzerr << "Velocity component not found for entity: " << this->dataPtr->linkEntity << std::endl;
+      // Adding Velocity Cmoponent
+      _ecm.CreateComponent(this->dataPtr->linkEntity, components::WorldLinearVelocity());
+      std::cout << "Added Velocity component for entity: " << this->dataPtr->linkEntity << std::endl;
+    } else {
+      std::cout << "Velocity component found for entity: " << this->dataPtr->linkEntity << std::endl;
+    }
   }
-
-  //std::cout << "linkName: " << this->dataPtr->linkName << std::endl;
-  //std::cout << "linkEntity: " << this->dataPtr->linkEntity << std::endl;
+  //std::cout << "linkName!!: " << this->dataPtr->linkName << std::endl;
+  //std::cout << "linkEntity!!: " << this->dataPtr->linkEntity << std::endl;
 }
 
 //////////////////////////////////////////////////
@@ -104,7 +125,8 @@ void Vicon_Plugin::PreUpdate(const UpdateInfo &/*_info*/,
     EntityComponentManager &_ecm)
 {
   GZ_PROFILE("Vicon_Plugin::PreUpdate");
-
+  //std::cout << "linkName!!: " << this->dataPtr->linkName << std::endl;
+  //std::cout << "linkEntity!!: " << this->dataPtr->linkEntity << std::endl;
 }
 
 //////////////////////////////////////////////////
@@ -138,19 +160,19 @@ void Vicon_Plugin::PostUpdate(const UpdateInfo &_info,
   //std::cout << "poseComp: " << poseComp->Data() << std::endl; 
   auto _poseComp = poseComp->Data();
   //std::cout << "poseComp: " << _poseComp << std::endl; 
-  /*std::cout << "_poseComp.Pos().(X): " << _poseComp.Pos().X() << std::endl; 
-  std::cout << "_poseComp.Pos().(Y): " << _poseComp.Pos().Y() << std::endl;
-  std::cout << "_poseComp.Pos().(Z): " << _poseComp.Pos().Z() << std::endl;
-  std::cout << "_poseComp.Rot().(X): " << _poseComp.Rot().X() << std::endl;
-  std::cout << "_poseComp.Rot().(Y): " << _poseComp.Rot().Y() << std::endl;
-  std::cout << "_poseComp.Rot().(Z): " << _poseComp.Rot().Z() << std::endl;*/
+  //std::cout << "_poseComp.Pos().(X): " << _poseComp.Pos().X() << std::endl; 
+  //std::cout << "_poseComp.Pos().(Y): " << _poseComp.Pos().Y() << std::endl;
+  //std::cout << "_poseComp.Pos().(Z): " << _poseComp.Pos().Z() << std::endl;
+  //std::cout << "_poseComp.Rot().(X): " << _poseComp.Rot().X() << std::endl;
+  //std::cout << "_poseComp.Rot().(Y): " << _poseComp.Rot().Y() << std::endl;
+  //std::cout << "_poseComp.Rot().(Z): " << _poseComp.Rot().Z() << std::endl;
 
   auto VelComp = _ecm.Component<components::WorldLinearVelocity>(modelEntity);
   auto _VelComp = VelComp->Data();
   //std::cout << "VelComp: " << _VelComp << std::endl; 
-  /*std::cout << "_VelComp.(X): " << _VelComp.X() << std::endl; 
-  std::cout << "_VelComp.(Y): " << _VelComp.Y() << std::endl; 
-  std::cout << "_VelComp.(Z): " << _VelComp.Z() << std::endl;*/
+  //std::cout << "_VelComp.(X): " << _VelComp.X() << std::endl; 
+  //std::cout << "_VelComp.(Y): " << _VelComp.Y() << std::endl; 
+  //std::cout << "_VelComp.(Z): " << _VelComp.Z() << std::endl;
 
   sar_msgs::msg::ViconData msg;
   

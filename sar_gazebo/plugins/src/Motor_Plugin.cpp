@@ -31,6 +31,8 @@ class gz::sim::systems::Motor_PluginPrivate
   public: Entity linkEntity;
   public: std::string linkName;
   
+  public: Entity ParentLinkEntity;
+
   /*
   /// canonical_link
   public: Entity canonicallinkEntity;
@@ -227,12 +229,11 @@ void Motor_PluginPrivate::Update(const UpdateInfo &_info,
   //std::cout << "velocty" << velocty  << std::endl; 
 
   //!!Torque need to solve!!!!!!!!!
-  //!! GET PROPELLER'S(LINK) POSE DIRECTION IN WORLD FRAME
-  //!!const auto ParentworldPose = _ecm.Component<components::WorldPose>(this->jointParentLinkEntity);
-  //!!std::cout << "this->jointParentLinkEntity" << this->jointParentLinkEntity << std::endl;  
-  //!!std::cout << "worldPose1: " << ParentworldPose << std::endl;  
-  //!!const auto &Parentpose = ParentworldPose->Data();
-  //!!std::cout << "Parentpose" << Parentpose << std::endl; 
+  const auto ParentworldPose = _ecm.Component<components::WorldPose>(this->ParentLinkEntity);
+  //std::cout << "ParentLinkEntity: " << this->ParentLinkEntity << std::endl; 
+  //std::cout << "worldPose1: " << ParentworldPose << std::endl;  
+  const auto &Parentpose = ParentworldPose->Data();
+  //std::cout << "Parentpose" << Parentpose << std::endl; 
 
   // CALCULATE THE FORCE ON WORLD FRAME
   gz::math::v7::Vector3d force0(0, 0, this->Thrust * g2Newton);
@@ -244,18 +245,18 @@ void Motor_PluginPrivate::Update(const UpdateInfo &_info,
   //std::cout << "force : " << this->jointName << force << std::endl;
 
   //!!Torque CALCULATE THE TORQUE ON WORLD FRAME
-  //!!gz::math::v7::Vector3d torque0(0, 0, -1 * this->Turn_Direction * this->C_tf * this->Thrust * g2Newton);
-  //!!const auto torque = pose1.Rot().RotateVector(torque0);
+  gz::math::v7::Vector3d torque0(0, 0, -1 * this->Turn_Direction * this->C_tf * this->Thrust * g2Newton);
+  const auto torque = Parentpose.Rot().RotateVector(torque0);
 
   gz::math::v7::Vector3d zeros(0, 0, 0);
 
   // MAKE LINK CLASS INSTANCE 
   Link link(this->linkEntity);
-  //!!Link link1(this->jointParentLinkEntity);
+  Link link1(this->ParentLinkEntity);
 
   // APPLY THE WRENCH ON PROPELLER(LINK)
   link.AddWorldWrench(_ecm, force, zeros);
-  //!!link1.AddWorldWrench(_ecm, zeros, torque0);
+  link1.AddWorldWrench(_ecm, zeros, torque);
   
   // UPDATE THE Prev_Thrust
   this->Prev_Thrust = this->Thrust;
@@ -320,15 +321,30 @@ void Motor_Plugin::Configure(const Entity &_entity,
     return;
 
   ///!!Torque Parent model
-  //!!const auto jointParentName = _ecm.Component<components::ParentEntity>(this->dataPtr->jointEntity)->Data();
-  //!!const auto jointParentName = _ecm.Component<components::ParentEntity>(this->dataPtr->jointEntity);
-  //!!const auto jointParentName = _ecm.Component<components::ParentLinkName>(this->dataPtr->jointEntity)->Data();
-  //!!std::cout << "jointParentName : " << jointParentName << std::endl;
-  //!!auto jointParentLinkEntity = entitiesFromScopedName(jointParentName, _ecm, this->dataPtr->model.Entity());
-  //!!auto parententities = entitiesFromScopedName(jointParentName, _ecm, this->dataPtr->model.Entity());
-  //!!this->dataPtr->jointParentLinkEntity = *parententities.begin();
-  //!!std::cout << "jointParentLinkEntity : " << this->dataPtr->jointParentLinkEntity  << std::endl;
+  // Get ParentLinkNameComp
+  const auto ParentLinkNameComp = _ecm.Component<components::ParentLinkName>(this->dataPtr->jointEntity);
+  //std::cout << "jointEntityComp  : " << this->dataPtr->jointEntity << std::endl;
+  //std::cout << "ParentLinkNameComp  : " << ParentLinkNameComp << std::endl;
+  if (ParentLinkNameComp == nullptr)
+  {
+    gzerr << "ParentLinkName component not found for joint entity: " << this->dataPtr->jointEntity << std::endl;
+    return;
+  }
 
+  // Get ParentEntity data
+  auto ParentLinkName = ParentLinkNameComp->Data();
+  //std::cout << "ParentLinkName : " << ParentLinkName << std::endl;
+
+  auto ParentLinkentities = entitiesFromScopedName(ParentLinkName, _ecm, this->dataPtr->model.Entity());
+  if (ParentLinkentities.empty()){
+    gzerr << "Link with name[" << ParentLinkName << "] not found. ";
+    return;
+  }
+  this->dataPtr->ParentLinkEntity = *ParentLinkentities.begin();
+  //std::cout << "ParentLinkEntity: " << this->dataPtr->ParentLinkEntity << std::endl; 
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // COLLECT THE Motor_Number FROM SDF
   this->dataPtr->Motor_Number = _sdf->Get<double>("Motor_Number");
 
@@ -354,7 +370,7 @@ void Motor_Plugin::Configure(const Entity &_entity,
   //std::cout << "turningDirection: " << turningDirection << std::endl;
   //std::cout << "this->dataPtr->Turn_Direction: " << this->dataPtr->Turn_Direction << std::endl;
 
-  //!!!!Initialize ROS2 node and Publisher
+  //Initialize ROS2 node and Publisher
   auto unique_name = "motor_plugin_node_" + this->dataPtr->jointName;
   //std::cout << "unique_name: " << unique_name << std::endl;
   this->dataPtr->ros_node = std::make_shared<rclcpp::Node>(unique_name);

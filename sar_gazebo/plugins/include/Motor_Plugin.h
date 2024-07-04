@@ -34,6 +34,9 @@
 #include "gz/sim/components/JointPosition.hh"
 #include "gz/sim/components/LinearVelocity.hh"
 #include "gz/sim/components/JointVelocityCmd.hh"
+
+#include "gz/sim/components/ParentLinkName.hh"
+
 #include "gz/sim/components/Link.hh"
 #include "gz/sim/components/Name.hh"
 #include "gz/sim/components/ExternalWorldWrenchCmd.hh"

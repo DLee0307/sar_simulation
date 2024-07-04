@@ -1,3 +1,5 @@
+//Motor_Plugin and Vicon_Plugin is compatible When get link pose you make component but If there is component code in Motor_Plugin you do not need to make the same link component in Vicon_Plugin.
+
 #include "Vicon_Plugin.h"
 
 using namespace gz;

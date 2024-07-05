@@ -28,7 +28,7 @@ SAR_Controller:
 
     GROUND_SETTINGS:
       Ground_Type: "Ground_Surface"
-      Ground_Config: "None"
+      Ground_Config: "Desert_Pattern"
 
     SIM_SETTINGS:
       GUI_Flag: True

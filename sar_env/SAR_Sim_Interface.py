@@ -141,7 +141,8 @@ class SAR_Sim_Interface(SAR_Base_Interface):
     ##     SIM MONITORING/LAUNCH
     # ================================
     def _launch_GZ_Sim(self):
-        print()
+        cmd = "gnome-terminal --disable-factory  --geometry 85x46+1050+0 -- ros2 launch sar_launch Gazebo_sim.launch.py"
+        self.GZ_Sim_process = subprocess.Popen(cmd, shell=True)
 
     def _launch_SAR_DC(self):
         cmd = "gnome-terminal --disable-factory --geometry 85x46+1050+0 -- ros2 run sar_data_converter SAR_DataConverter"
@@ -190,8 +191,8 @@ class SAR_Sim_Interface(SAR_Base_Interface):
     def _restart_Sim(self):
         self.Clock_Check_Flag.clear()
 
-        # ## LAUNCH GAZEBO
-        # self._launch_GZ_Sim()
+        ## LAUNCH GAZEBO
+        self._launch_GZ_Sim()
 
         # if rospy.get_param(f"/SIM_SETTINGS/GUI_Flag") == True:
         #     self._wait_for_node(node_name="gazebo_gui",timeout=60,interval=2)

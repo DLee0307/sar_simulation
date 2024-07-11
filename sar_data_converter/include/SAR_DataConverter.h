@@ -76,6 +76,9 @@ private:
     int LOGGING_RATE = 20;    // Default Logging Rate
     bool SHOW_CONSOLE = true;    
 
+    //@@@ Clock Class
+    rclcpp::Clock::SharedPtr clock_;
+
     // ==================
     //     SAR PARAMS
     // ==================

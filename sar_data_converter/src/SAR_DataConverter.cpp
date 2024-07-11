@@ -12,6 +12,8 @@ SAR_DataConverter::SAR_DataConverter()
         // ROS2 PARAMETER
         ROS_Parmas_Sub = this->create_subscription<sar_msgs::msg::ROSParams>("/ROS2/PARAMETER", 1, std::bind(&SAR_DataConverter::ROSParams_Callback, this, std::placeholders::_1));
 
+        //@@@ Clock 객체를 초기화
+        clock_ = std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
 
         // INITIALIZE STATE DATA PUBLISHERS
         StateData_Pub = this->create_publisher<sar_msgs::msg::SARStateData>("/SAR_DC/StateData", 1);
@@ -35,8 +37,8 @@ bool SAR_DataConverter::CMD_SAR_DC_Callback(const sar_msgs::srv::CTRLCmdSrv::Req
     req_copy->cmd_vals = request->cmd_vals;
     req_copy->cmd_flag = request->cmd_flag;
     req_copy->cmd_rx = request->cmd_rx;
-    //std::cout << "service is requested in DataConverter" <<  std::endl;
-    //std::cout << "cmd_type: " << request->cmd_type << std::endl;
+    std::cout << "service is requested in DataConverter" <<  std::endl;
+    std::cout << "cmd_type: " << request->cmd_type << std::endl;
     //std::cout << "cmd_type: " << req_copy->cmd_type << std::endl;
 
     auto result = cmd_output_client_->async_send_request(req_copy);
@@ -112,9 +114,9 @@ void SAR_DataConverter::MainInit()
 {
     //loadInitParams();
     //adjustSimSpeed(SIM_SPEED);
-    rclcpp::Clock::SharedPtr clock = this->get_clock();
-    Time_start = clock->now();    
-
+    //@@@rclcpp::Clock::SharedPtr clock = this->get_clock();
+    //@@@Time_start = clock->now();    
+    Time_start = clock_->now();    
 }
 
 void SAR_DataConverter::MainLoop()

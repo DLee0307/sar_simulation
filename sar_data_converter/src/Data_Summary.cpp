@@ -32,7 +32,8 @@ void SAR_DataConverter::Publish_StateData()
     //     FLIGHT DATA
     // ===================
     rclcpp::Clock::SharedPtr clock = this->get_clock();
-    rclcpp::Duration Time_delta = clock->now() - Time_start;
+    //@@@rclcpp::Duration Time_delta = clock->now() - Time_start;
+    rclcpp::Duration Time_delta = clock_->now() - Time_start;
     //rclcpp::Duration Time_delta = Time - Time_start;
     StateData_msg.time.sec = Time_delta.seconds();
     StateData_msg.time.nanosec = Time_delta.nanoseconds();

@@ -10,8 +10,9 @@ void SAR_DataConverter::CtrlData_Callback(const sar_msgs::msg::CtrlData::SharedP
     //     FLIGHT DATA
     // ===================
     Time_prev = Time;
-    rclcpp::Clock::SharedPtr clock = this->get_clock();
-    Time = clock->now();
+    //@@@rclcpp::Clock::SharedPtr clock = this->get_clock();
+    //@@@Time = clock->now();
+    Time = clock_->now();
 
     // STATES WRT ORIGIN
     Pose_B_O = ctrl_msg->pose_b_o;
@@ -153,7 +154,8 @@ void SAR_DataConverter::CtrlData_Callback(const sar_msgs::msg::CtrlData::SharedP
     Trg_Flag = ctrl_msg->trg_flag;
     if(ctrl_msg->trg_flag == true && OnceFlag_Trg == false)
     {   
-        Time_trg = clock->now();
+        Time_trg = clock_->now();
+        //@@@Time_trg = clock->now();
         OnceFlag_Trg = true;
         Rot_Sum = Eul_B_O.y;
 
@@ -261,7 +263,8 @@ void SAR_DataConverter::CtrlData_Callback(const sar_msgs::msg::CtrlData::SharedP
 
     if(ctrl_msg->impact_flag_ob == true && OnceFlag_Impact_OB == false)
     {   
-        Time_impact_OB = clock->now();
+        //@@@Time_impact_OB = clock->now();
+        Time_impact_OB = clock_->now();        
         OnceFlag_Impact_OB = true;
 
     }

@@ -15,7 +15,8 @@ void SAR_DataConverter::ConsoleLoop()
         // Clear the screen buffer
       erase();
 
-        mvprintw(0, 0,"t: %.4f",(Time-Time_start).seconds());
+        mvprintw(0, 0,"t: %.4f", (clock_->now() - Time_start).seconds());
+        //@@@mvprintw(0, 0,"t: %.4f",(Time-Time_start).seconds());
         mvprintw(1, 0,"SAR Type:   %s",SAR_Type.c_str());
         mvprintw(2, 0,"SAR Config: %s",SAR_Config.c_str());
 

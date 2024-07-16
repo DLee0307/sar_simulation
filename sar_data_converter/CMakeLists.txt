@@ -14,6 +14,7 @@ find_package(std_srvs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(Curses REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(crazyflie_interfaces REQUIRED)
 
 include_directories(
   include
@@ -30,7 +31,7 @@ add_executable(SAR_DataConverter
 	src/Data_Parsing.cpp
 	src/Data_Summary.cpp
 	src/Debug_Console.cpp)
-ament_target_dependencies(SAR_DataConverter rclcpp std_msgs sar_msgs std_srvs)
+ament_target_dependencies(SAR_DataConverter rclcpp std_msgs sar_msgs std_srvs crazyflie_interfaces)
 
 target_link_libraries(SAR_DataConverter ${CURSES_LIBRARIES} Eigen3::Eigen)
 

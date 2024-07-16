@@ -22,6 +22,7 @@
 
 #include "sar_msgs/srv/ctrl_cmd_srv.hpp"
 
+#include "crazyflie_interfaces/srv/ctrl_cmd_srv.hpp" // Added
 
 class SAR_DataConverter : public rclcpp::Node
 {
@@ -138,7 +139,8 @@ private:
     //     CTRL COMMAND OBJECTS
     // ===========================
     rclcpp::Service<sar_msgs::srv::CTRLCmdSrv>::SharedPtr cmd_input_service_;
-    rclcpp::Client<sar_msgs::srv::CTRLCmdSrv>::SharedPtr cmd_output_client_;
+    rclcpp::Client<sar_msgs::srv::CTRLCmdSrv>::SharedPtr CMD_Output_Service_Sim;
+    rclcpp::Client<crazyflie_interfaces::srv::CTRLCmdSrv>::SharedPtr CMD_Output_Service_Exp;
 
     // ============================
     //     DATA PUBLISH OBJECTS

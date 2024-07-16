@@ -3,8 +3,9 @@ SAR_DataConverter::SAR_DataConverter()
     : Node("SAR_DataConverter_Node") {
 
         cmd_input_service_ = this->create_service<sar_msgs::srv::CTRLCmdSrv>("/SAR_DC/CMD_Input", std::bind(&SAR_DataConverter::CMD_SAR_DC_Callback, this, std::placeholders::_1, std::placeholders::_2));
-        cmd_output_client_ = this->create_client<sar_msgs::srv::CTRLCmdSrv>("/CTRL/Cmd_ctrl"); //To Stabilizer
-        
+        CMD_Output_Service_Sim = this->create_client<sar_msgs::srv::CTRLCmdSrv>("/CTRL/Cmd_ctrl"); //To Stabilizer
+        CMD_Output_Service_Exp = this->create_client<crazyflie_interfaces::srv::CTRLCmdSrv>("/cf1/Cmd_ctrl"); // To crazyflie_server.cpp
+
         // INTERNAL SENSOR SUBSCRIBERS
         CTRL_Data_Sub = this->create_subscription<sar_msgs::msg::CtrlData>("/CTRL/data", 1, std::bind(&SAR_DataConverter::CtrlData_Callback, this, std::placeholders::_1));
         CTRL_Debug_Sub = this->create_subscription<sar_msgs::msg::CtrlDebug>("/CTRL/debug", 1, std::bind(&SAR_DataConverter::CtrlDebug_Callback, this, std::placeholders::_1));
@@ -32,19 +33,34 @@ bool SAR_DataConverter::CMD_SAR_DC_Callback(const sar_msgs::srv::CTRLCmdSrv::Req
                                             sar_msgs::srv::CTRLCmdSrv::Response::SharedPtr response)
 {
     // SIMULATION: SEND COMMAND VALUES TO SIM CONTROLLER (SEND AS SERVICE REQUEST)
-    auto req_copy = std::make_shared<sar_msgs::srv::CTRLCmdSrv::Request>();
-    req_copy->cmd_type = request->cmd_type;
-    req_copy->cmd_vals = request->cmd_vals;
-    req_copy->cmd_flag = request->cmd_flag;
-    req_copy->cmd_rx = request->cmd_rx;
+    auto req_copy_exp = std::make_shared<crazyflie_interfaces::srv::CTRLCmdSrv::Request>();
+    auto req_copy_sim = std::make_shared<sar_msgs::srv::CTRLCmdSrv::Request>();
+    req_copy_exp->cmd_type = request->cmd_type;
+    req_copy_exp->cmd_vals = request->cmd_vals;
+    req_copy_exp->cmd_flag = request->cmd_flag;
+    req_copy_exp->cmd_rx = request->cmd_rx;
+    req_copy_sim->cmd_type = request->cmd_type;
+    req_copy_sim->cmd_vals = request->cmd_vals;
+    req_copy_sim->cmd_flag = request->cmd_flag;
+    req_copy_sim->cmd_rx = request->cmd_rx;    
+
     std::cout << "service is requested in DataConverter" <<  std::endl;
     std::cout << "cmd_type: " << request->cmd_type << std::endl;
     //std::cout << "cmd_type: " << req_copy->cmd_type << std::endl;
+    //std::cout << "DATA_TYPE: " << DATA_TYPE.compare("SIM") << std::endl;
+    if (DATA_TYPE.compare("SIM") == 0)
+    {
+        auto result = CMD_Output_Service_Sim->async_send_request(req_copy_sim);
+        std::cout << "CMD_Output_Service_Sim" << std::endl;
+        return request->cmd_rx;
+    }
+    else
+    {
+        auto result = CMD_Output_Service_Exp->async_send_request(req_copy_exp);
+        std::cout << "CMD_Output_Service_Exp" << std::endl;
 
-    auto result = cmd_output_client_->async_send_request(req_copy);
-
-    return request->cmd_rx;
-
+        return request->cmd_rx;
+    }
 }
 
 void SAR_DataConverter::ROSParams_Callback(const sar_msgs::msg::ROSParams::SharedPtr msg)
@@ -71,7 +87,7 @@ void SAR_DataConverter::ROSParams_Callback(const sar_msgs::msg::ROSParams::Share
     //Plane_Pos.y = msg->pos_y;
     //Plane_Pos.z = msg->pos_z;
 
-     /*   
+    /*   
     // DATA SETTINGS
     if(DATA_TYPE.compare("SIM") == 0)
     {

@@ -40,7 +40,7 @@ def cmd_send(env):
             #21: env.handle_Load_Params,
             #22: env.handle_Start_Logging,
             #23: env.handle_Cap_Logging,
-            #24: env.handle_Arm_Quad,
+            24: env.handle_Arm_Quad,
             #30: env.handle_Thrust_CMD,
             #31: env.handle_Motor_CMD,
             #90: env.handle_GZ_Pose_Reset,

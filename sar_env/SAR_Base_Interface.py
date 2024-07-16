@@ -397,8 +397,9 @@ class SAR_Base_Interface(Node):
             
     def handle_Arm_Quad(self):
 
+        #cmd_flag = self.userInput("Arm Quad On/Off (1,0): ",int)
         cmd_flag = self.userInput("Arm Quad On/Off (1,0): ",int)
-        self.sendCmd("Arm_Quad",cmd_flag=cmd_flag)
+        self.sendCmd("Arm_Quad",cmd_vals=[1.0,1.0,1.0], cmd_flag=cmd_flag)
     
     def handle_Tumble_Detect(self):
 

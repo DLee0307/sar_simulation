@@ -46,7 +46,7 @@ SAR_Controller:
           Base_Izz: 34.2e-6               # [kg*m^2] 
 
           TrajAcc_Max: [1.0, 1.0, 3.1]    # Max Accel for trajectory generation [m/s^2]
-          TrajJerk_Max: [20,20,20]     # Max Jerk for trajectory generation [m/s^3]
+          TrajJerk_Max: [20.0,20.0,20.0]     # Max Jerk for trajectory generation [m/s^3]
 
 
         Leg_Params:

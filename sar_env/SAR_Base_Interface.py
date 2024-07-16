@@ -8,6 +8,8 @@ import os
 import numpy as np
 import getpass
 import asyncio
+import yaml
+import sys
 
 # ROS2 messages
 from sar_msgs.msg import SARStateData
@@ -30,72 +32,26 @@ class SAR_Base_Interface(Node):
     def __init__(self,Experiment_Setup=False):
         
         ## LOGGING PARAMETERS
-        self.BASE_PATH = os.path.dirname(get_package_share_directory('sar_env'))
+        sys.path.append('/home/dlee/ros2_ws/src/sar_simulation')
+        self.BASE_PATH = '/home/dlee/ros2_ws/src/sar_simulation'
         self.Log_Dir = f"{self.BASE_PATH}/sar_logging/local_logs"
         self.Log_Name = "TestLog.csv"
         self.Error_Str = "No_Debug_Data"
 
+        # ## LOGGING PARAMETERS
+        # self.Username = getpass.getuser()
+        # self.Log_Dir = f"/home/{self.Username}/ros2_ws/src/sar_simulation/sar_logging/local_logs"
+        # self.Log_Name = "TestLog.csv"
+        # self.Error_Str = "No_Debug_Data"
+
         if not Experiment_Setup:  
             super().__init__('SAR_Env_Node')
-            #self.loadBaseParams()
+            self.loadBaseParams()
             self._preInit()
 
         else:
-            #self.loadBaseParams()
+            self.loadBaseParams()
             self._preInit()
-
-
-        ## SAR PARAMETERS
-        self.SAR_Type = "None"
-        self.SAR_Config = "None"
-        
-        #self.Pos_0 = [0.0, 0.0, 0.4] 
-
-        ## INERTIAL PARAMETERS
-        self.Ref_Mass = 0.0
-        self.Ref_Ixx = 0.0
-        self.Ref_Iyy = 1.0
-        self.Ref_Izz = 0.0
-
-        ## GEOMETRIC PARAMETERS
-        self.Forward_Reach = 0.0
-        self.Leg_Length = 0.0
-        self.Leg_Angle = 0
-        self.Prop_Front = [0.0, 0.0]
-        self.Prop_Rear = [0.0, 0.0]
-
-        ## EFFECTIVE-GEOEMTRIC PARAMETERS
-        self.L_eff = 0.0
-        self.Gamma_eff = 0.0
-        self.Lx_eff = self.L_eff*np.sin(np.radians(self.Gamma_eff))
-        self.Lz_eff = self.L_eff*np.cos(np.radians(self.Gamma_eff))
-        self.Collision_Radius = max(self.L_eff,self.Forward_Reach)
-
-        ## SYSTEM AND FLIGHT PARAMETERS
-        self.Thrust_max = 0.0
-        self.TrajAcc_Max = [1.0, 1.0, 3.1]
-        self.TrajJerk_Max = [20.0, 20.0, 20.0]
-        self.Tau_up = 0.0
-        self.Tau_down = 0.0
-        self.Ang_Acc_max = (9.81*self.Thrust_max*1e-3*self.Prop_Front[0])*2/self.Ref_Iyy
-        self.setAngAcc_range([-self.Ang_Acc_max, self.Ang_Acc_max])
-        
-        self.Beta_Min_deg = -(self.Gamma_eff + np.degrees(np.arctan2(self.Forward_Reach-self.Lx_eff,self.Lz_eff)))
-        self.Phi_P_B_impact_Min_deg = -self.Beta_Min_deg - self.Gamma_eff + 90
-
-        ## CAM PARAMETERS
-        self.Cam_Config = "None"
-        self.Cam_Active = False
-
-        ## PLANE PARAMETERS
-        self.Plane_Type = "None"
-        self.Plane_Config = "None"
-
-        ## LOGGING PARAMETERS
-        self.Username = getpass.getuser()
-        self.Log_Dir = f"/home/{self.Username}/ros2_ws/src/sar_simulation/sar_logging/local_logs"
-        self.Log_Name = "TestLog.csv"
-        self.Error_Str = "No_Debug_Data"
 
         print(f"{GREEN}")
         print("=============================================")
@@ -124,7 +80,121 @@ class SAR_Base_Interface(Node):
         self.ROSParams_subscriber = self.create_subscription(ROSParams,'/ROS2/PARAMETER',self._ROS_PARAMETERCallback,1)
 
     def loadBaseParams(self):
-        print()
+        # LOAD BASE PARAMETERS
+        param_path_list = [
+            f"{self.BASE_PATH}/sar_config/Base_Settings_Bryan.yaml",
+            f"{self.BASE_PATH}/sar_config/Model_Types_Bryan.yaml",
+            f"{self.BASE_PATH}/sar_config/Cam_Types_Bryan.yaml",
+        ]
+        
+        for path in param_path_list:
+            with open(path, 'r') as file:
+                loaded_parameters = yaml.safe_load(file)
+
+            self.declare_parameters_from_dict(loaded_parameters)
+        
+        ## SAR PARAMETERS
+        self.SAR_Type = self.get_parameter('SAR_SETTINGS.SAR_Type').get_parameter_value().string_value
+        self.SAR_Config = self.get_parameter('SAR_SETTINGS.SAR_Config').get_parameter_value().string_value
+        self.Policy_Type = self.get_parameter('SAR_SETTINGS.Policy_Type').get_parameter_value().string_value
+        # self.get_logger().info(f'SAR_Type: {self.SAR_Type}')
+        # self.get_logger().info(f'SAR_Config: {self.SAR_Config}')
+        # self.get_logger().info(f'Policy_Type: {self.Policy_Type}')
+
+        ## INERTIAL PARAMETERS
+        self.Ref_Mass = self.get_parameter(f"SAR_Type.{self.SAR_Type}.Config.{self.SAR_Config}.Ref_Mass").get_parameter_value().double_value
+        self.Ref_Ixx = self.get_parameter(f"SAR_Type.{self.SAR_Type}.Config.{self.SAR_Config}.Ref_Ixx").get_parameter_value().double_value
+        self.Ref_Iyy = self.get_parameter(f"SAR_Type.{self.SAR_Type}.Config.{self.SAR_Config}.Ref_Iyy").get_parameter_value().double_value
+        self.Ref_Izz = self.get_parameter(f"SAR_Type.{self.SAR_Type}.Config.{self.SAR_Config}.Ref_Izz").get_parameter_value().double_value
+        
+        # self.get_logger().info(f'Ref_Mass: {self.Ref_Mass}')
+        # self.get_logger().info(f'Ref_Ixx: {self.Ref_Ixx}')
+        # self.get_logger().info(f'Ref_Iyy: {self.Ref_Iyy}')
+        # self.get_logger().info(f'Ref_Izz: {self.Ref_Izz}')
+
+        self.Base_Mass = self.get_parameter(f"SAR_Type.{self.SAR_Type}.System_Params.Base_Mass").get_parameter_value().double_value
+        self.Base_Ixx = self.get_parameter(f"SAR_Type.{self.SAR_Type}.System_Params.Base_Ixx").get_parameter_value().double_value
+        self.Base_Iyy = self.get_parameter(f"SAR_Type.{self.SAR_Type}.System_Params.Base_Iyy").get_parameter_value().double_value
+        self.Base_Izz = self.get_parameter(f"SAR_Type.{self.SAR_Type}.System_Params.Base_Izz").get_parameter_value().double_value
+        
+        # self.get_logger().info(f'Base_Mass: {self.Base_Mass}')
+        # self.get_logger().info(f'Base_Ixx: {self.Base_Ixx}')
+        # self.get_logger().info(f'Base_Iyy: {self.Base_Iyy}')
+        # self.get_logger().info(f'Base_Izz: {self.Base_Izz}')
+
+        ## GEOMETRIC PARAMETERS
+        self.Forward_Reach = self.get_parameter(f"SAR_Type.{self.SAR_Type}.System_Params.Forward_Reach").get_parameter_value().double_value
+        self.Leg_Length = self.get_parameter(f"SAR_Type.{self.SAR_Type}.Config.{self.SAR_Config}.Leg_Length").get_parameter_value().double_value
+        self.Leg_Angle = self.get_parameter(f"SAR_Type.{self.SAR_Type}.Config.{self.SAR_Config}.Leg_Angle").get_parameter_value().double_value
+        self.Prop_Front = self.get_parameter(f"SAR_Type.{self.SAR_Type}.System_Params.Prop_Front").get_parameter_value().double_array_value
+        self.Prop_Rear = self.get_parameter(f"SAR_Type.{self.SAR_Type}.System_Params.Prop_Rear").get_parameter_value().double_array_value
+
+        # self.get_logger().info(f'Forward_Reach: {self.Forward_Reach}')
+        # self.get_logger().info(f'Leg_Length: {self.Leg_Length}')
+        # self.get_logger().info(f'Leg_Angle: {self.Leg_Angle}')
+        # self.get_logger().info(f'Prop_Front: {self.Prop_Front}')
+        # self.get_logger().info(f'Prop_Rear: {self.Prop_Rear}')
+
+        ## EFFECTIVE-GEOEMTRIC PARAMETERS
+        self.L_eff = self.get_parameter(f"SAR_Type.{self.SAR_Type}.Config.{self.SAR_Config}.L_eff").get_parameter_value().double_value
+        self.Gamma_eff = self.get_parameter(f"SAR_Type.{self.SAR_Type}.Config.{self.SAR_Config}.Gamma_eff").get_parameter_value().double_value
+        self.Lx_eff = self.L_eff*np.sin(np.radians(self.Gamma_eff))
+        self.Lz_eff = self.L_eff*np.cos(np.radians(self.Gamma_eff))
+        self.Collision_Radius = self.L_eff
+
+        # self.get_logger().info(f'L_eff: {self.L_eff}')
+        # self.get_logger().info(f'Gamma_eff: {self.Gamma_eff}')
+
+        ## SYSTEM AND FLIGHT PARAMETERS
+        self.TrajAcc_Max = self.get_parameter(f"SAR_Type.{self.SAR_Type}.System_Params.TrajAcc_Max").get_parameter_value().double_array_value
+        self.TrajJerk_Max = self.get_parameter(f"SAR_Type.{self.SAR_Type}.System_Params.TrajJerk_Max").get_parameter_value().double_array_value
+        self.Tau_up = self.get_parameter(f"SAR_Type.{self.SAR_Type}.System_Params.Tau_up").get_parameter_value().double_value
+        self.Tau_down = self.get_parameter(f"SAR_Type.{self.SAR_Type}.System_Params.Tau_down").get_parameter_value().double_value
+        self.Thrust_max = self.get_parameter(f"SAR_Type.{self.SAR_Type}.System_Params.Thrust_max").get_parameter_value().double_value
+        self.C_tf = self.get_parameter(f"SAR_Type.{self.SAR_Type}.System_Params.C_tf").get_parameter_value().double_value
+        self.Ang_Acc_max = (9.81*self.Thrust_max*1e-3*self.Prop_Front[0])*2/self.Ref_Iyy
+        self.setAngAcc_range([-self.Ang_Acc_max, self.Ang_Acc_max])
+        
+        self.Beta_Min_deg = -(self.Gamma_eff + np.degrees(np.arctan2(self.Forward_Reach-self.Lx_eff,self.Lz_eff)))
+        self.Phi_P_B_impact_Min_deg = -self.Beta_Min_deg - self.Gamma_eff + 90
+
+        # self.get_logger().info(f'TrajAcc_Max: {self.TrajAcc_Max}')
+        # self.get_logger().info(f'TrajJerk_Max: {self.TrajJerk_Max}')
+        # self.get_logger().info(f'Tau_up: {self.Tau_up}')
+        # self.get_logger().info(f'Tau_down: {self.Tau_down}')
+        # self.get_logger().info(f'Thrust_max: {self.Thrust_max}')
+        # self.get_logger().info(f'C_tf: {self.C_tf}')
+
+        ## CAM PARAMETERS
+        self.Cam_Config = self.get_parameter(f"CAM_SETTINGS.Cam_Config").get_parameter_value().string_value
+        self.Cam_Active = self.get_parameter(f"CAM_SETTINGS.Cam_Active").get_parameter_value().bool_value
+        
+        # self.get_logger().info(f'Cam_Config: {self.Cam_Config}')
+        # self.get_logger().info(f'Cam_Active: {self.Cam_Active}')
+
+        ## PLANE PARAMETERS
+        self.Plane_Type = self.get_parameter(f"PLANE_SETTINGS.Plane_Type").get_parameter_value().string_value
+        self.Plane_Config = self.get_parameter(f"PLANE_SETTINGS.Plane_Config").get_parameter_value().string_value
+        self.Plane_Pos_x_init = self.get_parameter(f"PLANE_SETTINGS.Pos_X_init").get_parameter_value().double_value
+        self.Plane_Pos_y_init = self.get_parameter(f"PLANE_SETTINGS.Pos_Y_init").get_parameter_value().double_value
+        self.Plane_Pos_z_init = self.get_parameter(f"PLANE_SETTINGS.Pos_Z_init").get_parameter_value().double_value
+        self.Plane_Angle_deg_init = self.get_parameter(f"PLANE_SETTINGS.Plane_Angle_init").get_parameter_value().double_value
+
+        # self.get_logger().info(f'Plane_Type: {self.Plane_Type}')
+        # self.get_logger().info(f'Plane_Config: {self.Plane_Config}')
+        # self.get_logger().info(f'Plane_Pos_x_init: {self.Plane_Pos_x_init}')
+        # self.get_logger().info(f'Plane_Pos_y_init: {self.Plane_Pos_y_init}')
+        # self.get_logger().info(f'Plane_Pos_z_init: {self.Plane_Pos_z_init}')
+        # self.get_logger().info(f'Plane_Angle_deg_init: {self.Plane_Angle_deg_init}')
+
+    def declare_parameters_from_dict(self, parameters, parent_key=''):
+        for key, value in parameters.items():
+            full_key = f'{parent_key}.{key}' if parent_key else key
+            if isinstance(value, dict):
+                self.declare_parameters_from_dict(value, full_key)
+            else:
+                if not self.has_parameter(full_key):
+                    self.declare_parameter(full_key, value)
 
     def _getTime(self):
         print()

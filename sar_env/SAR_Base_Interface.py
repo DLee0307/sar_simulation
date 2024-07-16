@@ -59,7 +59,7 @@ class SAR_Base_Interface(Node):
         print("=============================================")
 
         print(f"SAR Type: {self.SAR_Type} -- SAR Config: {self.SAR_Config}\n")
-        print(f"Leg Length: {self.Leg_Length:.3f} m \t Leg Angle: {self.Leg_Angle:.1f} deg")
+        print(f"Leg Length: {self.Leg_Length:.3f} m \t Leg Angle: {self.Leg_Angle:.3f} deg")
         print(f"L_eff: {self.L_eff:.3f} m \t\t Gamma_eff: {self.Gamma_eff:.1f} deg\n")
         print(f"Phi_impact_P_B_Min: {self.Phi_P_B_impact_Min_deg:.1f} deg\n")
 

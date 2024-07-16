@@ -264,7 +264,7 @@ void Controller::loadInitParams()
     this->declare_parameter("SAR_Type." + SAR_Type + ".Leg_Params.K_Yaw", 0.0);
 
     this->declare_parameter("SAR_Type." + SAR_Type + ".Config." + SAR_Config + ".Leg_Length", 0.0);
-    this->declare_parameter("SAR_Type." + SAR_Type + ".Config." + SAR_Config + ".Leg_Angle", 0);
+    this->declare_parameter("SAR_Type." + SAR_Type + ".Config." + SAR_Config + ".Leg_Angle", 0.0);
 
     std::vector<double> default_prop_front = {0.0, 0.0};
     std::vector<double> default_prop_rear = {0.0, 0.0};
@@ -327,7 +327,7 @@ void Controller::loadInitParams()
     K_Yaw = this->get_parameter("SAR_Type." + SAR_Type + ".Leg_Params.K_Yaw").as_double();
 
     Leg_Length = this->get_parameter("SAR_Type." + SAR_Type + ".Config." + SAR_Config + ".Leg_Length").as_double();
-    Leg_Angle = this->get_parameter("SAR_Type." + SAR_Type + ".Config." + SAR_Config + ".Leg_Angle").as_int();
+    Leg_Angle = this->get_parameter("SAR_Type." + SAR_Type + ".Config." + SAR_Config + ".Leg_Angle").as_double();
 
     // UPDATE PROP DISTANCES
     Prop_Front_Vec = this->get_parameter("SAR_Type." + SAR_Type + ".System_Params.Prop_Front").as_double_array();
@@ -494,7 +494,7 @@ void Controller::loadParametersFromModel_TypesFile(const std::string &file_path)
         this->set_parameter(rclcpp::Parameter("SAR_Type." + SAR_Type + ".Leg_Params.K_Yaw", params["SAR_Type"][SAR_Type]["Leg_Params"]["K_Yaw"].as<double>()));
 
         this->set_parameter(rclcpp::Parameter("SAR_Type." + SAR_Type + ".Config." + SAR_Config + ".Leg_Length", params["SAR_Type"][SAR_Type]["Config"][SAR_Config]["Leg_Length"].as<double>()));
-        this->set_parameter(rclcpp::Parameter("SAR_Type." + SAR_Type + ".Config." + SAR_Config + ".Leg_Angle", params["SAR_Type"][SAR_Type]["Config"][SAR_Config]["Leg_Angle"].as<int>()));
+        this->set_parameter(rclcpp::Parameter("SAR_Type." + SAR_Type + ".Config." + SAR_Config + ".Leg_Angle", params["SAR_Type"][SAR_Type]["Config"][SAR_Config]["Leg_Angle"].as<double>()));
 
 
         // UPDATE PROP DISTANCES

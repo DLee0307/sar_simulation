@@ -43,7 +43,7 @@ int LOGGING_RATE = 10;
 bool SHOW_CONSOLE = true;
 
 float Leg_Length = 0.0;
-int Leg_Angle = 0;
+float Leg_Angle = 0.0;
 
 float Tau_up = 0.0;
 float Tau_down= 0.0;

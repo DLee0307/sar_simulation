@@ -80,7 +80,7 @@ extern int LOGGING_RATE;
 extern bool SHOW_CONSOLE;
 
 extern float Leg_Length;
-extern int Leg_Angle;
+extern float Leg_Angle;
 
 extern float Tau_up;
 extern float Tau_down;

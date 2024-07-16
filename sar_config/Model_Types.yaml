@@ -137,7 +137,7 @@ SAR_Controller:
             Ref_Iyy:   33.90E-6
             Ref_Izz:   56.00E-6
 
-            Leg_Angle:  30
+            Leg_Angle:  30.0
             Leg_Length:  25.00E-3
 
             Gamma_eff:  58.68

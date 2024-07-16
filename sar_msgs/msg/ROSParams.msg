@@ -48,7 +48,7 @@ float64 k_pitch
 float64 k_yaw
 
 float64 leg_length
-uint32 leg_angle
+float64 leg_angle
 
 float64[2] prop_front_vec
 float64[2] prop_rear_vec

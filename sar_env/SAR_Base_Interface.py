@@ -11,6 +11,8 @@ import asyncio
 import yaml
 import sys
 
+import asyncio #For Debug
+
 # ROS2 messages
 from sar_msgs.msg import SARStateData
 from sar_msgs.msg import SARTriggerData
@@ -178,14 +180,55 @@ class SAR_Base_Interface(Node):
         self.Plane_Pos_x_init = self.get_parameter(f"PLANE_SETTINGS.Pos_X_init").get_parameter_value().double_value
         self.Plane_Pos_y_init = self.get_parameter(f"PLANE_SETTINGS.Pos_Y_init").get_parameter_value().double_value
         self.Plane_Pos_z_init = self.get_parameter(f"PLANE_SETTINGS.Pos_Z_init").get_parameter_value().double_value
-        self.Plane_Angle_deg_init = self.get_parameter(f"PLANE_SETTINGS.Plane_Angle_init").get_parameter_value().double_value
-
+        self.Plane_Angle_deg_init = self.get_parameter(f"PLANE_SETTINGS.Plane_Angle_init").get_parameter_value().integer_value
+        
         # self.get_logger().info(f'Plane_Type: {self.Plane_Type}')
         # self.get_logger().info(f'Plane_Config: {self.Plane_Config}')
         # self.get_logger().info(f'Plane_Pos_x_init: {self.Plane_Pos_x_init}')
         # self.get_logger().info(f'Plane_Pos_y_init: {self.Plane_Pos_y_init}')
         # self.get_logger().info(f'Plane_Pos_z_init: {self.Plane_Pos_z_init}')
         # self.get_logger().info(f'Plane_Angle_deg_init: {self.Plane_Angle_deg_init}')
+
+        ## CONTROLLER GAIN VALUES
+        self.P_kp_xy = self.get_parameter(f"SAR_Type.{self.SAR_Type}.CtrlGains.P_kp_xy").get_parameter_value().double_value
+        self.P_kd_xy = self.get_parameter(f"SAR_Type.{self.SAR_Type}.CtrlGains.P_kd_xy").get_parameter_value().double_value
+        self.P_ki_xy = self.get_parameter(f"SAR_Type.{self.SAR_Type}.CtrlGains.P_ki_xy").get_parameter_value().double_value
+        self.i_range_xy = self.get_parameter(f"SAR_Type.{self.SAR_Type}.CtrlGains.i_range_xy").get_parameter_value().double_value
+
+        # self.get_logger().info(f'P_kp_xy: {self.P_kp_xy}')
+        # self.get_logger().info(f'P_kd_xy: {self.P_kd_xy}')
+        # self.get_logger().info(f'P_ki_xy: {self.P_ki_xy}')
+        # self.get_logger().info(f'i_range_xy: {self.i_range_xy}')
+
+        self.P_kp_z = self.get_parameter(f"SAR_Type.{self.SAR_Type}.CtrlGains.P_kp_z").get_parameter_value().double_value
+        self.P_kd_z = self.get_parameter(f"SAR_Type.{self.SAR_Type}.CtrlGains.P_kd_z").get_parameter_value().double_value
+        self.P_ki_z = self.get_parameter(f"SAR_Type.{self.SAR_Type}.CtrlGains.P_ki_z").get_parameter_value().double_value
+        self.i_range_z = self.get_parameter(f"SAR_Type.{self.SAR_Type}.CtrlGains.i_range_z").get_parameter_value().double_value
+
+        # self.get_logger().info(f'P_kp_z: {self.P_kp_z}')
+        # self.get_logger().info(f'P_kd_z: {self.P_kd_z}')
+        # self.get_logger().info(f'P_ki_z: {self.P_ki_z}')
+        # self.get_logger().info(f'i_range_z: {self.i_range_z}')
+
+        self.R_kp_xy = self.get_parameter(f"SAR_Type.{self.SAR_Type}.CtrlGains.R_kp_xy").get_parameter_value().double_value
+        self.R_kd_xy = self.get_parameter(f"SAR_Type.{self.SAR_Type}.CtrlGains.R_kd_xy").get_parameter_value().double_value
+        self.R_ki_xy = self.get_parameter(f"SAR_Type.{self.SAR_Type}.CtrlGains.R_ki_xy").get_parameter_value().double_value
+        self.i_range_R_xy = self.get_parameter(f"SAR_Type.{self.SAR_Type}.CtrlGains.i_range_R_xy").get_parameter_value().double_value
+
+        # self.get_logger().info(f'R_kp_xy: {self.R_kp_xy}')
+        # self.get_logger().info(f'R_kd_xy: {self.R_kd_xy}')
+        # self.get_logger().info(f'R_ki_xy: {self.R_ki_xy}')
+        # self.get_logger().info(f'i_range_R_xy: {self.i_range_R_xy}')
+
+        self.R_kp_z = self.get_parameter(f"SAR_Type.{self.SAR_Type}.CtrlGains.R_kp_z").get_parameter_value().double_value
+        self.R_kd_z = self.get_parameter(f"SAR_Type.{self.SAR_Type}.CtrlGains.R_kd_z").get_parameter_value().double_value
+        self.R_ki_z = self.get_parameter(f"SAR_Type.{self.SAR_Type}.CtrlGains.R_ki_z").get_parameter_value().double_value
+        self.i_range_R_z = self.get_parameter(f"SAR_Type.{self.SAR_Type}.CtrlGains.i_range_R_z").get_parameter_value().double_value
+
+        # self.get_logger().info(f'R_kp_z: {self.R_kp_z}')
+        # self.get_logger().info(f'R_kd_z: {self.R_kd_z}')
+        # self.get_logger().info(f'R_ki_z: {self.R_ki_z}')
+        # self.get_logger().info(f'i_range_R_z: {self.i_range_R_z}')
 
     def declare_parameters_from_dict(self, parameters, parent_key=''):
         for key, value in parameters.items():
@@ -199,7 +242,7 @@ class SAR_Base_Interface(Node):
     def _getTime(self):
         print()
 
-    def sendCmd(self,action,cmd_vals=[0,0,0],cmd_flag=1):
+    def sendCmd(self,action,cmd_vals=[0.0,0.0,0.0],cmd_flag=1):
         """Sends commands to SAR_DC->Controller via rosservice call
 
         Args:
@@ -207,8 +250,7 @@ class SAR_Base_Interface(Node):
             cmd_vals (list, optional): Command values typically in [x,y,z] notation. Defaults to [0,0,0].
             cmd_flag (float, optional): Used as either a on/off flag for command or an extra float value if needed. Defaults to 1.
         """        
-
-        
+        print("sendCmd in SAR_Base_Interface.py is started")
 
         ## CREATE SERVICE REQUEST MSG
         srv = CTRLCmdSrv.Request() 
@@ -221,10 +263,42 @@ class SAR_Base_Interface(Node):
         srv.cmd_rx = True
 
         ## TO SAR_DataConverter
-        self.callService('/SAR_DC/CMD_Input',srv,CTRLCmdSrv)    
+        print(f"Sending request: cmd_type={srv.cmd_type}, cmd_vals=({srv.cmd_vals.x}, {srv.cmd_vals.y}, {srv.cmd_vals.z}), cmd_flag={srv.cmd_flag}, cmd_rx={srv.cmd_rx}")
+        result = self.callService('/SAR_DC/CMD_Input', srv, CTRLCmdSrv)
+        if result:
+            print(f"Service call succeeded: srv_success={result.srv_success}")
+        else:
+            print("Service call failed")
+        print("sendCmd in SAR_Base_Interface.py is completed")        
+        # """Sends commands to SAR_DC->Controller via rosservice call
+
+        # Args:
+        #     action (string): The desired command
+        #     cmd_vals (list, optional): Command values typically in [x,y,z] notation. Defaults to [0,0,0].
+        #     cmd_flag (float, optional): Used as either a on/off flag for command or an extra float value if needed. Defaults to 1.
+        # """        
+        # print("sendCmd in SAR_Base_Interface.py is started")
+        
+
+        # ## CREATE SERVICE REQUEST MSG
+        # srv = CTRLCmdSrv.Request() 
+
+        # srv.cmd_type = self.cmd_dict[action]
+        # srv.cmd_vals.x = cmd_vals[0]
+        # srv.cmd_vals.y = cmd_vals[1]
+        # srv.cmd_vals.z = cmd_vals[2]
+        # srv.cmd_flag = cmd_flag
+        # srv.cmd_rx = True
+
+        # ## TO SAR_DataConverter
+        # self.callService('/SAR_DC/CMD_Input',srv,CTRLCmdSrv)    
+        # print("sendCmd in SAR_Base_Interface.py is completed")
 
     ## try several time for service
+
+
     def callService(self, srv_addr, srv_msg, srv_type, num_retries=5):
+        print("callService in SAR_Base_Interface.py is started")
         cli = self.create_client(srv_type, srv_addr)
 
         # CHECK THAT SERVICE IS AVAILABLE
@@ -232,25 +306,64 @@ class SAR_Base_Interface(Node):
             self.get_logger().info(f"[WARNING] Service '{srv_addr}' not available, waiting...")
 
         for retry in range(num_retries):
-            self.future = cli.call_async(srv_msg)
-
             try:
-                # Create an event loop if it doesn't exist in the current thread.
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-                loop.run_until_complete(self.future)
+                print(f"Attempting to call service '{srv_addr}', attempt {retry + 1}")
+                future = cli.call_async(srv_msg)
+                loop.run_until_complete(future)
 
-                if self.future.result() is not None:
-                    return self.future.result()
+                if future.result() is not None:
+                    print(f"Service call to '{srv_addr}' succeeded on attempt {retry + 1}")
+                    print(f"Service response: {future.result()}")
+                    loop.close()
+                    return future.result()
                 else:
-                    self.get_logger().warn(f"[WARNING] Attempt {retry + 1} to call service '{srv_addr}' failed: {self.future.exception()}")
+                    self.get_logger().warn(f"[WARNING] Attempt {retry + 1} to call service '{srv_addr}' failed: {future.exception()}")
+                    print(f"[WARNING] Attempt {retry + 1} to call service '{srv_addr}' failed: {future.exception()}")
             except RuntimeError as e:
-                self.get_logger().error(f"[ERROR] Runtime error: {e}")
+                self.get_logger().error(f"[ERROR] Runtime error on attempt {retry + 1}: {e}")
+                print(f"Runtime error on attempt {retry + 1}: {e}")
+            except Exception as e:
+                self.get_logger().error(f"[ERROR] Unexpected error on attempt {retry + 1}: {e}")
+                print(f"Unexpected error on attempt {retry + 1}: {e}")
+            finally:
+                loop.close()
 
-        # IF SERVICE CALL FAILS THEN MARK SIM EPISODE AS DONE AND RETURN ERROR
         self.Done = True
         self.get_logger().error(f"Service '{srv_addr}' call failed after {num_retries} attempts")
+        print(f"Service '{srv_addr}' call failed after {num_retries} attempts")
+        print("callService in SAR_Base_Interface.py is completed")
         return None
+
+        # print("callService in SAR_Base_Interface.py is started")
+        # cli = self.create_client(srv_type, srv_addr)
+
+        # # CHECK THAT SERVICE IS AVAILABLE
+        # while not cli.wait_for_service(timeout_sec=1.0):
+        #     self.get_logger().info(f"[WARNING] Service '{srv_addr}' not available, waiting...")
+
+        # for retry in range(num_retries):
+        #     self.future = cli.call_async(srv_msg)
+
+        #     try:
+        #         # Create an event loop if it doesn't exist in the current thread.
+        #         loop = asyncio.new_event_loop()
+        #         asyncio.set_event_loop(loop)
+        #         loop.run_until_complete(self.future)
+
+        #         if self.future.result() is not None:
+        #             return self.future.result()
+        #         else:
+        #             self.get_logger().warn(f"[WARNING] Attempt {retry + 1} to call service '{srv_addr}' failed: {self.future.exception()}")
+        #     except RuntimeError as e:
+        #         self.get_logger().error(f"[ERROR] Runtime error: {e}")
+
+        # # IF SERVICE CALL FAILS THEN MARK SIM EPISODE AS DONE AND RETURN ERROR
+        # self.Done = True
+        # self.get_logger().error(f"Service '{srv_addr}' call failed after {num_retries} attempts")
+        # print("callService in SAR_Base_Interface.py is completed")
+        # return None
 
 
     def setAngAcc_range(self, Ang_Acc_range):
@@ -469,7 +582,11 @@ class SAR_Base_Interface(Node):
 
         #cmd_flag = self.userInput("Arm Quad On/Off (1,0): ",int)
         cmd_flag = self.userInput("Arm Quad On/Off (1,0): ",int)
+        self.sendCmd("Load_Params")
+        self.sendCmd("Ctrl_Reset")
+        self.sendCmd("Plane_Pose",cmd_vals=[self.Plane_Pos_x_init,self.Plane_Pos_y_init,self.Plane_Pos_z_init],cmd_flag=self.Plane_Angle_deg_init)
         self.sendCmd("Arm_Quad",cmd_vals=[1.0,1.0,1.0], cmd_flag=cmd_flag)
+        
     
     def handle_Tumble_Detect(self):
 

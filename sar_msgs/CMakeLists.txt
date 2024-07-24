@@ -26,6 +26,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/SARImpactData.msg"
   "msg/SARMiscData.msg"
   "msg/ROSParams.msg"
+  "msg/GenericLogData.msg"
   "srv/SetTrigger.srv"
   "srv/CTRLCmdSrv.srv"
   "srv/LoggingCMD.srv"

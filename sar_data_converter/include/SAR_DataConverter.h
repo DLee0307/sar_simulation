@@ -19,10 +19,16 @@
 #include "sar_msgs/msg/sar_impact_data.hpp"
 #include "sar_msgs/msg/sar_misc_data.hpp"
 #include "sar_msgs/msg/ros_params.hpp"
+#include "sar_msgs/msg/generic_log_data.hpp"
 
 #include "sar_msgs/srv/ctrl_cmd_srv.hpp"
 
+#include "crazyflie_interfaces/msg/log_data_generic.hpp" // Added
+
 #include "crazyflie_interfaces/srv/ctrl_cmd_srv.hpp" // Added
+
+
+#include "quatcompress.h"
 
 class SAR_DataConverter : public rclcpp::Node
 {
@@ -38,6 +44,21 @@ public:
     // =======================
     void CtrlData_Callback(const sar_msgs::msg::CtrlData::SharedPtr msg);
     void CtrlDebug_Callback(const sar_msgs::msg::CtrlDebug::SharedPtr msg);
+
+    // =================================
+    //     EXPERIMENT DATA CALLBACKS
+    // =================================
+    void decompressXY(uint32_t xy, float xy_arr[]);
+    void cf1_States_B_O_Callback(const crazyflie_interfaces::msg::LogDataGeneric::SharedPtr msg);
+    void cf1_States_B_P_Callback(const crazyflie_interfaces::msg::LogDataGeneric::SharedPtr msg);
+    void cf1_CTRL_Output_Callback(const crazyflie_interfaces::msg::LogDataGeneric::SharedPtr msg);
+    void cf1_SetPoints_Callback(const crazyflie_interfaces::msg::LogDataGeneric::SharedPtr msg);
+    void cf1_TrgState_Callback(const crazyflie_interfaces::msg::LogDataGeneric::SharedPtr msg);
+    void cf1_Impact_OB_Callback(const crazyflie_interfaces::msg::LogDataGeneric::SharedPtr msg);
+    void cf1_Flags_Callback(const crazyflie_interfaces::msg::LogDataGeneric::SharedPtr msg);
+    void cf1_Misc_Callback(const crazyflie_interfaces::msg::LogDataGeneric::SharedPtr msg);
+    void cf1_Practice_Callback(const crazyflie_interfaces::msg::LogDataGeneric::SharedPtr msg);
+
 
     // =======================
     //     ROS2 PARAMETER
@@ -124,11 +145,13 @@ private:
     float SIM_SPEED = 0.5; 
     float SIM_SLOWDOWN_SPEED = 0.5;
 
-    // =======================
-    //     GAZEBO CALLBACKS
-    // =======================
+    // =====================
+    //     GAZEBO OBJECTS
+    // =====================
     rclcpp::Subscription<sar_msgs::msg::CtrlData>::SharedPtr CTRL_Data_Sub;
     rclcpp::Subscription<sar_msgs::msg::CtrlDebug>::SharedPtr CTRL_Debug_Sub;
+
+
 
     // ===========================
     //     ROS2 Parameter
@@ -154,6 +177,19 @@ private:
     sar_msgs::msg::SARTriggerData TriggerData_msg;
     sar_msgs::msg::SARImpactData ImpactData_msg;
     sar_msgs::msg::SARMiscData MiscData_msg;
+
+    // ===================================
+    //     EXP COMPRESSED DATA OBJECTS
+    // ===================================
+    rclcpp::Subscription<crazyflie_interfaces::msg::LogDataGeneric>::SharedPtr cf1_States_B_O_Sub;
+    rclcpp::Subscription<crazyflie_interfaces::msg::LogDataGeneric>::SharedPtr cf1_States_B_P_Sub;
+    rclcpp::Subscription<crazyflie_interfaces::msg::LogDataGeneric>::SharedPtr cf1_TrgState_Sub;
+    rclcpp::Subscription<crazyflie_interfaces::msg::LogDataGeneric>::SharedPtr cf1_ImpactOBState_Sub;
+    rclcpp::Subscription<crazyflie_interfaces::msg::LogDataGeneric>::SharedPtr cf1_CTRL_Output_Sub;
+    rclcpp::Subscription<crazyflie_interfaces::msg::LogDataGeneric>::SharedPtr cf1_SetPoints_Sub;
+    rclcpp::Subscription<crazyflie_interfaces::msg::LogDataGeneric>::SharedPtr cf1_Flags_Sub;
+    rclcpp::Subscription<crazyflie_interfaces::msg::LogDataGeneric>::SharedPtr cf1_Misc_Sub;
+    rclcpp::Subscription<crazyflie_interfaces::msg::LogDataGeneric>::SharedPtr cf1_Practice_Sub;
 
     // ===================
     //     FLIGHT DATA

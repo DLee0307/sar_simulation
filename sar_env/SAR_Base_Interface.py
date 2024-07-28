@@ -591,7 +591,7 @@ class SAR_Base_Interface(Node):
     def handle_Tumble_Detect(self):
 
         cmd_flag = self.userInput("Tumble Detection On/Off (1,0): ",int)
-        self.sendCmd('Tumble_Detect',cmd_flag=cmd_flag)
+        self.sendCmd('Tumble_Detect',cmd_vals=[1.0,1.0,1.0],cmd_flag=cmd_flag)
 
     def handle_Load_Params(self):
 

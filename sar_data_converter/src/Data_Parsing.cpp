@@ -642,5 +642,5 @@ void SAR_DataConverter::cf1_Practice_Callback(const crazyflie_interfaces::msg::L
 {
     auto X = log_msg->values[0];
 
-    std::cout << "cf1_Practice_Callback is parsing" << std::endl;
+    //std::cout << "cf1_Practice_Callback is parsing" << std::endl;
 }

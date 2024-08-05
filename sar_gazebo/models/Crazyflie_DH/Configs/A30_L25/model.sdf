@@ -47,6 +47,11 @@
         </sphere>
         </geometry>
     </collision>
+    <sensor name='sensor_contact' type='contact'>
+        <contact>
+            <collision>Leg_Collision_1</collision>
+        </contact>
+    </sensor>
     <!--
     <sensor name="Contact_Sensor" type="contact">
         <update_rate>100.0</update_rate>

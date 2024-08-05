@@ -81,6 +81,11 @@ class SAR_Base_Interface(Node):
         
         self.ROSParams_subscriber = self.create_subscription(ROSParams,'/ROS2/PARAMETER',self._ROS_PARAMETERCallback,1)
 
+        # !!!!! Need to Add
+        # ## RL DATA PUBLISHERS
+        # self.RL_Data_Pub = rospy.Publisher("/RL/Data",RL_Data,queue_size=10)
+        # self.RL_History_Pub = rospy.Publisher("/RL/History",RL_History,queue_size=10)
+
     def loadBaseParams(self):
         # LOAD BASE PARAMETERS
         param_path_list = [
@@ -265,11 +270,13 @@ class SAR_Base_Interface(Node):
         ## TO SAR_DataConverter
         print(f"Sending request: cmd_type={srv.cmd_type}, cmd_vals=({srv.cmd_vals.x}, {srv.cmd_vals.y}, {srv.cmd_vals.z}), cmd_flag={srv.cmd_flag}, cmd_rx={srv.cmd_rx}")
         result = self.callService('/SAR_DC/CMD_Input', srv, CTRLCmdSrv)
+
         if result:
             print(f"Service call succeeded: srv_success={result.srv_success}")
         else:
             print("Service call failed")
-        print("sendCmd in SAR_Base_Interface.py is completed")        
+        print("sendCmd in SAR_Base_Interface.py is completed")
+
         # """Sends commands to SAR_DC->Controller via rosservice call
 
         # Args:
@@ -333,6 +340,7 @@ class SAR_Base_Interface(Node):
         self.Done = True
         self.get_logger().error(f"Service '{srv_addr}' call failed after {num_retries} attempts")
         print(f"Service '{srv_addr}' call failed after {num_retries} attempts")
+        
         print("callService in SAR_Base_Interface.py is completed")
         return None
 
@@ -582,9 +590,12 @@ class SAR_Base_Interface(Node):
 
         #cmd_flag = self.userInput("Arm Quad On/Off (1,0): ",int)
         cmd_flag = self.userInput("Arm Quad On/Off (1,0): ",int)
-        self.sendCmd("Load_Params")
-        self.sendCmd("Ctrl_Reset")
-        self.sendCmd("Plane_Pose",cmd_vals=[self.Plane_Pos_x_init,self.Plane_Pos_y_init,self.Plane_Pos_z_init],cmd_flag=self.Plane_Angle_deg_init)
+        
+        #For experiment
+        #self.sendCmd("Load_Params")
+        #self.sendCmd("Ctrl_Reset")
+        #self.sendCmd("Plane_Pose",cmd_vals=[self.Plane_Pos_x_init,self.Plane_Pos_y_init,self.Plane_Pos_z_init],cmd_flag=self.Plane_Angle_deg_init)
+        
         self.sendCmd("Arm_Quad",cmd_vals=[1.0,1.0,1.0], cmd_flag=cmd_flag)
         
     

@@ -26,8 +26,19 @@
 	    <diffuse>1 1 1 1</diffuse>
 	    <specular>0.5 0.5 0.5 1</specular>
 	    </material>
+<!--Added from DH-->
       </visual>
+      <collision name='Surface_Collision'>
+        <max_contacts>10</max_contacts>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>8 8 0.01</size>
+          </box>
+        </geometry>
+      </collision>      
     </link>
+<!---->
 <!--
     <joint name='Surface_Pattern_Joint' type='fixed'>
       <parent>Ground_Base_Model::Ground_Link</parent>

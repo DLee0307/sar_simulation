@@ -1,29 +1,19 @@
-#ifndef GZ_SIM_SYSTEMS_VICON_HH_
-#define GZ_SIM_SYSTEMS_VICON_HH_
+#ifndef GZ_SIM_SYSTEMS_STICKY_LEG_PLUGIN_HH_
+#define GZ_SIM_SYSTEMS_STICKY_LEG_PLUGIN_HH_
 
-// For making plugin INCLUDES  
+// For registering plugin
 #include <gz/common/Profiler.hh>
 #include <gz/plugin/Register.hh>
 
 // For sdf_model
 #include <sdf/Element.hh>
 
-#include <memory>
-#include <cmath>
-
-#include <gz/sim/config.hh>
-#include <gz/sim/System.hh>
-#include "gz/sim/Link.hh" ///
 #include "gz/sim/Model.hh"
-#include <gz/sim/Util.hh>
 
-#include <gz/sim/components/Link.hh>
-#include "gz/sim/components/Pose.hh"
-#include "gz/sim/components/LinearVelocity.hh"
+#include <memory>
+#include <gz/sim/System.hh>
 
-// For ROS2 Topic
 #include <rclcpp/rclcpp.hpp>
-#include "sar_msgs/msg/vicon_data.hpp"
 
 
 namespace gz
@@ -35,19 +25,19 @@ inline namespace GZ_SIM_VERSION_NAMESPACE {
 namespace systems
 {
   // Forward declarations.
-  class Vicon_PluginPrivate;
+  class Sticky_Leg_PluginPrivate;
 
-  class Vicon_Plugin:
+  class Sticky_Leg_Plugin:
     public System,
     public ISystemConfigure,
     public ISystemPreUpdate,
     public ISystemPostUpdate
   {
     /// \brief Constructor
-    public: explicit Vicon_Plugin();
+    public: explicit Sticky_Leg_Plugin();
 
     /// \brief Destructor
-    public: ~Vicon_Plugin() override;
+    public: ~Sticky_Leg_Plugin() override;
 
     public: void Configure(const Entity &_entity,
                            const std::shared_ptr<const sdf::Element> &_sdf,
@@ -62,8 +52,14 @@ namespace systems
     public: void PostUpdate(const UpdateInfo &_info,
                             const EntityComponentManager &_ecm) final;
 
+    // Initialize the plugin
+    public: void Load(const EntityComponentManager &_ecm,
+                      const sdf::ElementPtr &_sdf);
+
     /// \brief Private data pointer.
-    private: std::unique_ptr<Vicon_PluginPrivate> dataPtr;
+    private: 
+      std::unique_ptr<Sticky_Leg_PluginPrivate> dataPtr;
+
   };
   }
 }

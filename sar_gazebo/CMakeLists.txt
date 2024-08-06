@@ -50,6 +50,27 @@ include_directories(
   ${gz-sensors8_INCLUDE_DIRS}
 )
 
+# Sticky_Leg_Plugin
+add_library(Sticky_Leg_Plugin SHARED plugins/src/Sticky_Leg_Plugin.cpp)
+
+ament_target_dependencies(Sticky_Leg_Plugin
+  gz-sim8
+  gz-sensors8
+  rclcpp
+)
+
+target_link_libraries(Sticky_Leg_Plugin
+  gz-sim8::gz-sim8
+  gz-sensors8::gz-sensors8
+  ${rclcpp_LIBRARIES}
+
+)
+
+install(TARGETS Sticky_Leg_Plugin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin)
+
 # Motor Plugin
 add_library(Motor_Plugin SHARED plugins/src/Motor_Plugin.cpp)
 
@@ -122,6 +143,7 @@ install(TARGETS Vicon_Plugin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin)
+
 
 
 if(BUILD_TESTING)

@@ -333,6 +333,42 @@
     </axis2>
     </joint>
 
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libSticky_Leg_Plugin.so"
+        name="gz::sim::systems::Sticky_Leg_Plugin">
+      <LegNumber>1</LegNumber>
+      <LinkName>Leg_1</LinkName>
+      <CollisionName>Leg_Collision_1</CollisionName>
+      <JointName>Leg_1_Contact_Joint</JointName>
+    </plugin>
+<!--
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libSticky_Leg_Plugin.so"
+        name="gz::sim::systems::Sticky_Leg_Plugin">
+      <LegNumber>2</LegNumber>
+      <LinkName>Leg_2</LinkName>
+      <CollisionName>Leg_Collision_2</CollisionName>
+      <JointName>Leg_2_Contact_Joint</JointName>
+    </plugin>
+
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libSticky_Leg_Plugin.so"
+        name="gz::sim::systems::Sticky_Leg_Plugin">
+      <LegNumber>3</LegNumber>
+      <LinkName>Leg_3</LinkName>
+      <CollisionName>Leg_Collision_3</CollisionName>
+      <JointName>Leg_3_Contact_Joint</JointName>
+    </plugin>
+
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libSticky_Leg_Plugin.so"
+        name="gz::sim::systems::Sticky_Leg_Plugin">
+      <LegNumber>4</LegNumber>
+      <LinkName>Leg_4</LinkName>
+      <CollisionName>Leg_Collision_4</CollisionName>
+      <JointName>Leg_4_Contact_Joint</JointName>
+    </plugin>
+-->
     <static>0</static>
     <allow_auto_disable>1</allow_auto_disable>
   </model>

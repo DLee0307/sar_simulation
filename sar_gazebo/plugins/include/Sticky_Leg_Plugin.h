@@ -15,6 +15,9 @@
 
 #include <rclcpp/rclcpp.hpp>
 
+#include "sar_msgs/msg/sticky_pad_connect.hpp"
+
+#include "sar_msgs/srv/activate_sticky_pads.hpp"
 
 namespace gz
 {
@@ -51,10 +54,6 @@ namespace systems
     /// Documentation inherited
     public: void PostUpdate(const UpdateInfo &_info,
                             const EntityComponentManager &_ecm) final;
-
-    // Initialize the plugin
-    public: void Load(const EntityComponentManager &_ecm,
-                      const sdf::ElementPtr &_sdf);
 
     /// \brief Private data pointer.
     private: 

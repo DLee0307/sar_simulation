@@ -22,6 +22,14 @@ class gz::sim::systems::Sticky_Leg_PluginPrivate
     public: std::string Link_Name;
     public: int Leg_Number;
 
+    ////!! ROS2 Service
+    public: std::shared_ptr<rclcpp::Node> ros_node;
+    public: rclcpp::Service<sar_msgs::srv::ActivateStickyPads>::SharedPtr Leg_Connect_Service;
+
+    /// ROS2 Callback for thrust subscription \param[in] _msg thrust message
+    public: bool Service_Callback(const sar_msgs::srv::ActivateStickyPads::Request::SharedPtr request,
+                                        sar_msgs::srv::ActivateStickyPads::Response::SharedPtr response);
+
     public: void Load(const EntityComponentManager &_ecm,
                       const sdf::ElementPtr &_sdf);
 
@@ -113,6 +121,13 @@ void Sticky_Leg_PluginPrivate::Update(const EntityComponentManager &_ecm)
 
 }
 */
+
+//////////////////////////////////////////////////////////////
+bool Sticky_Leg_PluginPrivate::Service_Callback(const sar_msgs::srv::ActivateStickyPads::Request::SharedPtr request,
+                                                sar_msgs::srv::ActivateStickyPads::Response::SharedPtr response)
+{
+
+}
 
 GZ_ADD_PLUGIN(Sticky_Leg_Plugin, System,
   Sticky_Leg_Plugin::ISystemConfigure,

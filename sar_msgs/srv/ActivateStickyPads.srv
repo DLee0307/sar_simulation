@@ -1,0 +1,5 @@
+# Request
+bool sticky_flag
+---
+# Response
+bool cmd_success

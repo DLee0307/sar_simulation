@@ -27,9 +27,11 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/SARMiscData.msg"
   "msg/ROSParams.msg"
   "msg/GenericLogData.msg"
+  "msg/StickyPadConnect.msg"
   "srv/SetTrigger.srv"
   "srv/CTRLCmdSrv.srv"
   "srv/LoggingCMD.srv"
+  "srv/ActivateStickyPads.srv"
   DEPENDENCIES std_msgs geometry_msgs builtin_interfaces
 )
 

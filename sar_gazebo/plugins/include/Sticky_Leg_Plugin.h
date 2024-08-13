@@ -8,7 +8,24 @@
 // For sdf_model
 #include <sdf/Element.hh>
 
+#include <unordered_map>
+
+#include <gz/transport/Node.hh>
+#include <gz/msgs/contacts.pb.h>
+#include <gz/msgs/contact.pb.h>
+
 #include "gz/sim/Model.hh"
+#include <gz/sim/Util.hh> 
+#include "gz/sim/Conversions.hh"
+
+#include "gz/sim/components/DetachableJoint.hh"
+#include "gz/sim/components/Link.hh"
+#include "gz/sim/components/Name.hh"
+#include "gz/sim/components/ParentEntity.hh"
+
+#include "gz/sim/components/Collision.hh"
+#include "gz/sim/components/ContactSensor.hh"
+#include "gz/sim/components/ContactSensorData.hh"
 
 #include <memory>
 #include <gz/sim/System.hh>
@@ -18,6 +35,8 @@
 #include "sar_msgs/msg/sticky_pad_connect.hpp"
 
 #include "sar_msgs/srv/activate_sticky_pads.hpp"
+
+
 
 namespace gz
 {
@@ -55,9 +74,35 @@ namespace systems
     public: void PostUpdate(const UpdateInfo &_info,
                             const EntityComponentManager &_ecm) final;
 
+    public: void Load(const sdf::ElementPtr &_sdf, const std::string &_topic,
+                      const std::vector<Entity> &_collisionEntities);
+
+    public: void AddContacts(const std::chrono::steady_clock::duration &_stamp,
+                            const msgs::Contacts &_contacts);
+
+
+    /// \brief Publish sensor data over gz transport
+    public: void Publish();
+
+    /// \brief Topic to publish data to
+    public: std::string topic;
+
+    /// \brief Message to publish
+    public: msgs::Contacts contactsMsg;
+
+    /// \brief Gazebo transport node
+    public: transport::Node node;
+
+    /// \brief Gazebo transport publisher
+    public: transport::Node::Publisher pub;
+
+    /// \brief Entities for which this sensor publishes data
+    public: std::vector<Entity> collisionEntities;
+
     /// \brief Private data pointer.
-    private: 
-      std::unique_ptr<Sticky_Leg_PluginPrivate> dataPtr;
+    private: std::unique_ptr<Sticky_Leg_PluginPrivate> dataPtr;
+
+
 
   };
   }

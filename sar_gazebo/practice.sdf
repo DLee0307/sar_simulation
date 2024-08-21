@@ -1,0 +1,144 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="empty">
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+    <plugin
+      filename="gz-sim-physics-system"
+      name="gz::sim::systems::Physics">
+    </plugin>
+    <plugin
+      filename="gz-sim-user-commands-system"
+      name="gz::sim::systems::UserCommands">
+    </plugin>
+    <plugin
+      filename="gz-sim-scene-broadcaster-system"
+      name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
+    <plugin
+      filename="gz-sim-contact-system"
+      name="gz::sim::systems::Contact">
+    </plugin>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0.8 1</ambient>
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+            <specular>0.8 0.8 0.8 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+
+    <model name="box">
+      <pose>0 0 1 0 0 0</pose>
+      <link name="box_link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>2 2 2</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>2 2 2</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.5 0.5 0.5 1</ambient>
+            <diffuse>0.5 0.5 0.5 1</diffuse>
+            <specular>0.5 0.5 0.5 1</specular>
+          </material>
+        </visual>
+        <!--<sensor name="contact_sensor" type="contact">
+          <contact>
+            <collision>collision</collision>
+            <topic>/box/contact</topic>
+          </contact>
+          <always_on>1</always_on>
+          <update_rate>100</update_rate>
+        </sensor>-->
+      </link>
+      <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libPractice.so"
+        name="gz::sim::systems::Practice">
+        <parent_link>box_link</parent_link>
+        <child_model>stick</child_model>
+        <child_link>link</child_link>
+        <detach_topic>/model/box_stick_model/detachable_joint/detach</detach_topic>
+        <attach_topic>/model/box_stick_model/detachable_joint/attach</attach_topic>
+        <output_topic>/model/box_stick_model/detachable_joint/state</output_topic>
+      </plugin>      
+    </model>
+
+    <model name="stick">
+      <pose>1 1 2.5 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.2 0.2 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.2 0.2 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.5 0.5 0.5 1</ambient>
+            <diffuse>0.5 0.5 0.5 1</diffuse>
+            <specular>0.5 0.5 0.5 1</specular>
+          </material>
+        </visual>
+        <sensor name="contact_sensor" type="contact">
+          <contact>
+            <collision>collision</collision>
+            <topic>/box/contact</topic>
+          </contact>
+          <always_on>1</always_on>
+          <update_rate>100</update_rate>
+        </sensor>
+      </link>
+    </model>
+
+  </world>
+</sdf>

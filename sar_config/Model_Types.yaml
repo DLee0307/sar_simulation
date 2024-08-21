@@ -144,7 +144,7 @@ SAR_Controller:
             L_eff:  42.77E-3
 
           A30_L70:
-            Ref_Mass:  50.76E-3
+            Ref_Mass:  50.76E-3 
             Ref_Ixx:   75.90E-6
             Ref_Iyy:   76.40E-6
             Ref_Izz:   87.60E-6

@@ -19,6 +19,7 @@
 #include "gz/sim/Conversions.hh"
 
 #include "gz/sim/components/DetachableJoint.hh"
+#include <gz/sim/components/Model.hh>
 #include "gz/sim/components/Link.hh"
 #include "gz/sim/components/Name.hh"
 #include "gz/sim/components/ParentEntity.hh"
@@ -61,6 +62,9 @@ namespace systems
     /// \brief Destructor
     public: ~Sticky_Leg_Plugin() override;
 
+    /// \brief Gazebo transport node
+    public: transport::Node node;
+
     public: void Configure(const Entity &_entity,
                            const std::shared_ptr<const sdf::Element> &_sdf,
                            EntityComponentManager &_ecm,
@@ -73,13 +77,12 @@ namespace systems
     /// Documentation inherited
     public: void PostUpdate(const UpdateInfo &_info,
                             const EntityComponentManager &_ecm) final;
-
+/*
     public: void Load(const sdf::ElementPtr &_sdf, const std::string &_topic,
                       const std::vector<Entity> &_collisionEntities);
 
     public: void AddContacts(const std::chrono::steady_clock::duration &_stamp,
                             const msgs::Contacts &_contacts);
-
 
     /// \brief Publish sensor data over gz transport
     public: void Publish();
@@ -90,15 +93,17 @@ namespace systems
     /// \brief Message to publish
     public: msgs::Contacts contactsMsg;
 
-    /// \brief Gazebo transport node
-    public: transport::Node node;
 
     /// \brief Gazebo transport publisher
     public: transport::Node::Publisher pub;
 
     /// \brief Entities for which this sensor publishes data
     public: std::vector<Entity> collisionEntities;
+*/
+    public: void SubscribeToContacts();
 
+    private: void OnContactsMsg(const gz::msgs::Contacts &_msg);
+    
     /// \brief Private data pointer.
     private: std::unique_ptr<Sticky_Leg_PluginPrivate> dataPtr;
 

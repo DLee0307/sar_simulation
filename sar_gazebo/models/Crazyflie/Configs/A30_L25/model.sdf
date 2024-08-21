@@ -47,23 +47,24 @@
         </sphere>
         </geometry>
     </collision>
-    <sensor name='sensor_contact' type='contact'>
+    <sensor name='contact_sensor' type='contact'>
         <contact>
             <collision>Leg_Collision_1</collision>
-            <topic>/contact_example</topic>
+            <topic>/SAR_Internal/Leg_Connections_1</topic>
         </contact>
         <always_on>1</always_on>
         <update_rate>100</update_rate>
-    </sensor>
+    </sensor>    
+
     <!--
     <sensor name="Contact_Sensor" type="contact">
         <update_rate>100.0</update_rate>
         <contact>
         <collision>Leg_Collision_1</collision>
         </contact>
-    </sensor>
+    </sensor>    -->
     <self_collide>1</self_collide>
-    -->
+
     </link>
 
     <link name='Leg_2'>
@@ -107,15 +108,23 @@
         </sphere>
         </geometry>
     </collision>
+    <sensor name='contact_sensor' type='contact'>
+        <contact>
+            <collision>Leg_Collision_2</collision>
+            <topic>/SAR_Internal/Leg_Connections_2</topic>
+        </contact>
+        <always_on>1</always_on>
+        <update_rate>100</update_rate>
+    </sensor>        
     <!--
     <sensor name="Contact_Sensor" type="contact">
         <update_rate>100.0</update_rate>
         <contact>
         <collision>Leg_Collision_2</collision>
         </contact>
-    </sensor>
+    </sensor>    -->
     <self_collide>1</self_collide>
-    -->
+
     </link>
 
     <link name='Leg_3'>
@@ -159,15 +168,23 @@
         </sphere>
         </geometry>
     </collision>
+    <sensor name='contact_sensor' type='contact'>
+        <contact>
+            <collision>Leg_Collision_3</collision>
+            <topic>/SAR_Internal/Leg_Connections_3</topic>
+        </contact>
+        <always_on>1</always_on>
+        <update_rate>100</update_rate>
+    </sensor>    
     <!--
     <sensor name="Contact_Sensor" type="contact">
         <update_rate>100.0</update_rate>
         <contact>
         <collision>Leg_Collision_3</collision>
         </contact>
-    </sensor>
+    </sensor>    -->
     <self_collide>1</self_collide>
-    -->
+
     </link>
 
     <link name='Leg_4'>
@@ -211,15 +228,23 @@
         </sphere>
         </geometry>
     </collision>
+    <sensor name='contact_sensor' type='contact'>
+        <contact>
+            <collision>Leg_Collision_4</collision>
+            <topic>/SAR_Internal/Leg_Connections_4</topic>
+        </contact>
+        <always_on>1</always_on>
+        <update_rate>100</update_rate>
+    </sensor>    
     <!--
     <sensor name="Contact_Sensor" type="contact">
         <update_rate>100.0</update_rate>
         <contact>
         <collision>Leg_Collision_4</collision>
         </contact>
-    </sensor>
+    </sensor>    -->
     <self_collide>1</self_collide>
-    -->
+
     </link>
 
 
@@ -231,23 +256,23 @@
     <axis>
         <xyz>0 1 0</xyz>
         <limit>
-        <lower>-5</lower>
-        <upper>5</upper>
+        <lower>-1.0821</lower>
+        <upper>0</upper>
         </limit>
         <dynamics>
-        <spring_stiffness>800e-6</spring_stiffness>
-        <damping>5e-6</damping>
+        <spring_stiffness>0.5</spring_stiffness>
+        <damping>0.15</damping>
         </dynamics>
     </axis>
     <axis2>
         <xyz>0 0 1</xyz>
         <limit>
-        <lower>-5</lower>
-        <upper>5</upper>
+        <lower>-0.3491</lower>
+        <upper>0.3491</upper>
         </limit>
         <dynamics>
-        <spring_stiffness>800e-6</spring_stiffness>
-        <damping>5e-6</damping>
+        <spring_stiffness>0.5</spring_stiffness>
+        <damping>0.35</damping>
         </dynamics>
     </axis2>
     </joint>
@@ -336,6 +361,14 @@
     </axis2>
     </joint>
 
+<!--
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libContact_Plugin.so"
+        name="gz::sim::systems::Contact_Plugin">
+    </plugin>
+-->
+
+<!---->
     <plugin
         filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libSticky_Leg_Plugin.so"
         name="gz::sim::systems::Sticky_Leg_Plugin">
@@ -343,7 +376,49 @@
       <LinkName>Leg_1</LinkName>
       <CollisionName>Leg_Collision_1</CollisionName>
       <JointName>Leg_1_Contact_Joint</JointName>
+
+      <!--<parent_link>Leg_1</parent_link>-->
+      <child_model>A30_L25</child_model>
+      <child_link>Leg_1</child_link>
     </plugin>
+<!--
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libSticky_Leg_Plugin.so"
+        name="gz::sim::systems::Sticky_Leg_Plugin">
+      <LegNumber>2</LegNumber>
+      <LinkName>Leg_2</LinkName>
+      <CollisionName>Leg_Collision_2</CollisionName>
+      <JointName>Leg_2_Contact_Joint</JointName>
+
+      <child_model>A30_L25</child_model>
+      <child_link>Leg_2</child_link>
+    </plugin>
+
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libSticky_Leg_Plugin.so"
+        name="gz::sim::systems::Sticky_Leg_Plugin">
+      <LegNumber>3</LegNumber>
+      <LinkName>Leg_3</LinkName>
+      <CollisionName>Leg_Collision_3</CollisionName>
+      <JointName>Leg_3_Contact_Joint</JointName>
+
+      <child_model>A30_L25</child_model>
+      <child_link>Leg_3</child_link>
+    </plugin>
+
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libSticky_Leg_Plugin.so"
+        name="gz::sim::systems::Sticky_Leg_Plugin">
+      <LegNumber>4</LegNumber>
+      <LinkName>Leg_4</LinkName>
+      <CollisionName>Leg_Collision4</CollisionName>
+      <JointName>Leg_4_Contact_Joint</JointName>
+
+      <child_model>A30_L25</child_model>
+      <child_link>Leg_4</child_link>
+    </plugin>
+-->
+
 <!--
     <plugin
         filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libSticky_Leg_Plugin.so"

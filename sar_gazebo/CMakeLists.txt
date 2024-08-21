@@ -25,6 +25,7 @@ find_package(gz-sensors8 REQUIRED)
 find_package(sar_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(gz-msgs10 REQUIRED)
 
 gz_find_package(gz-physics7
   COMPONENTS
@@ -48,7 +49,30 @@ include_directories(
   ${std_msgs_INCLUDE_DIRS}
   ${sar_msgs_INCLUDE_DIRS}
   ${gz-sensors8_INCLUDE_DIRS}
+  ${gz-msgs10_INCLUDE_DIRS}
 )
+
+# Practice
+add_library(Practice SHARED plugins/src/Practice.cpp)
+
+ament_target_dependencies(Practice
+  gz-sim8
+  gz-sensors8
+  rclcpp
+)
+
+target_link_libraries(Practice
+  gz-sim8::gz-sim8
+  gz-sensors8::gz-sensors8
+  gz-msgs10::gz-msgs10
+  ${rclcpp_LIBRARIES}
+
+)
+
+install(TARGETS Practice
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin)
 
 # Sticky_Leg_Plugin
 add_library(Sticky_Leg_Plugin SHARED plugins/src/Sticky_Leg_Plugin.cpp)

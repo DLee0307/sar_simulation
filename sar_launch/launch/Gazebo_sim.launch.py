@@ -41,18 +41,18 @@ def generate_launch_description():
     pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
 
     # Gazebo Sim
-    gazebo = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
-        ),
-        launch_arguments={'gz_args': '-r empty.sdf'}.items(),
-    )
     # gazebo = IncludeLaunchDescription(
     #     PythonLaunchDescriptionSource(
     #         os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
     #     ),
-    #     launch_arguments={'gz_args': f'-r {os.path.expanduser("~/ros2_ws/src/sar_simulation/sar_gazebo/worlds/empty.world")}'}.items(),  # 절대 경로로 empty.world 파일 설정
+    #     launch_arguments={'gz_args': '-r empty.sdf'}.items(),
     # )
+    gazebo = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
+        ),
+        launch_arguments={'gz_args': f'-r {os.path.expanduser("~/ros2_ws/src/sar_simulation/sar_gazebo/worlds/empty.world")}'}.items(),  # 절대 경로로 empty.world 파일 설정
+    )
 
     # SAR Spawn
     SAR_SPAWN = Node(
@@ -66,7 +66,7 @@ def generate_launch_description():
     PLANE_SPAWN = Node(
         package='ros_gz_sim',
         executable='create',
-        arguments=['-file', Plane_SDF_Path, '-x', '3.0', '-z', '2.58'],
+        arguments=['-file', Plane_SDF_Path, '-x', '3.0', '-z', '2.56'], # 2.55
         output='screen',
     )
 
@@ -74,7 +74,7 @@ def generate_launch_description():
     GROUND_SPAWN = Node(
         package='ros_gz_sim',
         executable='create',
-        arguments=['-file', Ground_SDF_Path, '-z', '0.1'],
+        arguments=['-file', Ground_SDF_Path, '-z', '-3.0'],
         output='screen',
     )    
     return LaunchDescription([

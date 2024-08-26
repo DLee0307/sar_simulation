@@ -82,6 +82,9 @@ extern bool SHOW_CONSOLE;
 extern float Leg_Length;
 extern float Leg_Angle;
 
+extern float Thrust_Coeff;
+extern float Torque_Coeff;
+
 extern float Tau_up;
 extern float Tau_down;
 extern std::vector<double> TrajAcc_Max;

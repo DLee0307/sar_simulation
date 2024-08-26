@@ -36,6 +36,9 @@ float64 base_izz
 float64 thrust_max
 float64 c_tf
 
+float64 thrust_coeff
+float64 torque_coeff
+
 float64 tau_up
 float64 tau_down
 float64[3] trajacc_max

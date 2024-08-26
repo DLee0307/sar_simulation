@@ -251,6 +251,8 @@ void Controller::loadInitParams()
 
     std::vector<double> default_TrajAcc_Max = {0.0, 0.0, 0.0};
     std::vector<double> default_TrajJerk_Max = {0.0, 0.0, 0.0};
+    this->declare_parameter("SAR_Type." + SAR_Type + ".System_Params.Thrust_Coeff", 0.0);
+    this->declare_parameter("SAR_Type." + SAR_Type + ".System_Params.Torque_Coeff", 0.0);
     this->declare_parameter("SAR_Type." + SAR_Type + ".System_Params.Tau_up", 0.0);
     this->declare_parameter("SAR_Type." + SAR_Type + ".System_Params.Tau_down", 0.0);
     this->declare_parameter("SAR_Type." + SAR_Type + ".System_Params.TrajAcc_Max", default_TrajAcc_Max);
@@ -314,6 +316,8 @@ void Controller::loadInitParams()
     Thrust_max = this->get_parameter("SAR_Type." + SAR_Type + ".System_Params.Thrust_max").as_double();
     C_tf = this->get_parameter("SAR_Type." + SAR_Type + ".System_Params.C_tf").as_double();
 
+    Thrust_Coeff = this->get_parameter("SAR_Type." + SAR_Type + ".System_Params.Thrust_Coeff").as_double();
+    Torque_Coeff = this->get_parameter("SAR_Type." + SAR_Type + ".System_Params.Torque_Coeff").as_double();
     Tau_up = this->get_parameter("SAR_Type." + SAR_Type + ".System_Params.Tau_up").as_double();
     Tau_down = this->get_parameter("SAR_Type." + SAR_Type + ".System_Params.Tau_down").as_double();
     TrajAcc_Max = this->get_parameter("SAR_Type." + SAR_Type + ".System_Params.TrajAcc_Max").as_double_array();
@@ -375,6 +379,8 @@ void Controller::loadInitParams()
     RCLCPP_INFO(this->get_logger(), "Thrust_max: %f", Thrust_max);
     RCLCPP_INFO(this->get_logger(), "C_tf: %f", C_tf);
 
+    RCLCPP_INFO(this->get_logger(), "Thrust_Coeff: %f", Thrust_Coeff);
+    RCLCPP_INFO(this->get_logger(), "Torque_Coeff: %f", Torque_Coeff);
     RCLCPP_INFO(this->get_logger(), "Tau_up: %f", Tau_up);
     RCLCPP_INFO(this->get_logger(), "Tau_down: %f", Tau_down);
     RCLCPP_INFO(this->get_logger(), "TrajAcc_Max: [%f, %f, %f]", TrajAcc_Max[0], TrajAcc_Max[1], TrajAcc_Max[2]);
@@ -471,6 +477,8 @@ void Controller::loadParametersFromModel_TypesFile(const std::string &file_path)
         this->set_parameter(rclcpp::Parameter("SAR_Type." + SAR_Type + ".System_Params.Thrust_max", params["SAR_Type"][SAR_Type]["System_Params"]["Thrust_max"].as<double>()));
         this->set_parameter(rclcpp::Parameter("SAR_Type." + SAR_Type + ".System_Params.C_tf", params["SAR_Type"][SAR_Type]["System_Params"]["C_tf"].as<double>()));
 
+        this->set_parameter(rclcpp::Parameter("SAR_Type." + SAR_Type + ".System_Params.Thrust_Coeff", params["SAR_Type"][SAR_Type]["System_Params"]["Thrust_Coeff"].as<double>()));
+        this->set_parameter(rclcpp::Parameter("SAR_Type." + SAR_Type + ".System_Params.Torque_Coeff", params["SAR_Type"][SAR_Type]["System_Params"]["Torque_Coeff"].as<double>()));
         this->set_parameter(rclcpp::Parameter("SAR_Type." + SAR_Type + ".System_Params.Tau_up", params["SAR_Type"][SAR_Type]["System_Params"]["Tau_up"].as<double>()));
         this->set_parameter(rclcpp::Parameter("SAR_Type." + SAR_Type + ".System_Params.Tau_down", params["SAR_Type"][SAR_Type]["System_Params"]["Tau_down"].as<double>()));
 
@@ -780,6 +788,8 @@ void Controller::publishROSParamData(){
     ROSParams_msg.thrust_max = Thrust_max;
     ROSParams_msg.c_tf = C_tf;
 
+    ROSParams_msg.thrust_coeff = Thrust_Coeff;
+    ROSParams_msg.torque_coeff = Torque_Coeff;
     ROSParams_msg.tau_up = Tau_up;
     ROSParams_msg.tau_down = Tau_down;
     ROSParams_msg.trajacc_max[0] = TrajAcc_Max[0];

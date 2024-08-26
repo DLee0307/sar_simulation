@@ -49,6 +49,8 @@
 #include "gz/sim/Model.hh"
 #include "gz/sim/Util.hh"
 
+#include "sar_msgs/msg/ros_params.hpp"
+
 #define g2Newton (9.81f/1000.0f)
 #define Newton2g (1000.0f/9.81f)
 
@@ -93,8 +95,20 @@ namespace systems
     public: void PostUpdate(const gz::sim::UpdateInfo &_info,
                            const gz::sim::EntityComponentManager &_ecm) override;
 
+    // =======================
+    //     ROS2 PARAMETER
+    // =======================
+    public: void ROSParams_Callback(const sar_msgs::msg::ROSParams::SharedPtr msg);
+
     /// \brief Private data pointer
-    private: std::unique_ptr<Motor_PluginPrivate> dataPtr;
+    private: 
+    std::unique_ptr<Motor_PluginPrivate> dataPtr;
+
+    // ===========================
+    //     ROS2 Parameter
+    // ===========================
+    rclcpp::Subscription<sar_msgs::msg::ROSParams>::SharedPtr ROS_Parmas_Sub;
+    std::shared_ptr<rclcpp::Node> ros_node;
   };
   }
 }

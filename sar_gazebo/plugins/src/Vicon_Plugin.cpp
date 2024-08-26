@@ -161,7 +161,7 @@ void Vicon_Plugin::PostUpdate(const UpdateInfo &_info,
 
   //std::cout << "poseComp: " << poseComp->Data() << std::endl; 
   auto _poseComp = poseComp->Data();
-  std::cout << "poseComp: " << _poseComp << std::endl; 
+  //std::cout << "poseComp: " << _poseComp << std::endl; 
   //std::cout << "_poseComp.Pos().(X): " << _poseComp.Pos().X() << std::endl; 
   //std::cout << "_poseComp.Pos().(Y): " << _poseComp.Pos().Y() << std::endl;
   //std::cout << "_poseComp.Pos().(Z): " << _poseComp.Pos().Z() << std::endl;
@@ -171,7 +171,7 @@ void Vicon_Plugin::PostUpdate(const UpdateInfo &_info,
 
   auto VelComp = _ecm.Component<components::WorldLinearVelocity>(modelEntity);
   auto _VelComp = VelComp->Data();
-  std::cout << "VelComp: " << _VelComp << std::endl; 
+  //std::cout << "VelComp: " << _VelComp << std::endl; 
   //std::cout << "_VelComp.(X): " << _VelComp.X() << std::endl; 
   //std::cout << "_VelComp.(Y): " << _VelComp.Y() << std::endl; 
   //std::cout << "_VelComp.(Z): " << _VelComp.Z() << std::endl;

@@ -471,13 +471,13 @@ void Motor_Plugin::ROSParams_Callback(const sar_msgs::msg::ROSParams::SharedPtr 
   this->dataPtr->C_tf = msg->c_tf;
   this->dataPtr->Tau_up = msg->tau_up;
   this->dataPtr->Tau_down = msg->tau_down;
-
+/*
   std::cout << "Thrust_Coeff: " << this->dataPtr->Thrust_Coeff << std::endl;
   std::cout << "Torque_Coeff: " << this->dataPtr->Torque_Coeff << std::endl;
   std::cout << "C_tf: " << this->dataPtr->C_tf << std::endl;
   std::cout << "Tau_up: " << this->dataPtr->Tau_up << std::endl;
   std::cout << "Tau_down: " << this->dataPtr->Tau_down << std::endl;
-
+*/
 }
 
 /*

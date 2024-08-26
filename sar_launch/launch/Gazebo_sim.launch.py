@@ -66,7 +66,7 @@ def generate_launch_description():
     PLANE_SPAWN = Node(
         package='ros_gz_sim',
         executable='create',
-        arguments=['-file', Plane_SDF_Path, '-x', '3.0', '-z', '2.56'], # 2.55
+        arguments=['-file', Plane_SDF_Path, '-x', '3.0', '-z', '2.59'], # 2.55
         output='screen',
     )
 

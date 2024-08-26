@@ -3,8 +3,10 @@ SAR_Controller:
     DATA_TYPE: "SIM"
 
     SAR_SETTINGS:
-      SAR_Type: "Crazyflie"
-      SAR_Config: "A30_L70"
+      #SAR_Type: "Crazyflie"
+      SAR_Type: "Source_One_V5"
+      #SAR_Config: "A30_L70"
+      SAR_Config: "A30_L200"
       # Policy_Type: "PARAM_OPTIM"
       # Policy_Type: "DEEP_RL_SB3" 
       Policy_Type: "DEEP_RL_ONBOARD" 

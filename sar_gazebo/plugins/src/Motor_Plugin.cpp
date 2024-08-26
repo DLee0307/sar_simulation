@@ -42,14 +42,14 @@ class gz::sim::systems::Motor_PluginPrivate
   /// MOTOR PARAMETERS
   public: int Turn_Direction;
   public: std::string turningDirection;  
-  public: double Thrust_Coeff = 2.2e-8;  /// Thrust Coeff [N/(rad/s)]
-  public: double Torque_Coeff = 135.96e-12; /// Torque Coeff [N*m/(rad/s)]
-  public: double C_tf = 6.18e-3 ; /// Torque-Thrust Coeff [N*m/N]
+  public: double Thrust_Coeff =  1.43e-6; //For Source_One_V5 //2.2e-8; //For Crazyflie  /// Thrust Coeff [N/(rad/s)]
+  public: double Torque_Coeff = 1.57e-8; //For Source_One_V5 //135.96e-12; //For Crazyflie /// Torque Coeff [N*m/(rad/s)]
+  public: double C_tf = 1.1e-2; //For Source_One_V5 //6.18e-3; //For Crazyflie /// Torque-Thrust Coeff [N*m/N]
 
   /// FIRST ORDER FILTER BEHAVIOR
   public: float Thrust_input = 0.0f;  // Desired Thrust [N]
-  public: double Tau_up = 0.05 ; /// Motor Time Constant (Up) [s]
-  public: double Tau_down = 0.15; /// Motor Time Constant (Down) [s]
+  public: double Tau_up = 9.8e-3; //For Source_One_V5 // 0.05; //For Crazyflie /// Motor Time Constant (Up) [s]
+  public: double Tau_down = 31.9e-3; //For Desired // 0.15; //For crazyflie /// Motor Time Constant (Down) [s]
   public: double Sampling_time;
   public: double Prev_Sim_time = 0.0;
   public: double Prev_Thrust = 0.0;  

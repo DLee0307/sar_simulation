@@ -38,6 +38,32 @@
           <lighting>1</lighting>
           </material>
       </visual>
+<!--
+      <visual name='Collision_Radius_1'>
+        <pose>104.5e-3 0 -1.9e-3 0 1.57 0</pose>
+        <geometry>
+          <cylinder>
+            <length>209.0e-3</length>
+            <radius>2.5e-3</radius>
+          </cylinder>
+        </geometry>
+        <material>
+        <ambient>1 1 1 0.2</ambient>
+        <diffuse>1 1 1 0.2</diffuse>
+        <lighting>1</lighting>
+        </material>
+      </visual>
+-->
+      <collision name="Leg_Collision_1">
+        <pose>104.5e-3 0 -1.9e-3 0 1.57 0</pose>
+        <geometry>
+          <cylinder>
+            <length>109.0e-3</length>
+            <radius>2.5e-3</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+<!--
       <collision name="Leg_Collision_1">
         <pose>210.0e-3 0 -1.9e-3 0 0 0</pose>
         <geometry>
@@ -46,6 +72,8 @@
           </sphere>
         </geometry>
       </collision>
+-->
+<!--
       <sensor name='contact_sensor' type='contact'>
           <contact>
               <collision>Leg_Collision_1</collision>
@@ -53,31 +81,16 @@
           </contact>
           <always_on>1</always_on>
           <update_rate>100</update_rate>
-      </sensor>    
-      <!--
-      <sensor name="Contact_Sensor" type="contact">
-        <update_rate>100.0</update_rate>
-        <contact>
-          <collision>Leg_Collision_1</collision>
-        </contact>
       </sensor>
-      -->
+-->
       <self_collide>1</self_collide>
     </link>
-
+<!---->
     <link name='Foot_1'>
       <pose>94.4e-3 -94.4e-3 -192.1e-3 0 1.047 -0.785</pose>
       <inertial>
         <mass>2.47E-2</mass>
         <pose>0 0 0 0 0 0 </pose>
-        <inertia>
-          <ixx>1.61E-6</ixx>
-          <ixy>0</ixy>
-          <ixz>0</ixz>
-          <iyy>2.09E-4</iyy>
-          <iyz>0</iyz>
-          <izz>2.08E-4</izz>
-        </inertia>
       </inertial>
       <gravity>1</gravity>
       <self_collide>1</self_collide>
@@ -90,24 +103,46 @@
           </mesh>
         </geometry>
           <material>
-              <!--Red-->
               <ambient>1.0 0.0 0.0 1</ambient>
               <diffuse>1.0 0.0 0.0 1</diffuse>
               <specular>0.1 0.1 0.1 1.0</specular>
           <lighting>1</lighting>
           </material>
       </visual>
+
+      <visual name='Collision_Radius_Foot_1'>
+        <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>13.9e-3</radius>
+          </sphere>
+        </geometry>
+        <material>
+        <ambient>1 1 1 0.2</ambient>
+        <diffuse>1 1 1 0.2</diffuse>
+        <lighting>1</lighting>
+        </material>
+      </visual>
+
       <collision name="Foot_Collision_1">
-        <pose>0 0 0 0 0 0</pose>
+        <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>13.9e-3</radius>
           </sphere>
         </geometry>
       </collision>
+      <sensor name='contact_sensor' type='contact'>
+          <contact>
+              <collision>Foot_Collision_1</collision>
+              <topic>/SAR_Internal/Leg_Connections_1</topic>
+          </contact>
+          <always_on>1</always_on>
+          <update_rate>100</update_rate>
+      </sensor>
       <self_collide>1</self_collide>
     </link>
-    
+
     <link name='Leg_2'>
       <pose>-18.5e-3 -18.5e-3 -4.0e-3 0 1.047 -2.35</pose>
       <inertial>
@@ -140,6 +175,36 @@
           <lighting>1</lighting>
           </material>
       </visual>
+
+<!--
+      <visual name='Collision_Radius_2'>
+        <pose>104.5e-3 0 -1.9e-3 0 1.57 0</pose>
+        <geometry>
+          <cylinder>
+            <length>209.0e-3</length>
+            <radius>2.5e-3</radius>
+          </cylinder>
+        </geometry>
+        <material>
+        <ambient>1 1 1 0.2</ambient>
+        <diffuse>1 1 1 0.2</diffuse>
+        <lighting>1</lighting>
+        </material>
+      </visual>
+-->
+<!---->
+
+      <collision name="Leg_Collision_2">
+        <pose>104.5e-3 0 -1.9e-3 0 1.57 0</pose>
+        <geometry>
+          <cylinder>
+            <length>109.0e-3</length>
+            <radius>2.5e-3</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+
+<!--
       <collision name="Leg_Collision_2">
         <pose>210.0e-3 0 -1.9e-3 0 0 0</pose>
         <geometry>
@@ -148,6 +213,8 @@
           </sphere>
         </geometry>
       </collision>
+-->
+<!--
       <sensor name='contact_sensor' type='contact'>
           <contact>
               <collision>Leg_Collision_2</collision>
@@ -155,15 +222,73 @@
           </contact>
           <always_on>1</always_on>
           <update_rate>100</update_rate>
-      </sensor>    
-      <!--
-      <sensor name="Contact_Sensor" type="contact">
-        <update_rate>100.0</update_rate>
-        <contact>
-          <collision>Leg_Collision_2</collision>
-        </contact>
       </sensor>
-      -->
+-->
+      <self_collide>1</self_collide>
+    </link>
+<!---->
+    <link name='Foot_2'>
+      <pose>-94.4e-3 -94.4e-3 -192.1e-3 0 1.047 -2.35</pose>
+      <inertial>
+        <mass>2.47E-2</mass>
+        <pose>0 0 0 0 0 0 </pose>
+        <inertia>
+          <ixx>1.61E-6</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.09E-4</iyy>
+          <iyz>0</iyz>
+          <izz>2.08E-4</izz>
+        </inertia>
+      </inertial>
+      <gravity>1</gravity>
+      <self_collide>1</self_collide>
+      <visual name='Foot_Visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Leg_Assemblies/meshes/Leg_Foot_DH.STL</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+          <material>
+              <ambient>0.175 0.175 0.175 1</ambient>
+              <diffuse>0.175 0.175 0.175 1</diffuse>
+              <specular>0.175 0.175 0.175 1.00</specular>
+          <lighting>1</lighting>
+          </material>
+      </visual>
+
+      <visual name='Collision_Radius_Foot_2'>
+        <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>13.9e-3</radius>
+          </sphere>
+        </geometry>
+        <material>
+        <ambient>1 1 1 0.2</ambient>
+        <diffuse>1 1 1 0.2</diffuse>
+        <lighting>1</lighting>
+        </material>
+      </visual>
+
+      <collision name="Foot_Collision_2">
+        <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>13.9e-3</radius>
+          </sphere>
+        </geometry>
+      </collision>
+      <sensor name='contact_sensor' type='contact'>
+          <contact>
+              <collision>Foot_Collision_2</collision>
+              <topic>/SAR_Internal/Leg_Connections_2</topic>
+          </contact>
+          <always_on>1</always_on>
+          <update_rate>100</update_rate>
+      </sensor>
       <self_collide>1</self_collide>
     </link>
 
@@ -199,6 +324,35 @@
           <lighting>1</lighting>
           </material>
       </visual>
+
+<!--
+      <visual name='Collision_Radius_3'>
+        <pose>104.5e-3 0 -1.9e-3 0 1.57 0</pose>
+        <geometry>
+          <cylinder>
+            <length>209.0e-3</length>
+            <radius>2.5e-3</radius>
+          </cylinder>
+        </geometry>
+        <material>
+        <ambient>1 1 1 0.2</ambient>
+        <diffuse>1 1 1 0.2</diffuse>
+        <lighting>1</lighting>
+        </material>
+      </visual>
+-->
+<!---->
+      <collision name="Leg_Collision_3">
+        <pose>104.5e-3 0 -1.9e-3 0 1.57 0</pose>
+        <geometry>
+          <cylinder>
+            <length>109.0e-3</length>
+            <radius>2.5e-3</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+
+<!--
       <collision name="Leg_Collision_3">
         <pose>210.0e-3 0 -1.9e-3 0 0 0</pose>
         <geometry>
@@ -207,6 +361,8 @@
           </sphere>
         </geometry>
       </collision>
+-->
+<!--
       <sensor name='contact_sensor' type='contact'>
           <contact>
               <collision>Leg_Collision_3</collision>
@@ -214,15 +370,73 @@
           </contact>
           <always_on>1</always_on>
           <update_rate>100</update_rate>
-      </sensor>    
-      <!--
-      <sensor name="Contact_Sensor" type="contact">
-        <update_rate>100.0</update_rate>
-        <contact>
-          <collision>Leg_Collision_3</collision>
-        </contact>
       </sensor>
-      -->
+-->
+      <self_collide>1</self_collide>
+    </link>
+<!---->
+    <link name='Foot_3'>
+      <pose>-94.4e-3 94.4e-3 -192.1e-3 0 1.047 2.35</pose>
+      <inertial>
+        <mass>2.47E-2</mass>
+        <pose>0 0 0 0 0 0 </pose>
+        <inertia>
+          <ixx>1.61E-6</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.09E-4</iyy>
+          <iyz>0</iyz>
+          <izz>2.08E-4</izz>
+        </inertia>
+      </inertial>
+      <gravity>1</gravity>
+      <self_collide>1</self_collide>
+      <visual name='Foot_Visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Leg_Assemblies/meshes/Leg_Foot_DH.STL</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+          <material>
+              <ambient>0.175 0.175 0.175 1</ambient>
+              <diffuse>0.175 0.175 0.175 1</diffuse>
+              <specular>0.175 0.175 0.175 1.00</specular>
+          <lighting>1</lighting>
+          </material>
+      </visual>
+
+      <visual name='Collision_Radius_Foot_3'>
+        <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>13.9e-3</radius>
+          </sphere>
+        </geometry>
+        <material>
+        <ambient>1 1 1 0.2</ambient>
+        <diffuse>1 1 1 0.2</diffuse>
+        <lighting>1</lighting>
+        </material>
+      </visual>
+
+      <collision name="Foot_Collision_3">
+        <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>13.9e-3</radius>
+          </sphere>
+        </geometry>
+      </collision>
+      <sensor name='contact_sensor' type='contact'>
+          <contact>
+              <collision>Foot_Collision_3</collision>
+              <topic>/SAR_Internal/Leg_Connections_3</topic>
+          </contact>
+          <always_on>1</always_on>
+          <update_rate>100</update_rate>
+      </sensor>
       <self_collide>1</self_collide>
     </link>
 
@@ -258,6 +472,35 @@
           <lighting>1</lighting>
           </material>
       </visual>
+
+<!--
+      <visual name='Collision_Radius_4'>
+        <pose>104.5e-3 0 -1.9e-3 0 1.57 0</pose>
+        <geometry>
+          <cylinder>
+            <length>209.0e-3</length>
+            <radius>2.5e-3</radius>
+          </cylinder>
+        </geometry>
+        <material>
+        <ambient>1 1 1 0.2</ambient>
+        <diffuse>1 1 1 0.2</diffuse>
+        <lighting>1</lighting>
+        </material>
+      </visual>
+-->
+<!---->
+      <collision name="Leg_Collision_4">
+        <pose>104.5e-3 0 -1.9e-3 0 1.57 0</pose>
+        <geometry>
+          <cylinder>
+            <length>109.0e-3</length>
+            <radius>2.5e-3</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+
+<!--
       <collision name="Leg_Collision_4">
         <pose>210.0e-3 0 -1.9e-3 0 0 0</pose>
         <geometry>
@@ -266,6 +509,8 @@
           </sphere>
         </geometry>
       </collision>
+-->
+<!--
       <sensor name='contact_sensor' type='contact'>
           <contact>
               <collision>Leg_Collision_4</collision>
@@ -274,18 +519,74 @@
           <always_on>1</always_on>
           <update_rate>100</update_rate>
       </sensor>
-      <!--
-      <sensor name="Contact_Sensor" type="contact">
-        <update_rate>100.0</update_rate>
-        <contact>
-          <collision>Leg_Collision_4</collision>
-        </contact>
-      </sensor>
-      -->
+-->
       <self_collide>1</self_collide>
     </link>
+<!---->
+    <link name='Foot_4'>
+      <pose>94.4e-3 94.4e-3 -192.1e-3 0 1.047 0.785</pose>
+      <inertial>
+        <mass>2.47E-2</mass>
+        <pose>0 0 0 0 0 0 </pose>
+        <inertia>
+          <ixx>1.61E-6</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.09E-4</iyy>
+          <iyz>0</iyz>
+          <izz>2.08E-4</izz>
+        </inertia>
+      </inertial>
+      <gravity>1</gravity>
+      <self_collide>1</self_collide>
+      <visual name='Foot_Visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://Leg_Assemblies/meshes/Leg_Foot_DH.STL</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+          <material>
+              <ambient>1.0 0.0 0.0 1</ambient>
+              <diffuse>1.0 0.0 0.0 1</diffuse>
+              <specular>0.1 0.1 0.1 1.0</specular>
+          <lighting>1</lighting>
+          </material>
+      </visual>
 
+      <visual name='Collision_Radius_Foot_4'>
+        <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>13.9e-3</radius>
+          </sphere>
+        </geometry>
+        <material>
+        <ambient>1 1 1 0.2</ambient>
+        <diffuse>1 1 1 0.2</diffuse>
+        <lighting>1</lighting>
+        </material>
+      </visual>
 
+      <collision name="Foot_Collision_4">
+        <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>13.9e-3</radius>
+          </sphere>
+        </geometry>
+      </collision>
+      <sensor name='contact_sensor' type='contact'>
+          <contact>
+              <collision>Foot_Collision_4</collision>
+              <topic>/SAR_Internal/Leg_Connections_4</topic>
+          </contact>
+          <always_on>1</always_on>
+          <update_rate>100</update_rate>
+      </sensor>
+      <self_collide>1</self_collide>
+    </link>
 
     <joint name='Hinge_1_Joint' type='universal'>
       <parent>SAR_Base::SAR_Body</parent>
@@ -314,7 +615,7 @@
         </dynamics>
       </axis2>
     </joint>
-
+<!---->
     <joint name='Ball_1_Joint' type='ball'>
       <parent>Leg_1</parent>
       <child>Foot_1</child>
@@ -358,6 +659,22 @@
         </dynamics>
       </axis2>
     </joint>
+<!---->
+    <joint name='Ball_2_Joint' type='ball'>
+      <parent>Leg_2</parent>
+      <child>Foot_2</child>
+      <pose>0 0 0 0 0 0</pose>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1e16</lower>
+          <upper>1e16</upper>
+        </limit>
+        <dynamics>
+          <damping>0.01</damping>
+        </dynamics>
+      </axis>
+    </joint>
 
     <joint name='Hinge_3_Joint' type='universal'>
       <parent>SAR_Base::SAR_Body</parent>
@@ -385,6 +702,22 @@
           <damping>0.7</damping>
         </dynamics>
       </axis2>
+    </joint>
+<!---->
+    <joint name='Ball_3_Joint' type='ball'>
+      <parent>Leg_3</parent>
+      <child>Foot_3</child>
+      <pose>0 0 0 0 0 0</pose>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1e16</lower>
+          <upper>1e16</upper>
+        </limit>
+        <dynamics>
+          <damping>0.01</damping>
+        </dynamics>
+      </axis>
     </joint>
 
     <joint name='Hinge_4_Joint' type='universal'>
@@ -414,21 +747,37 @@
         </dynamics>
       </axis2>
     </joint>
-
+<!---->
+    <joint name='Ball_4_Joint' type='ball'>
+      <parent>Leg_4</parent>
+      <child>Foot_4</child>
+      <pose>0 0 0 0 0 0</pose>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1e16</lower>
+          <upper>1e16</upper>
+        </limit>
+        <dynamics>
+          <damping>0.01</damping>
+        </dynamics>
+      </axis>
+    </joint>
 
 <!--
     <plugin
         filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libSticky_Leg_Plugin.so"
         name="gz::sim::systems::Sticky_Leg_Plugin">
       <LegNumber>1</LegNumber>
-      <LinkName>Leg_1</LinkName>
-      <CollisionName>Leg_Collision_1</CollisionName>
-      <JointName>Leg_1_Contact_Joint</JointName>
+      <LinkName>Foot_1</LinkName>
+      <CollisionName>Foot_Collision_1</CollisionName>
+      <JointName>Foot_1_Contact_Joint</JointName>
 
 
-      <child_model>A30_L25</child_model>
-      <child_link>Leg_1</child_link>
-    </plugin>-->
+      <child_model>A30_L200</child_model>
+      <child_link>Foot_1</child_link>
+    </plugin>
+-->
 <!--
     <plugin
         filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libSticky_Leg_Plugin.so"
@@ -438,7 +787,7 @@
       <CollisionName>Leg_Collision_2</CollisionName>
       <JointName>Leg_2_Contact_Joint</JointName>
 
-      <child_model>A30_L25</child_model>
+      <child_model>A30_L200</child_model>
       <child_link>Leg_2</child_link>
     </plugin>
 
@@ -450,7 +799,7 @@
       <CollisionName>Leg_Collision_3</CollisionName>
       <JointName>Leg_3_Contact_Joint</JointName>
 
-      <child_model>A30_L25</child_model>
+      <child_model>A30_L200</child_model>
       <child_link>Leg_3</child_link>
     </plugin>
 
@@ -462,7 +811,7 @@
       <CollisionName>Leg_Collision4</CollisionName>
       <JointName>Leg_4_Contact_Joint</JointName>
 
-      <child_model>A30_L25</child_model>
+      <child_model>A30_L200</child_model>
       <child_link>Leg_4</child_link>
     </plugin>
 -->

@@ -324,7 +324,7 @@
       </axis2>
     </joint>
 
-<!--
+<!---->
     <plugin
         filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libSticky_Leg_Plugin.so"
         name="gz::sim::systems::Sticky_Leg_Plugin">
@@ -334,10 +334,10 @@
       <JointName>Leg_1_Contact_Joint</JointName>
 
 
-      <child_model>A30_L25</child_model>
+      <child_model>A30_L</child_model>
       <child_link>Leg_1</child_link>
-    </plugin>-->
-<!--
+    </plugin>
+<!---->
     <plugin
         filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libSticky_Leg_Plugin.so"
         name="gz::sim::systems::Sticky_Leg_Plugin">
@@ -373,7 +373,7 @@
       <child_model>A30_L25</child_model>
       <child_link>Leg_4</child_link>
     </plugin>
--->
+
 
     <static>0</static>
     <allow_auto_disable>1</allow_auto_disable>

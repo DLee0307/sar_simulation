@@ -29,7 +29,7 @@
       <topic>imu</topic>
       <enable_metrics>true</enable_metrics>
       </sensor>
-
+<!--
       <visual name='Collision_Radius'>
         <pose>0 0 0 1.57 0 0</pose>
         <geometry>
@@ -40,14 +40,14 @@
         </geometry>
         <material>
         <ambient>1 1 1 0.2</ambient>
-        <diffuse>1 1 1 0.2</diffuse>
+        <diffuse>1 1 1 0.2</diffuse>-->
         <!--<script>
           <uri>file://media/materials/scripts/gazebo.material</uri>
         </script>-->
-        <lighting>1</lighting>
+<!--        <lighting>1</lighting>
       </material>
       </visual>
-
+-->
       <visual name='SO_V5_Base_Assembly'>
         <pose>0 0 0 0 0 0</pose>
         <geometry>

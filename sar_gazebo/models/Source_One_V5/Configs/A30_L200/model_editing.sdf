@@ -9,15 +9,15 @@
     <link name='Leg_1'>
       <pose>18.5e-3 -18.5e-3 -4.0e-3 0 1.047 -0.785</pose>
       <inertial>
-        <mass>2.47E-2</mass>
+        <mass>1.43E-2</mass>
         <pose>1.35E-1 0 -1.20E-3 0 0 0 </pose>
         <inertia>
-          <ixx>1.61E-6</ixx>
+          <ixx>3.68E-7</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>2.09E-4</iyy>
+          <iyy>8.78E-5</iyy>
           <iyz>0</iyz>
-          <izz>2.08E-4</izz>
+          <izz>8.79E-5</izz>
         </inertia>
       </inertial>
       <gravity>1</gravity>
@@ -26,7 +26,7 @@
         <pose>0 0 0 0 0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://Leg_Assemblies/meshes/Leg_Assembly_30_deg--200mm.STL</uri>
+            <uri>model://Leg_Assemblies/meshes/Leg_Assembly_DH.STL</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -86,15 +86,67 @@
       <self_collide>1</self_collide>
     </link>
 <!---->
-    <link name='Foot_1'>
-      <pose>91.6e-3 -91.6e-3 -186.9e-3 0 2.618 -0.785</pose>
-      <inertial>
+    <link name='I1'>
+      <pose>94.4e-3 -94.4e-3 -192.1e-3 0 1.047 -0.785</pose>
+       <inertial>
         <mass>0.01E-6</mass>
         <pose>0 0 0 0 0 0 </pose>
+       </inertial>
+      <self_collide>1</self_collide>
+      <visual name="I1_Visual_1">
+        <geometry>
+          <box>
+            <size>0.01 0.01 0.01</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.5 0.5 0.5 1</ambient>
+          <diffuse>0.5 0.5 0.5 1</diffuse>
+          <specular>0.5 0.5 0.5 1</specular>
+        </material>
+      </visual> 
+    </link>
+<!--
+    <link name='I2'>
+      <pose>94.4e-3 -94.4e-3 -192.1e-3 0 1.047 -0.785</pose>
+       <inertial>
+        <mass>0.01E-6</mass>
+        <pose>0 0 0 0 0 0 </pose>
+       </inertial>
+      <self_collide>1</self_collide>
+      <visual name="I2_Visual_1">
+        <geometry>
+          <box>
+            <size>0.01 0.01 0.01</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.5 0.5 0.5 1</ambient>
+          <diffuse>0.5 0.5 0.5 1</diffuse>
+          <specular>0.5 0.5 0.5 1</specular>
+        </material>
+      </visual> 
+    </link>
+-->
+<!---->
+    <link name='Foot_1'>
+      <pose>94.4e-3 -94.4e-3 -192.1e-3 0 1.047 -0.785</pose>
+      <inertial>
+        <mass>1.04E-2</mass>
+        <pose>0 0 0 0 0 0 </pose>
+        <inertia>
+          <ixx>1.83E-7</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.31E-6</iyy>
+          <iyz>0</iyz>
+          <izz>1.36E-6</izz>
+        </inertia>
       </inertial>
       <gravity>1</gravity>
       <self_collide>1</self_collide>
-<!--
+
+<!---->
       <visual name='Foot_Visual'>
         <pose>0 0 0 0 0 0</pose>
         <geometry>
@@ -110,10 +162,9 @@
           <lighting>1</lighting>
           </material>
       </visual>
--->
+
       <visual name='Collision_Radius_Foot_1'>
-        <pose>0 0 0 0 0 0</pose>
-        <!--<pose>-7.34e-3 0 1.17e-3 0 0 0</pose>-->
+        <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>13.9e-3</radius>
@@ -127,7 +178,7 @@
       </visual>
 
       <collision name="Foot_Collision_1">
-        <pose>0 0 0 0 0 0</pose>
+        <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>13.9e-3</radius>
@@ -148,15 +199,15 @@
     <link name='Leg_2'>
       <pose>-18.5e-3 -18.5e-3 -4.0e-3 0 1.047 -2.35</pose>
       <inertial>
-        <mass>2.47E-2</mass>
+        <mass>1.43E-2</mass>
         <pose>1.35E-1 0 -1.20E-3 0 0 0 </pose>
         <inertia>
-          <ixx>1.61E-6</ixx>
+          <ixx>3.68E-7</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>2.09E-4</iyy>
+          <iyy>8.78E-5</iyy>
           <iyz>0</iyz>
-          <izz>2.08E-4</izz>
+          <izz>8.79E-5</izz>
         </inertia>
       </inertial>
       <gravity>1</gravity>
@@ -165,7 +216,7 @@
         <pose>0 0 0 0 0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://Leg_Assemblies/meshes/Leg_Assembly_30_deg--200mm.STL</uri>
+            <uri>model://Leg_Assemblies/meshes/Leg_Assembly_DH.STL</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -230,14 +281,22 @@
     </link>
 <!---->
     <link name='Foot_2'>
-      <pose>-91.6e-3 -91.6e-3 -186.9e-3 0 2.618 -2.35</pose>
+      <pose>-94.4e-3 -94.4e-3 -192.1e-3 0 1.047 -2.35</pose>
       <inertial>
-        <mass>0.01E-6</mass>
+        <mass>1.04E-2</mass>
         <pose>0 0 0 0 0 0 </pose>
+        <inertia>
+          <ixx>1.83E-7</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.31E-6</iyy>
+          <iyz>0</iyz>
+          <izz>1.36E-6</izz>
+        </inertia>
       </inertial>
       <gravity>1</gravity>
       <self_collide>1</self_collide>
-<!--
+<!---->
       <visual name='Foot_Visual'>
         <pose>0 0 0 0 0 0</pose>
         <geometry>
@@ -253,9 +312,9 @@
           <lighting>1</lighting>
           </material>
       </visual>
--->
+
       <visual name='Collision_Radius_Foot_2'>
-        <pose>0 0 0 0 0 0</pose>
+        <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>13.9e-3</radius>
@@ -269,7 +328,7 @@
       </visual>
 
       <collision name="Foot_Collision_2">
-        <pose>0 0 0 0 0 0</pose>
+        <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>13.9e-3</radius>
@@ -290,15 +349,15 @@
     <link name='Leg_3'>
       <pose>-18.5e-3 18.5e-3 -4.0e-3 0 1.047 2.35</pose>
       <inertial>
-        <mass>2.47E-2</mass>
+        <mass>1.43E-2</mass>
         <pose>1.35E-1 0 -1.20E-3 0 0 0 </pose>
         <inertia>
-          <ixx>1.61E-6</ixx>
+          <ixx>3.68E-7</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>2.09E-4</iyy>
+          <iyy>8.78E-5</iyy>
           <iyz>0</iyz>
-          <izz>2.08E-4</izz>
+          <izz>8.79E-5</izz>
         </inertia>
       </inertial>
       <gravity>1</gravity>
@@ -307,7 +366,7 @@
         <pose>0 0 0 0 0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://Leg_Assemblies/meshes/Leg_Assembly_30_deg--200mm.STL</uri>
+            <uri>model://Leg_Assemblies/meshes/Leg_Assembly_DH.STL</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -371,14 +430,22 @@
     </link>
 <!---->
     <link name='Foot_3'>
-      <pose>-91.6e-3 91.6e-3 -186.9e-3 0 2.618 2.35</pose>
+      <pose>-94.4e-3 94.4e-3 -192.1e-3 0 1.047 2.35</pose>
       <inertial>
-        <mass>0.01E-6</mass>
+        <mass>1.04E-2</mass>
         <pose>0 0 0 0 0 0 </pose>
+        <inertia>
+          <ixx>1.83E-7</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.31E-6</iyy>
+          <iyz>0</iyz>
+          <izz>1.36E-6</izz>
+        </inertia>
       </inertial>
       <gravity>1</gravity>
       <self_collide>1</self_collide>
-<!--
+<!---->
       <visual name='Foot_Visual'>
         <pose>0 0 0 0 0 0</pose>
         <geometry>
@@ -394,9 +461,9 @@
           <lighting>1</lighting>
           </material>
       </visual>
--->
+
       <visual name='Collision_Radius_Foot_3'>
-        <pose>0 0 0 0 0 0</pose>
+        <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>13.9e-3</radius>
@@ -410,7 +477,7 @@
       </visual>
 
       <collision name="Foot_Collision_3">
-        <pose>0 0 0 0 0 0</pose>
+        <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>13.9e-3</radius>
@@ -431,15 +498,15 @@
     <link name='Leg_4'>
       <pose>18.5e-3 18.5e-3 -4.0e-3 0 1.047 0.785</pose>
       <inertial>
-        <mass>2.47E-2</mass>
+        <mass>1.43E-2</mass>
         <pose>1.35E-1 0 -1.20E-3 0 0 0 </pose>
         <inertia>
-          <ixx>1.61E-6</ixx>
+          <ixx>3.68E-7</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>2.09E-4</iyy>
+          <iyy>8.78E-5</iyy>
           <iyz>0</iyz>
-          <izz>2.08E-4</izz>
+          <izz>8.79E-5</izz>
         </inertia>
       </inertial>
       <gravity>1</gravity>
@@ -448,7 +515,7 @@
         <pose>0 0 0 0 0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://Leg_Assemblies/meshes/Leg_Assembly_30_deg--200mm.STL</uri>
+            <uri>model://Leg_Assemblies/meshes/Leg_Assembly_DH.STL</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
@@ -512,14 +579,22 @@
     </link>
 <!---->
     <link name='Foot_4'>
-      <pose>91.6e-3 91.6e-3 -186.9e-3 0 2.618 0.785</pose>
+      <pose>94.4e-3 94.4e-3 -192.1e-3 0 1.047 0.785</pose>
       <inertial>
-        <mass>0.01E-6</mass>
+        <mass>1.04E-2</mass>
         <pose>0 0 0 0 0 0 </pose>
+        <inertia>
+          <ixx>1.83E-7</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.31E-6</iyy>
+          <iyz>0</iyz>
+          <izz>1.36E-6</izz>
+        </inertia>
       </inertial>
       <gravity>1</gravity>
       <self_collide>1</self_collide>
-<!--
+<!---->
       <visual name='Foot_Visual'>
         <pose>0 0 0 0 0 0</pose>
         <geometry>
@@ -535,9 +610,9 @@
           <lighting>1</lighting>
           </material>
       </visual>
--->
+
       <visual name='Collision_Radius_Foot_4'>
-        <pose>0 0 0 0 0 0</pose>
+        <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>13.9e-3</radius>
@@ -551,7 +626,7 @@
       </visual>
 
       <collision name="Foot_Collision_4">
-        <pose>0 0 0 0 0 0</pose>
+        <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
         <geometry>
           <sphere>
             <radius>13.9e-3</radius>
@@ -596,13 +671,93 @@
         </dynamics>
       </axis2>
     </joint>
+      
+    <joint name='J1' type='revolute'>
+      <parent>Leg_1</parent>
+      <child>I1</child>
+      <pose>0 0 0 0 0 0</pose>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-10.0</lower>
+          <upper>10</upper>
+        </limit>
+        <dynamics>
+          <spring_stiffness>5.0</spring_stiffness>
+          <damping>0.3</damping>
+        </dynamics>
+      </axis>
+    </joint>
+<!--
+    <joint name='J2' type='revolute'>
+      <parent>I1</parent>
+      <child>I2</child>
+      <pose>0 0 0 0 0 0</pose>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-10.0</lower>
+          <upper>10</upper>
+        </limit>
+        <dynamics>
+          <spring_stiffness>5.0</spring_stiffness>
+          <damping>0.3</damping>
+        </dynamics>
+    </joint>
+-->
+<!--     -->   
+    <joint name='J3' type='revolute'>
+      <parent>I1</parent>
+      <child>Foot_1</child>
+      <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-10.0</lower>
+          <upper>10</upper>
+        </limit>
+        <dynamics>
+          <spring_stiffness>5.0</spring_stiffness>
+          <damping>0.3</damping>
+        </dynamics>
+    </joint>
 
+<!--
     <joint name='Ball_1_Joint' type='ball'>
       <parent>Leg_1</parent>
       <child>Foot_1</child>
-      <pose>0 0 0 0 0 0</pose>
+      <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
     </joint>
-
+-->    
+<!--
+    <joint name='Ball_1_Joint' type='universal'>
+      <parent>Leg_1</parent>
+      <child>Foot_1</child>
+      <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-10</lower>
+          <upper>10</upper>
+        </limit>
+        <dynamics>
+          <spring_stiffness>0.0</spring_stiffness>
+          <damping>0.0</damping>
+        </dynamics>
+      </axis>
+      <axis2>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-10</lower>
+          <upper>10</upper>
+        </limit>
+        <dynamics>
+          <spring_stiffness>0.0</spring_stiffness>
+          <damping>0.0</damping>
+        </dynamics>
+      </axis2>
+    </joint>
+-->
     <joint name='Hinge_2_Joint' type='universal'>
       <parent>SAR_Base::SAR_Body</parent>
       <child>Leg_2</child>
@@ -634,7 +789,7 @@
     <joint name='Ball_2_Joint' type='ball'>
       <parent>Leg_2</parent>
       <child>Foot_2</child>
-      <pose>0 0 0 0 0 0</pose>
+      <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
     </joint>
 
     <joint name='Hinge_3_Joint' type='universal'>
@@ -668,7 +823,7 @@
     <joint name='Ball_3_Joint' type='ball'>
       <parent>Leg_3</parent>
       <child>Foot_3</child>
-      <pose>0 0 0 0 0 0</pose>
+      <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
     </joint>
 
     <joint name='Hinge_4_Joint' type='universal'>
@@ -702,10 +857,16 @@
     <joint name='Ball_4_Joint' type='ball'>
       <parent>Leg_4</parent>
       <child>Foot_4</child>
-      <pose>0 0 0 0 0 0</pose>
+      <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
     </joint>
-
-<!---->
+<!--
+    <joint name='Ball_4_Joint' type='ball'>
+      <parent>Leg_4</parent>
+      <child>Foot_4</child>
+      <pose>-7.34e-3 0 1.17e-3 0 0 0</pose>
+    </joint>
+-->
+<!--
     <plugin
         filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libSticky_Leg_Plugin.so"
         name="gz::sim::systems::Sticky_Leg_Plugin">
@@ -718,14 +879,14 @@
       <child_model>A30_L200</child_model>
       <child_link>Foot_1</child_link>
     </plugin>
-
-<!---->
+-->
+<!--
     <plugin
         filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libSticky_Leg_Plugin.so"
         name="gz::sim::systems::Sticky_Leg_Plugin">
       <LegNumber>2</LegNumber>
       <LinkName>Foot_2</LinkName>
-      <CollisionName>Foot_Collision_2</CollisionName>
+      <CollisionName>Leg_Collision_2</CollisionName>
       <JointName>Leg_2_Contact_Joint</JointName>
 
       <child_model>A30_L200</child_model>
@@ -737,7 +898,7 @@
         name="gz::sim::systems::Sticky_Leg_Plugin">
       <LegNumber>3</LegNumber>
       <LinkName>Foot_3</LinkName>
-      <CollisionName>Foot_Collision_3</CollisionName>
+      <CollisionName>Leg_Collision_3</CollisionName>
       <JointName>Leg_3_Contact_Joint</JointName>
 
       <child_model>A30_L200</child_model>
@@ -749,13 +910,13 @@
         name="gz::sim::systems::Sticky_Leg_Plugin">
       <LegNumber>4</LegNumber>
       <LinkName>Foot_4</LinkName>
-      <CollisionName>Foot_Collision_4</CollisionName>
+      <CollisionName>Leg_Collision4</CollisionName>
       <JointName>Leg_4_Contact_Joint</JointName>
 
       <child_model>A30_L200</child_model>
       <child_link>Foot_4</child_link>
     </plugin>
-
+-->
 
     <static>0</static>
     <allow_auto_disable>1</allow_auto_disable>

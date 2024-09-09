@@ -50,6 +50,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         ## START SIMULATION
         self._kill_Sim()
         self._restart_Sim()
+        self._start_monitoring_subprocesses()
 
     def loadSimParams(self):
         print()
@@ -155,7 +156,9 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
         
     def _start_monitoring_subprocesses(self):
-        print()
+        monitor_thread = Thread(target=self._monitor_subprocesses)
+        monitor_thread.daemon = True
+        monitor_thread.start()
 
     def _monitor_subprocesses(self):
         print()
@@ -232,11 +235,11 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
     def pausePhysics(self,pause_flag=True):
         if pause_flag == True:
-            cmd = f"gz service -s /world/sar_world/control --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --timeout 3000 --req 'pause: true'"
+            cmd = f"gz service -s /world/empty/control --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --timeout 3000 --req 'pause: true'"
             self.pause_simulation_process = subprocess.Popen(cmd, shell=True)
 
         else:
-            cmd = f"gz service -s /world/sar_world/control --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --timeout 3000 --req 'pause: false'"
+            cmd = f"gz service -s /world/empty/control --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --timeout 3000 --req 'pause: false'"
             self.pause_simulation_process = subprocess.Popen(cmd, shell=True)
 
 

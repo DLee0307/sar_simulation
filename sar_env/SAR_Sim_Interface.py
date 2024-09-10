@@ -161,13 +161,32 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         monitor_thread.start()
 
     def _monitor_subprocesses(self):
-        print()
+
+        while True:
+
+            self.GZ_ping_ok = self._ping_service("/SAR_DC/CMD_Input",timeout=10)
+            
+            time.sleep(0.5)
 
     def _wait_for_sim_running(self,timeout=600):
         print()
 
-    def _ping_service(self, service_name,timeout=5,silence_errors=False):
-        print()
+    def _ping_service(self, service_name, timeout=5, silence_errors=False):
+        cmd = f"ros2 service call {service_name} sar_msgs/srv/CTRLCmdSrv '{{}}'"
+        stderr_option = subprocess.DEVNULL if silence_errors else None
+
+        try:
+            result = subprocess.run(cmd, shell=True, timeout=timeout, check=True, stdout=subprocess.PIPE, stderr=stderr_option)
+            
+            #print(f"Command Output: {result.stdout.decode('utf-8')}")
+
+            return result.returncode == 0
+        except subprocess.TimeoutExpired:
+            #print("Timeout expired while calling the service.")
+            return False
+        except subprocess.CalledProcessError:
+            #print("Error occurred while calling the service.")
+            return False
 
     def _kill_Sim(self):
         ## KILL ALL POTENTIAL NODE/SUBPROCESSES

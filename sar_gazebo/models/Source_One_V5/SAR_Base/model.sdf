@@ -174,10 +174,10 @@
           </mesh>
         </geometry>
         <material>
-            <!--Blue-->
-            <ambient>0.0 0.0 1.0 1</ambient>
-            <diffuse>0.0 0.0 1.0 1</diffuse>
-        <lighting>1</lighting>
+          <!-- Blue Transparent -->
+          <ambient>0.0 0.0 1.0 0.5</ambient>
+          <diffuse>0.0 0.0 1.0 0.5</diffuse>
+          <lighting>1</lighting>
         </material>
       </visual>
     </link>
@@ -207,10 +207,10 @@
           </mesh>
         </geometry>
         <material>
-            <!--Blue-->
-            <ambient>0.0 0.0 1.0 1</ambient>
-            <diffuse>0.0 0.0 1.0 1</diffuse>
-        <lighting>1</lighting>
+          <!-- Blue Transparent -->
+          <ambient>0.0 0.0 1.0 0.5</ambient>
+          <diffuse>0.0 0.0 1.0 0.5</diffuse>
+          <lighting>1</lighting>
         </material>
       </visual>
     </link>
@@ -240,10 +240,10 @@
           </mesh>
         </geometry>
         <material>
-            <!--Blue-->
-            <ambient>0.0 0.0 1.0 1</ambient>
-            <diffuse>0.0 0.0 1.0 1</diffuse>
-        <lighting>1</lighting>
+          <!-- Blue Transparent -->
+          <ambient>0.0 0.0 1.0 0.5</ambient>
+          <diffuse>0.0 0.0 1.0 0.5</diffuse>
+          <lighting>1</lighting>
         </material>
       </visual>
     </link>
@@ -273,29 +273,80 @@
           </mesh>
         </geometry>
         <material>
-            <!--Blue-->
-            <ambient>0.0 0.0 1.0 1</ambient>
-            <diffuse>0.0 0.0 1.0 1</diffuse>
-        <lighting>1</lighting>
+          <!-- Blue Transparent -->
+          <ambient>0.0 0.0 1.0 0.5</ambient>
+          <diffuse>0.0 0.0 1.0 0.5</diffuse>
+          <lighting>1</lighting>
         </material>
       </visual>
     </link>
 
     <link name='Camera'>
-        <inertial>
-            <mass>1e-6</mass>
-            <inertia>
-            <ixx>1e-9</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>1e-9</iyy>
-            <iyz>0</iyz>
-            <izz>1e-9</izz>
-            </inertia>
-            <pose>0 0 0 0 0 0</pose>
-        </inertial>
+      <inertial>
+        <mass>1e-6</mass>
+        <inertia>
+        <ixx>1e-9</ixx>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyy>1e-9</iyy>
+        <iyz>0</iyz>
+        <izz>1e-9</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
 
+      <sensor name="camera" type="camera">
+        <pose>0 0 0.5e-1 0 -1.57 0</pose>
+        <update_rate>100</update_rate>
+        <visualize>true</visualize>
+        <camera name="head">
+          <save enabled="false">
+            <path>/home/dlee/Pictures</path>
+          </save>
+          <horizontal_fov>1.435</horizontal_fov>
+          <image>
+            <width>64</width>
+            <height>64</height>
+            <format>R8G8B8</format>
+            <!--<format>L8</format>-->
+          </image>
+          <clip>
+            <near>0.02</near>
+            <far>300</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <!-- Noise is sampled independently per pixel on each frame.
+                That pixel's noise value is added to each of its color
+                channels, which at that point lie in the range [0,1]. -->
+            <mean>0.0</mean>
+            <stddev>0.000</stddev>
+          </noise>
+          <lens>
+            <type>sterographic</type>
+          </lens>
+        </camera>
+        <always_on>1</always_on>
+        <topic>camera</topic>
+      </sensor>
 
+      <visual name='camera_center'>
+        <cast_shadows>0</cast_shadows>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.002</radius>
+          </sphere>
+        </geometry>
+        <material>
+          <!-- Blue -->
+          <ambient>0.0 0.0 1.0 1.0</ambient>
+          <diffuse>0.0 0.0 1.0 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+          <emissive>0.0 0.0 0.0 1.0</emissive> 
+          <lighting>1</lighting> 
+        </material>
+      </visual>
     </link>
 
     <joint name='Prop_1_Joint' type='revolute'>
@@ -373,7 +424,11 @@
         </dynamics>
       </axis>
     </joint>
-
+    
+    <joint name='Camera_Joint' type='fixed'>
+      <parent>SAR_Body</parent>
+      <child>Camera</child>
+    </joint>
 
 <!--  -->            
     <plugin

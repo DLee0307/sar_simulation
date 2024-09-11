@@ -70,6 +70,11 @@ gz service -s /world/empty/create \
       name="gz::sim::systems::Physics">
     </plugin>
     <plugin
+      filename="gz-sim-sensors-system"
+      name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin
       filename="gz-sim-user-commands-system"
       name="gz::sim::systems::UserCommands">
     </plugin>
@@ -81,6 +86,19 @@ gz service -s /world/empty/create \
       filename="gz-sim-contact-system"
       name="gz::sim::systems::Contact">
     </plugin>
+    <!--    -->
+    <gui>
+      <plugin filename="ImageDisplay" name="Image Display">
+        <gz-gui>
+          <title>RGB camera</title>
+          <property key="state" type="string">floating</property>
+          <property type="double" key="width">350</property>
+          <property type="double" key="height">315</property>
+        </gz-gui>
+        <topic>camera</topic>
+        <topic_picker>false</topic_picker>
+      </plugin>
+    </gui>
 
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>

@@ -643,7 +643,7 @@ class SAR_Base_Interface(Node):
     ##    Logging Services 
     # ========================
 
-    def createCSV(self,logName):
+    def createCSV(self):
         """Sends service to CF_DataConverter to create CSV log file 
 
         Args:
@@ -652,31 +652,33 @@ class SAR_Base_Interface(Node):
 
         ## CREATE SERVICE REQUEST MSG
         srv = LoggingCMD.Request()
-        srv.file_path = os.path.join(self.Log_Dir,logName)
+        srv.file_path = os.path.join(self.Log_Dir,self.Log_Name)
         srv.logging_cmd = 0
 
         ## SEND LOGGING REQUEST VIA SERVICE
-        self.callService('/SAR_DC/DataLogging',srv,LoggingCMD)
+        self.callService('/SAR_DC/DataLogging',srv, LoggingCMD)
 
-    def startLogging(self,logName):
+    def startLogging(self):
         """Start logging values to the current CSV file
         """        
 
         ## CREATE SERVICE REQUEST MSG
         srv = LoggingCMD.Request()
-        srv.file_path = os.path.join(self.Log_Dir,logName)
+        srv.file_path = os.path.join(self.Log_Dir,self.Log_Name)
+        print(f"file_path={srv.file_path}")
         srv.logging_cmd = 1
+        print(f"logging_cmd: {srv.logging_cmd}")
 
         ## SEND LOGGING REQUEST VIA SERVICE
-        self.callService('/SAR_DC/DataLogging',srv,LoggingCMD)
+        self.callService('/SAR_DC/DataLogging',srv, LoggingCMD)
 
-    def capLogging(self,logName):
+    def capLogging(self):
         """Cap logging values with Flight, Rot, and Impact conditions and stop continuous logging
         """        
 
         ## CREATE SERVICE REQUEST MSG
         srv = LoggingCMD.Request()
-        srv.file_path = os.path.join(self.Log_Dir,logName)
+        srv.file_path = os.path.join(self.Log_Dir,self.Log_Name)
         srv.logging_cmd = 2
         srv.error_string = self.Error_Str # String for why logging was capped
         

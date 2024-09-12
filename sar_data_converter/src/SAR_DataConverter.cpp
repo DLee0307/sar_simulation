@@ -49,10 +49,13 @@ SAR_DataConverter::SAR_DataConverter()
         ImpactData_Pub = this->create_publisher<sar_msgs::msg::SARImpactData>("/SAR_DC/ImpactData", 1);
         MiscData_Pub = this->create_publisher<sar_msgs::msg::SARMiscData>("/SAR_DC/MiscData", 1);
 
+        // LOGGING 
+        Logging_Service = this->create_service<sar_msgs::srv::LoggingCMD>("/SAR_DC/DataLogging", std::bind(&SAR_DataConverter::DataLogging_Callback, this, std::placeholders::_1, std::placeholders::_2));
+
         // INITIALIZE SAR_DC THREADS
         SAR_DC_Thread = std::thread(&SAR_DataConverter::MainLoop, this);
         ConsoleOutput_Thread = std::thread(&SAR_DataConverter::ConsoleLoop, this);
-
+        Logging_Thread = std::thread(&SAR_DataConverter::LoggingLoop, this);
 
 }
 

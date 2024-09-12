@@ -38,7 +38,7 @@ def cmd_send(env):
             13: env.handle_Impact_traj,
             #20: env.handle_Tumble_Detect,
             #21: env.handle_Load_Params,
-            #22: env.handle_Start_Logging,
+            22: env.handle_Start_Logging,
             #23: env.handle_Cap_Logging,
             24: env.handle_Arm_Quad,
             #30: env.handle_Thrust_CMD,
@@ -79,8 +79,8 @@ def main(args=None):
     env.pausePhysics(False)
     
     ## INITIALIZE LOGGING DATA
-    #trial_num = 24
-    #logName = f"Control_Playground--trial_{int(trial_num):02d}--{env.SAR_Config}.csv"
+    trial_num = 24
+    env.Log_Name = f"Control_Playground--trial_{int(trial_num):02d}--{env.SAR_Config}.csv"
     
     #env.createCSV()
     cmd_thread = threading.Thread(target=cmd_send, args=(env,))  

@@ -22,6 +22,7 @@
 #include "sar_msgs/msg/generic_log_data.hpp"
 
 #include "sar_msgs/srv/ctrl_cmd_srv.hpp"
+#include "sar_msgs/srv/logging_cmd.hpp"
 
 #include "crazyflie_interfaces/msg/log_data_generic.hpp" // Added
 
@@ -38,7 +39,8 @@ public:
     void MainInit();
     void MainLoop();
     void ConsoleLoop();
-
+    void LoggingLoop();
+    
     // =======================
     //     GAZEBO CALLBACKS
     // =======================
@@ -71,6 +73,12 @@ public:
     bool CMD_SAR_DC_Callback(const sar_msgs::srv::CTRLCmdSrv::Request::SharedPtr request,
                              sar_msgs::srv::CTRLCmdSrv::Response::SharedPtr response);
 
+    // =======================
+    //    LOGGING FUNCTIONS
+    // =======================
+    bool DataLogging_Callback(const sar_msgs::srv::LoggingCMD::Request::SharedPtr request,
+                             sar_msgs::srv::LoggingCMD::Response::SharedPtr response);
+
     // =================================
     //     ORGANIZED DATA PUBLISHERS
     // =================================
@@ -89,6 +97,7 @@ private:
 
     std::thread SAR_DC_Thread;
     std::thread ConsoleOutput_Thread;
+    std::thread Logging_Thread;
 
     // =====================
     //     SYSTEM PARAMS
@@ -393,6 +402,7 @@ private:
     //     LOGGING VARIABLES
     // =========================
     //ros::ServiceServer Logging_Service;
+    rclcpp::Service<sar_msgs::srv::LoggingCMD>::SharedPtr Logging_Service;
     FILE* fPtr; // File Pointer to logging file
     bool Logging_Flag = false;
     std::string error_string = "No_Data";    

@@ -30,7 +30,8 @@ add_executable(SAR_DataConverter
 	src/SAR_DataConverter.cpp
 	src/Data_Parsing.cpp
 	src/Data_Summary.cpp
-	src/Debug_Console.cpp)
+	src/Debug_Console.cpp
+	src/Logging_Funcs.cpp)
 ament_target_dependencies(SAR_DataConverter rclcpp std_msgs sar_msgs std_srvs crazyflie_interfaces)
 
 target_link_libraries(SAR_DataConverter ${CURSES_LIBRARIES} Eigen3::Eigen)

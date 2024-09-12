@@ -82,7 +82,7 @@ def main(args=None):
     trial_num = 24
     env.Log_Name = f"Control_Playground--trial_{int(trial_num):02d}--{env.SAR_Config}.csv"
     
-    #env.createCSV()
+    env.createCSV()
     cmd_thread = threading.Thread(target=cmd_send, args=(env,))  
     cmd_thread.start()   
     

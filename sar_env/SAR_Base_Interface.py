@@ -665,9 +665,9 @@ class SAR_Base_Interface(Node):
         ## CREATE SERVICE REQUEST MSG
         srv = LoggingCMD.Request()
         srv.file_path = os.path.join(self.Log_Dir,self.Log_Name)
-        print(f"file_path={srv.file_path}")
+        #print(f"file_path={srv.file_path}")
         srv.logging_cmd = 1
-        print(f"logging_cmd: {srv.logging_cmd}")
+        #print(f"logging_cmd: {srv.logging_cmd}")
 
         ## SEND LOGGING REQUEST VIA SERVICE
         self.callService('/SAR_DC/DataLogging',srv, LoggingCMD)

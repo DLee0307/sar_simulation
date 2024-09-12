@@ -78,6 +78,7 @@ public:
     // =======================
     bool DataLogging_Callback(const sar_msgs::srv::LoggingCMD::Request::SharedPtr request,
                              sar_msgs::srv::LoggingCMD::Response::SharedPtr response);
+    void create_CSV();
 
     // =================================
     //     ORGANIZED DATA PUBLISHERS

@@ -1,0 +1,2 @@
+K_ep,K_run,t,Trg_Action,Rot_Action,Mu,Sigma,Policy,D_perp,Tau,Tau_CR,Theta_x,V_BO_Mag,V_BO_Angle,a_BO_Mag,V_BP_Mag,V_BP_Angle,Phi_PB,Trg_Flag,Impact_Flag_Ext,Impact_Flag_OB,r_BO.x,r_BO.y,r_BO.z,V_BO.x,V_BO.y,V_BO.z,a_BO.x,a_BO.y,a_BO.z,Eul_BO.x,Eul_BO.y,Eul_BO.z,W_BO.x,W_BO.y,W_BO.z,AngAcc_BO.y,F_thrust,Mx,My,Mz,x_d.x,x_d.y,x_d.z,v_d.x,v_d.y,v_d.z,a_d.x,a_d.y,a_d.z,Error
+# DATA_TYPE: SIM, SAR_SETTINGS: {Policy_Type: DEEP_RL_ONBOARD, SAR_Type: Source_One_V5, SAR_Config: A30_L200}, LEG_SETTINGS: {L_eff: 0.208, Gamma_eff: 26, K_Pitch: 5.0, K_Yaw: 5.0}, 

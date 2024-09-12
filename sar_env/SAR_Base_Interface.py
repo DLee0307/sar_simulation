@@ -245,7 +245,13 @@ class SAR_Base_Interface(Node):
                     self.declare_parameter(full_key, value)
 
     def _getTime(self):
-        print()
+        """Returns current known time.
+
+        Returns:
+            float: Current known time.
+        """        
+        
+        return self.t
 
     def sendCmd(self,action,cmd_vals=[0.0,0.0,0.0],cmd_flag=1):
         """Sends commands to SAR_DC->Controller via rosservice call
@@ -1225,9 +1231,6 @@ class SAR_Base_Interface(Node):
                 angle_radians = -angle_radians
 
         return angle_radians    
-
-        
-
 
 
 def main(args=None):

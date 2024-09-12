@@ -86,7 +86,7 @@ gz service -s /world/empty/create \
       filename="gz-sim-contact-system"
       name="gz::sim::systems::Contact">
     </plugin>
-    <!--    -->
+<!--
     <gui>
       <plugin filename="ImageDisplay" name="Image Display">
         <gz-gui>
@@ -99,7 +99,7 @@ gz service -s /world/empty/create \
         <topic_picker>false</topic_picker>
       </plugin>
     </gui>
-
+--> 
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
       <pose>0 0 10 0 0 0</pose>

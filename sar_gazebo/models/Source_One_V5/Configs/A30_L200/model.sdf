@@ -120,7 +120,7 @@
           </sphere>
         </geometry>
         <material>
-        <ambient>1 1 1 0.2</ambient>
+        <ambient>1 1 1 0.2 </ambient>
         <diffuse>1 1 1 0.2</diffuse>
         <lighting>1</lighting>
         </material>

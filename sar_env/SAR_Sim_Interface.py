@@ -51,6 +51,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         self._kill_Sim()
         self._restart_Sim()
         self._start_monitoring_subprocesses()
+        #self._wait_for_sim_running()
 
     def loadSimParams(self):
         print()
@@ -70,7 +71,19 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         print()
 
     def sleep(self,time_s):        
-        print()
+        """
+        Sleep in terms of Gazebo sim seconds not real time seconds
+        """
+
+        t_start = self.t
+        while self.t - t_start <= time_s:
+
+            ## NEGATIVE TIME DELTA
+            if self.t < t_start:
+                self.Done = True
+                return False
+
+        return True
 
     def Sim_VelTraj(self,pos,vel):         
         print()
@@ -85,7 +98,15 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         print()
 
     def scaleValue(self,x, original_range=(-1, 1), target_range=(-1, 1)):        
-        print()
+        original_min, original_max = original_range
+        target_min, target_max = target_range
+
+        # Scale x to [0, 1] in original range
+        x_scaled = (x - original_min) / (original_max - original_min)
+
+        # Scale [0, 1] to target range
+        x_target = x_scaled * (target_max - target_min) + target_min
+        return x_target
 
     # ============================
     ##      Command Handlers 
@@ -164,7 +185,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
         while True:
 
-            self.GZ_ping_ok = self._ping_service("/SAR_DC/CMD_Input",timeout=10)
+            #self.GZ_ping_ok = self._ping_service("/SAR_DC/CMD_Input",timeout=10)
             
             time.sleep(0.5)
 
@@ -253,6 +274,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         return True
 
     def pausePhysics(self,pause_flag=True):
+
         if pause_flag == True:
             cmd = f"gz service -s /world/empty/control --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --timeout 3000 --req 'pause: true'"
             self.pause_simulation_process = subprocess.Popen(cmd, shell=True)
@@ -260,9 +282,6 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         else:
             cmd = f"gz service -s /world/empty/control --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --timeout 3000 --req 'pause: false'"
             self.pause_simulation_process = subprocess.Popen(cmd, shell=True)
-
-
-
 
     def spin(self):
         rclpy.spin(self.node)

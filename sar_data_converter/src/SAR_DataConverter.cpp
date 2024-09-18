@@ -85,7 +85,8 @@ bool SAR_DataConverter::CMD_SAR_DC_Callback(const sar_msgs::srv::CTRLCmdSrv::Req
 */
     if (DATA_TYPE == "SIM")
     {
-        std::cout << "Sending request to CMD_Output_Service_Sim" << std::endl;
+        //!!! is for experiment work
+        //!!!std::cout << "Sending request to CMD_Output_Service_Sim" << std::endl;
         auto result = CMD_Output_Service_Sim->async_send_request(req_copy_sim);
 /*
         // 동기적 서비스 호출 처리
@@ -100,7 +101,7 @@ bool SAR_DataConverter::CMD_SAR_DC_Callback(const sar_msgs::srv::CTRLCmdSrv::Req
         } else {
             std::cerr << "Service call to SIM failed to complete" << std::endl;
         }*/
-        std::cout << "CMD_SAR_DC_Callback in SAR_DataConverter.cpp is completed" << std::endl;
+        //!!!std::cout << "CMD_SAR_DC_Callback in SAR_DataConverter.cpp is completed" << std::endl;
         return request->cmd_rx;
     }
     else {

@@ -298,17 +298,17 @@
       <sensor name="camera" type="camera">
         <pose>0 0 0.5e-1 0 -1.57 0</pose>
         <update_rate>100</update_rate>
-        <visualize>true</visualize>
+        <visualize>false</visualize>
         <camera name="head">
           <save enabled="false">
-            <path>/home/dlee/Pictures</path>
+            <path>/home/dlee/Pictures/Gazebo</path>
           </save>
           <horizontal_fov>1.435</horizontal_fov>
           <image>
             <width>64</width>
             <height>64</height>
-            <format>R8G8B8</format>
-            <!--<format>L8</format>-->
+            <!--64<format>R8G8B8</format>-->
+            <format>L8</format>
           </image>
           <clip>
             <near>0.02</near>
@@ -442,6 +442,12 @@
         <!--<link_name>Prop_1</link_name>-->
         <link_name>SAR_Body</link_name>
     </plugin>
+
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libCamera_Plugin.so"
+        name="gz::sim::systems::Camera_Plugin">
+    </plugin>
+
 <!---->
     <plugin
         filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libMotor_Plugin.so"

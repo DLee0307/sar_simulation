@@ -74,6 +74,28 @@ install(TARGETS Practice
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin)
 
+# Camera_Plugin
+add_library(Camera_Plugin SHARED plugins/src/Camera_Plugin.cpp)
+
+ament_target_dependencies(Camera_Plugin
+  gz-sim8
+  gz-sensors8
+  rclcpp
+)
+
+target_link_libraries(Camera_Plugin
+  gz-sim8::gz-sim8
+  gz-sensors8::gz-sensors8
+  gz-msgs10::gz-msgs10
+  ${rclcpp_LIBRARIES}
+
+)
+
+install(TARGETS Camera_Plugin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin)
+
 # Sticky_Leg_Plugin
 add_library(Sticky_Leg_Plugin SHARED plugins/src/Sticky_Leg_Plugin.cpp)
 

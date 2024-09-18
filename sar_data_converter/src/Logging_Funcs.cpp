@@ -8,7 +8,7 @@ bool SAR_DataConverter::DataLogging_Callback(const sar_msgs::srv::LoggingCMD::Re
     switch(request->logging_cmd){
         case 0:
 /**/
-            std::cout << "000" << std::endl;
+            //!!!std::cout << "000" << std::endl;
             Logging_Flag = false;
             fPtr = fopen(request->file_path.c_str(), "w");
             create_CSV();
@@ -17,7 +17,7 @@ bool SAR_DataConverter::DataLogging_Callback(const sar_msgs::srv::LoggingCMD::Re
 
         case 1:
 /**/
-            std::cout << "111" << std::endl;
+            //!!!std::cout << "111" << std::endl;
             Logging_Flag = true;
             fPtr = fopen(request->file_path.c_str(), "a");
 

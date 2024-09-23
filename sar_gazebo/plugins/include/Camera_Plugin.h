@@ -12,6 +12,9 @@
 
 #include <gz/msgs.hh>
 
+#include <Eigen/Dense>
+#include <iostream>
+
 namespace gz
 {
 namespace sim
@@ -44,6 +47,8 @@ namespace systems
 
     public: void PostUpdate(const gz::sim::UpdateInfo &_info,
                            const gz::sim::EntityComponentManager &_ecm) override;
+
+    public: void OF_Calc_Opt_Sep();
 
     private: void CameraMsg(const gz::msgs::Image &_msg);
 

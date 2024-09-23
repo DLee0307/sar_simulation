@@ -7,46 +7,76 @@ using namespace systems;
 
 class gz::sim::systems::Camera_PluginPrivate
 {
-
+public:
+  Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic> cur_img;
+  Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic> prev_img;
+  std::chrono::time_point<std::chrono::high_resolution_clock> last_time;
 };
-
 Camera_Plugin::Camera_Plugin() : System(), dataPtr(std::make_unique<Camera_PluginPrivate>())
 {
-
+  dataPtr->cur_img = Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic>();
+  dataPtr->prev_img = Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic>();
+  dataPtr->last_time = std::chrono::high_resolution_clock::now();
 }
 
 //////////////////////////////////////////////////
 void Camera_Plugin::CameraMsg(const gz::msgs::Image &_msg)
 {
+  auto current_time = std::chrono::high_resolution_clock::now();
+
+  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - dataPtr->last_time).count();
+  std::cout << "Time between cycles: " << duration << " ms" << std::endl;
+
+  dataPtr->last_time = current_time;
+
   auto width = _msg.width();
   auto height = _msg.height();
   const auto &data = _msg.data();
 
-  Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic> pixelMatrix(height, width);
+  if (dataPtr->cur_img.size() > 0)
+  {
+    dataPtr->prev_img = dataPtr->cur_img;
+  }
+
+  dataPtr->cur_img.resize(height, width);
 
   for (size_t y = 0; y < height; ++y)
   {
     for (size_t x = 0; x < width; ++x)
     {
         size_t index = y * width + x;
-        pixelMatrix(y, x) = data[index];
+        dataPtr->cur_img(y, x) = data[index];
     }
   }
+  this->OF_Calc_Opt_Sep();
 }
 
 
 void Camera_Plugin::OF_Calc_Opt_Sep()
 {
-    int HEIGHT_PIXELS = 8;
-    int WIDTH_PIXELS = 8;
+    int I_0 = 255; //Brightness value (0-255)
+    float FoV = 82.22; //Field of View [deg]
+
+    
+    int HEIGHT_PIXELS = 32;
+    int WIDTH_PIXELS = 32;
+
     float w = 3.6e-6;
     float f = 0.33e-3;
     int O_up = WIDTH_PIXELS / 2;
     int O_vp = HEIGHT_PIXELS / 2;
     float delta_t = 0.01;
 
-    Eigen::MatrixXi cur_img = Eigen::MatrixXi::Constant(HEIGHT_PIXELS, WIDTH_PIXELS, 100);
-    Eigen::MatrixXi prev_img = Eigen::MatrixXi::Constant(HEIGHT_PIXELS, WIDTH_PIXELS, 1);
+    Eigen::MatrixXi cur_img = Eigen::MatrixXi::Zero(HEIGHT_PIXELS, WIDTH_PIXELS);
+    Eigen::MatrixXi prev_img = Eigen::MatrixXi::Zero(HEIGHT_PIXELS, WIDTH_PIXELS);
+
+    if (dataPtr->cur_img.size() > 0) {
+        cur_img = dataPtr->cur_img.cast<int>();
+    }
+
+    if (dataPtr->prev_img.size() > 0) {
+        prev_img = dataPtr->prev_img.cast<int>();
+    }
 
     Eigen::Matrix<int, 1, 3> Ku_1;
     Ku_1 << -1, 0, 1;
@@ -80,6 +110,7 @@ void Camera_Plugin::OF_Calc_Opt_Sep()
             G_tp(v_p, u_p) = cur_img(v_p, u_p) - prev_img(v_p, u_p);
         }
     }
+    //std::cout << "OF_Calc_Opt_Sep is run " << std::endl;
 
     // Calculate Eigen Matrix
     Eigen::MatrixXd X(3, 3);
@@ -103,7 +134,8 @@ void Camera_Plugin::OF_Calc_Opt_Sep()
 
     Eigen::Vector3d b = X.completeOrthogonalDecomposition().pseudoInverse() * y;
 
-    std::cout << "Solution vector b: " << b.transpose() << std::endl;
+    //std::cout << "Solution vector b: " << b.transpose() << std::endl;
+    //std::cout << "Solution vector b: " << b[2] << std::endl;
     /**/
 }
 
@@ -113,13 +145,15 @@ void Camera_Plugin::Configure(const Entity &_entity,
 {
   this->node.Subscribe("/camera", &Camera_Plugin::CameraMsg, this);
 
-  this->OF_Calc_Opt_Sep();
+  //this->OF_Calc_Opt_Sep();
 }
 
 void Camera_Plugin::PreUpdate(const UpdateInfo &_info, 
                                 EntityComponentManager &_ecm)
 {
   GZ_PROFILE("Camera_Plugin::PreUpdate");
+  
+  
 }
 
 //////////////////////////////////////////////////
@@ -127,7 +161,7 @@ void Camera_Plugin::PostUpdate(const UpdateInfo &_info,
                      const EntityComponentManager &_ecm)
 {
   GZ_PROFILE("Camera_Plugin::PostUpdate");
-
+  
 }
 
 

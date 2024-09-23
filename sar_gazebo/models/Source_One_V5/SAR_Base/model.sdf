@@ -294,7 +294,7 @@
         </inertia>
         <pose>0 0 0 0 0 0</pose>
       </inertial>
-
+<!--http://classic.gazebosim.org/tutorials?tut=ros_gzplugins-->
       <sensor name="camera" type="camera">
         <pose>0 0 0.5e-1 0 -1.57 0</pose>
         <update_rate>100</update_rate>
@@ -305,8 +305,8 @@
           </save>
           <horizontal_fov>1.435</horizontal_fov>
           <image>
-            <width>64</width>
-            <height>64</height>
+            <width>32</width>
+            <height>32</height>
             <!--64<format>R8G8B8</format>-->
             <format>L8</format>
           </image>

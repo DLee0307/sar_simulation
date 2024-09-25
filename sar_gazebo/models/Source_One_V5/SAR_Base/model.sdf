@@ -296,8 +296,8 @@
       </inertial>
 <!--http://classic.gazebosim.org/tutorials?tut=ros_gzplugins-->
       <sensor name="camera" type="camera">
-        <pose>0 0 0.5e-1 0 -1.57 0</pose>
-        <update_rate>100</update_rate>
+        <pose>0 0 0.3e-1 0 -1.57 0</pose>
+        <update_rate>60</update_rate>
         <visualize>false</visualize>
         <camera name="head">
           <save enabled="false">
@@ -312,16 +312,19 @@
           </image>
           <clip>
             <near>0.02</near>
-            <far>300</far>
+            <far>500</far>
           </clip>
-          <noise>
+<!--          <noise>
             <type>gaussian</type>
+-->
             <!-- Noise is sampled independently per pixel on each frame.
                 That pixel's noise value is added to each of its color
                 channels, which at that point lie in the range [0,1]. -->
+<!--
             <mean>0.0</mean>
             <stddev>0.000</stddev>
           </noise>
+-->          
           <lens>
             <type>sterographic</type>
           </lens>

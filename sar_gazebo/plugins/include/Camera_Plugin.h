@@ -53,6 +53,7 @@ namespace systems
     private: void CameraMsg(const gz::msgs::Image &_msg);
 
     private: std::unique_ptr<Camera_PluginPrivate> dataPtr;
+
   };
 }
 }

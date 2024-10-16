@@ -77,6 +77,29 @@ def generate_launch_description():
         arguments=['-file', Ground_SDF_Path, '-z', '-10.0'],
         output='screen',
     )    
+
+    # Clock Bridge
+    CLOCK_BRIDGE = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
+        output='screen',
+    )
+
+    SAR_CONTROLLER = Node(
+        package='sar_control',
+        executable='SAR_Controller',
+        name='sar_controller',
+        output='screen',
+        parameters=[{'use_sim_time': True}],  # use_sim_time을 직접 노드의 파라미터로 설정
+    )
+
+    controller_terminal_command = ExecuteProcess(
+        cmd=['gnome-terminal', '--disable-factory', '--geometry', '85x46+1050+0', '--',
+             'ros2', 'run', 'sar_control', 'SAR_Controller', '--ros-args', '--param', 'use_sim_time:=true'],
+        shell=True
+    )
+    
     return LaunchDescription([
         SetEnvironmentVariable(
             name='GZ_SIM_RESOURCE_PATH',
@@ -85,7 +108,9 @@ def generate_launch_description():
         gazebo,
         SAR_SPAWN,
         PLANE_SPAWN,
-        GROUND_SPAWN
+        GROUND_SPAWN,
+        CLOCK_BRIDGE,
+        SAR_CONTROLLER
     ])
 
 

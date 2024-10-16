@@ -28,6 +28,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ROSParams.msg"
   "msg/GenericLogData.msg"
   "msg/StickyPadConnect.msg"
+  "msg/OpticalFlowData.msg"
   "srv/SetTrigger.srv"
   "srv/CTRLCmdSrv.srv"
   "srv/LoggingCMD.srv"

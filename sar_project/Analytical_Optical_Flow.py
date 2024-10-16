@@ -303,7 +303,7 @@ if __name__ == '__main__':
     
 
 
-    #OF.Optical_Flow_Traj(X_0=0,Vx=0,D_0=1.0,Vz=0.0)
+    OF.Optical_Flow_Traj(X_0=0,Vx=0,D_0=1.0,Vz=1.0)
 
     #anim = OF.Optical_Flow_Traj(X_0=0,Vx=0.0,D_0=0.5,Vz=0.1)
 

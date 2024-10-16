@@ -35,7 +35,7 @@ void appMain() {
 
     while (1)
     {
-        std::cout << "CTRL_Cmd.cmd_rx: " << CTRL_Cmd.cmd_rx <<  std::endl;//!!! If remove this part, cannot run.
+        //std::cout << "CTRL_Cmd.cmd_rx: " << CTRL_Cmd.cmd_rx <<  std::endl;//!!! If remove this part, cannot run.
 
         if (CTRL_Cmd.cmd_rx == true)
         {
@@ -384,7 +384,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
             case P2P:
                 point2point_Traj();
-                //std::cout << "11111111111: " <<  std::endl;
+                //std::cout << "P2P" <<  std::endl;
                 break;
                 
             case CONST_VEL:

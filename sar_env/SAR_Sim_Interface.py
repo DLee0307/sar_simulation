@@ -91,7 +91,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
     def resetPose(self,z_0=0.5): 
         print()
 
-    def _setModelState(self,pos=[0,0,0.5],quat=[0,0,0,1],vel=[0,0,0],ang_vel=[0,0,0]):        
+    def _setModelState(self,pos=[0,0,0.5],quat=[0,0,0,1],vel=[0,0,0],ang_vel=[0,0,0]):
         print()
 
     def _setModelInertia(self,Mass=0,Inertia=[0,0,0]):        
@@ -243,8 +243,8 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         #     self._wait_for_node(node_name="gazebo",timeout=60,interval=2)
 
         ## LAUNCH CONTROLLER
-        self._launch_Controller()
-        self._wait_for_node(node_name="SAR_Controller_Node",timeout=5,interval=0.25)
+        # self._launch_Controller()
+        # self._wait_for_node(node_name="SAR_Controller_Node",timeout=5,interval=0.25)
 
         ## LAUNCH SAR_DC
         self._launch_SAR_DC()

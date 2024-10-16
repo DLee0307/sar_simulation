@@ -850,7 +850,7 @@ void Controller::appLoop()
         rate.sleep();
     }
 }
-
+/*
 void Controller::stabilizerLoop() // MAIN CONTROLLER LOOP
 {
     rclcpp::Rate rate(1000);
@@ -876,7 +876,46 @@ void Controller::stabilizerLoop() // MAIN CONTROLLER LOOP
     }
 
 }
+*/
 
+void Controller::stabilizerLoop() 
+{
+    bool sim_time_enabled = this->get_parameter("use_sim_time").as_bool();
+    if (sim_time_enabled) {
+        RCLCPP_INFO(this->get_logger(), "Simulation time enabled.");
+    } else {
+        RCLCPP_INFO(this->get_logger(), "Real time (wall clock) enabled.");
+    }
+
+    // 시뮬레이션 시간이 흐를 때의 시작 시간
+    rclcpp::Time last_time = this->get_clock()->now(); 
+
+    loadInitParams();
+    controllerOutOfTreeInit();
+    Armed_Flag = true;
+
+    while (rclcpp::ok())
+    {
+        // 현재 시뮬레이션 시간
+        rclcpp::Time current_time = this->get_clock()->now();
+        
+        // 시뮬레이션 시간에서 지난 시간 계산
+        rclcpp::Duration time_diff = current_time - last_time;
+
+        // 시뮬레이션 시간이 0.001초 이상 경과했을 때 `tick` 업데이트
+        if (time_diff.seconds() >= 0.001) {
+            controllerOutOfTree(&control, &setpoint, &sensorData, &state, tick);
+
+            // 데이터와 디버그 메시지 전송
+            Controller::publishCtrlData();
+            Controller::publishCtrlDebug();
+            Controller::publishROSParamData();
+
+            tick++;  // tick 값을 시뮬레이션 시간에 따라 증가
+            last_time = current_time;  // 마지막 시간을 업데이트
+        }
+    }
+}
 
 int main(int argc, char **argv)
 {

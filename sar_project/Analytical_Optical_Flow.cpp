@@ -161,8 +161,8 @@ int main() {
     Eigen::Vector3d b = pinv_X * y;
 
     // Output the solution vector b
-    //std::cout << "Solution vector b: " << b.transpose() << std::endl;
-    std::cout << "Solution vector b: " << 1/b[2] << std::endl;
+    std::cout << "Solution vector b: " << b.transpose() << std::endl;
+    //std::cout << "Solution vector b: " << 1/b[2] << std::endl;
 
     // Save X matrix as a CSV file
     saveMatrixAsCSV(X, "/home/dlee/ros2_ws/src/sar_simulation/sar_project/X_matrix.csv");

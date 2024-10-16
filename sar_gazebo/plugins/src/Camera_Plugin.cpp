@@ -11,12 +11,23 @@ public:
   Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic> cur_img;
   Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic> prev_img;
   std::chrono::time_point<std::chrono::high_resolution_clock> last_time;
+
+  ////!! ROS2 Publisher
+  public: std::shared_ptr<rclcpp::Node> ros_node;
+  public: rclcpp::Publisher<sar_msgs::msg::OpticalFlowData>::SharedPtr opticalflow_publisher;
+
 };
+
 Camera_Plugin::Camera_Plugin() : System(), dataPtr(std::make_unique<Camera_PluginPrivate>())
 {
-  dataPtr->cur_img = Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic>();
-  dataPtr->prev_img = Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic>();
-  dataPtr->last_time = std::chrono::high_resolution_clock::now();
+
+  if (!rclcpp::ok()) {
+    rclcpp::init(0, nullptr);
+  }
+
+  this->dataPtr->ros_node = std::make_shared<rclcpp::Node>("Opticalflow_Publisher_Node");
+  this->dataPtr->opticalflow_publisher = this->dataPtr->ros_node->create_publisher<sar_msgs::msg::OpticalFlowData>("Opticalflow/data", 1);
+
 }
 
 //////////////////////////////////////////////////
@@ -58,11 +69,11 @@ void Camera_Plugin::OF_Calc_Opt_Sep()
     float FoV = 82.22; //Field of View [deg]
 
     float w = 3.6e-6;
-    float f = 0.066e-3;
-    float delta_t = 0.01667;
+    float f = 0.033e-3;
+    float delta_t = 0.01;
 
-    int HEIGHT_PIXELS = 32;
-    int WIDTH_PIXELS = 32;
+    int HEIGHT_PIXELS = 16;
+    int WIDTH_PIXELS = 16;
     int O_up = WIDTH_PIXELS / 2;
     int O_vp = HEIGHT_PIXELS / 2;
 
@@ -145,6 +156,12 @@ void Camera_Plugin::OF_Calc_Opt_Sep()
     //std::cout << "Solution vector b: " << b.transpose() << std::endl;
     std::cout << "Solution vector b: " << 1/b[2] << std::endl;
 
+    sar_msgs::msg::OpticalFlowData msg;
+
+    msg.tau = 1/b[2];
+
+    this->dataPtr->opticalflow_publisher->publish(msg);
+
 }
 
 
@@ -152,9 +169,15 @@ void Camera_Plugin::Configure(const Entity &_entity,
                          const std::shared_ptr<const sdf::Element> &_sdf,
                          EntityComponentManager &_ecm, EventManager &)
 {
+  dataPtr->cur_img = Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic>();
+  dataPtr->prev_img = Eigen::Matrix<uint8_t, Eigen::Dynamic, Eigen::Dynamic>();
+  dataPtr->last_time = std::chrono::high_resolution_clock::now();
+  
   this->node.Subscribe("/camera", &Camera_Plugin::CameraMsg, this);
 
   //this->OF_Calc_Opt_Sep();
+
+
 }
 
 void Camera_Plugin::PreUpdate(const UpdateInfo &_info, 

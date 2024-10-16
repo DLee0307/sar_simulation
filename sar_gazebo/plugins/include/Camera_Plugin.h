@@ -15,6 +15,8 @@
 #include <Eigen/Dense>
 #include <iostream>
 
+#include "sar_msgs/msg/optical_flow_data.hpp"
+
 namespace gz
 {
 namespace sim

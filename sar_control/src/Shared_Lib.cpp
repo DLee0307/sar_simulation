@@ -231,6 +231,8 @@ float Tau = 0.0f;       // [s]
 float Tau_CR = 0.0f;    // [s]
 float Theta_x = 0.0f;   // [rad/s] 
 float Theta_y = 0.0f;   // [rad/s]
+float Tau_DH = 0.0f;    // [s]
+float Tau_DIFF = 0.0f;  // [s]
 
 // OPTICAL FLOW STATES (CAMERA ESTIMATE)
 float Tau_Cam = 0.0f;       // [s]

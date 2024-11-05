@@ -64,8 +64,9 @@ gz service -s /world/empty/create \
     <physics name="1ms" type="ignored">
       <real_time_update_rate>1000</real_time_update_rate>
       <max_step_size>0.001</max_step_size>
-      <real_time_factor>0.4</real_time_factor>
+      <real_time_factor>0.2</real_time_factor>
     </physics>
+    <use_sim_time>true</use_sim_time>
     <plugin
       filename="gz-sim-physics-system"
       name="gz::sim::systems::Physics">
@@ -147,7 +148,8 @@ gz service -s /world/empty/create \
           <property key="showTitleBar" type="bool">false</property>
         </gz-gui>
       </plugin>
-      <!-- World control 
+      
+      <!-- World control -->
       <plugin filename="WorldControl" name="World control">
         <gz-gui>
           <title>World control</title>
@@ -168,7 +170,7 @@ gz service -s /world/empty/create \
         <start_paused>true</start_paused>
         <use_event>true</use_event>
 
-      </plugin>-->
+      </plugin>
 
       <!-- World statistics -->
       <plugin filename="WorldStats" name="World stats">

@@ -40,7 +40,7 @@ SAR_DataConverter::SAR_DataConverter()
         // ROS2 PARAMETER
         ROS_Parmas_Sub = this->create_subscription<sar_msgs::msg::ROSParams>("/ROS2/PARAMETER", 1, std::bind(&SAR_DataConverter::ROSParams_Callback, this, std::placeholders::_1));
 
-        //@@@ Clock 객체를 초기화
+        //Initialize Clock Class
         clock_ = std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
 
         // INITIALIZE STATE DATA PUBLISHERS

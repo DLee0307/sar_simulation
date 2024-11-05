@@ -12,6 +12,7 @@
 #include "sar_msgs/msg/ctrl_data.hpp"
 #include "sar_msgs/msg/ctrl_debug.hpp"
 #include "sar_msgs/msg/ros_params.hpp"
+#include "sar_msgs/msg/optical_flow_data.hpp"
 
 #include "sar_msgs/srv/ctrl_cmd_srv.hpp"
 
@@ -75,6 +76,7 @@ public:
 
     void Vicon_Update_Callback(const sar_msgs::msg::ViconData::SharedPtr msg);
     void IMU_Update_Callback(const sar_msgs::msg::IMUData::SharedPtr msg);
+    void OpticalFlow_Update_Callback(const sar_msgs::msg::OpticalFlowData::SharedPtr msg);
 
 
     void CMD_Service_Resp(const sar_msgs::srv::CTRLCmdSrv::Request::SharedPtr request,
@@ -101,6 +103,7 @@ private:
     // ROS2 Topic Subscriber
     rclcpp::Subscription<sar_msgs::msg::ViconData>::SharedPtr subscriber_Vicon;
     rclcpp::Subscription<sar_msgs::msg::IMUData>::SharedPtr subscriber_IMU;
+    rclcpp::Subscription<sar_msgs::msg::OpticalFlowData>::SharedPtr subscriber_OpticalFlow;
 
     // ROS2 Service
     rclcpp::Service<sar_msgs::srv::CTRLCmdSrv>::SharedPtr CMD_Output_Service;
@@ -115,6 +118,7 @@ private:
     // MESSAGES for Subscriber
     sar_msgs::msg::IMUData::SharedPtr Imu_Data;
     sar_msgs::msg::ViconData::SharedPtr Vicon_Data;
+    sar_msgs::msg::OpticalFlowData::SharedPtr OpticalFlow_Data;
 
 };
 

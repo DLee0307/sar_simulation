@@ -36,7 +36,7 @@ void Camera_Plugin::CameraMsg(const gz::msgs::Image &_msg)
   auto current_time = std::chrono::high_resolution_clock::now();
 
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - dataPtr->last_time).count();
-  //std::cout << "Time between cycles: " << duration << "ms" << std::endl;
+  std::cout << "Time between cycles: " << duration << "ms" << std::endl;
 
   dataPtr->last_time = current_time;
 
@@ -69,11 +69,16 @@ void Camera_Plugin::OF_Calc_Opt_Sep()
     float FoV = 82.22; //Field of View [deg]
 
     float w = 3.6e-6;
-    float f = 0.033e-3;
+    //float f = 0.033e-3; //for 16*16
+    float f = 0.33e-3; // for 64*64
     float delta_t = 0.01;
 
-    int HEIGHT_PIXELS = 16;
-    int WIDTH_PIXELS = 16;
+    //int HEIGHT_PIXELS = 16;
+    //int WIDTH_PIXELS = 16;
+
+    int HEIGHT_PIXELS = 64;
+    int WIDTH_PIXELS = 64;
+    
     int O_up = WIDTH_PIXELS / 2;
     int O_vp = HEIGHT_PIXELS / 2;
 

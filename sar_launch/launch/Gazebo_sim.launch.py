@@ -91,7 +91,7 @@ def generate_launch_description():
         executable='SAR_Controller',
         name='sar_controller',
         output='screen',
-        parameters=[{'use_sim_time': True}],  # use_sim_time을 직접 노드의 파라미터로 설정
+        parameters=[{'use_sim_time': True}],
     )
 
     controller_terminal_command = ExecuteProcess(
@@ -110,7 +110,8 @@ def generate_launch_description():
         PLANE_SPAWN,
         GROUND_SPAWN,
         CLOCK_BRIDGE,
-        SAR_CONTROLLER
+        #SAR_CONTROLLER
+        controller_terminal_command
     ])
 
 

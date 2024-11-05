@@ -76,4 +76,4 @@ float64 r_kd_z
 float64 r_ki_z
 float64 i_range_r_z
 
-
+float64 tau_diff

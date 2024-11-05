@@ -251,6 +251,8 @@ extern float Tau;           // [s]
 extern float Tau_CR;        // [s]
 extern float Theta_x;       // [rad/s] 
 extern float Theta_y;       // [rad/s]
+extern float Tau_DH;        // [s]
+extern float Tau_DIFF;      // [s]
 
 // OPTICAL FLOW STATES (CAMERA ESTIMATE)
 extern float Tau_Cam;      // [s]

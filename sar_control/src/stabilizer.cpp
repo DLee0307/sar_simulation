@@ -16,6 +16,9 @@ Controller::Controller()
     // INTERNAL SENSOR SUBSCRIBERS
     subscriber_IMU = this->create_subscription<sar_msgs::msg::IMUData>("Imu/data", 1, std::bind(&Controller::IMU_Update_Callback, this, std::placeholders::_1));
 
+    // OpticalFlow SUBSCRIBERS
+    subscriber_OpticalFlow = this->create_subscription<sar_msgs::msg::OpticalFlowData>("Opticalflow/data", 1, std::bind(&Controller::OpticalFlow_Update_Callback, this, std::placeholders::_1));
+
     // MISC SERVICES/PUBLISHERS
     CTRL_Data_Publisher = this->create_publisher<sar_msgs::msg::CtrlData>("/CTRL/data", 1);
     CTRL_Debug_Publisher = this->create_publisher<sar_msgs::msg::CtrlDebug>("/CTRL/debug", 1);
@@ -128,6 +131,19 @@ void Controller::IMU_Update_Callback(const sar_msgs::msg::IMUData::SharedPtr msg
     std::cout << "linear_acceleration(z) : " << msg->linear_acceleration.z << std::endl;*/
 }
 
+void Controller::OpticalFlow_Update_Callback(const sar_msgs::msg::OpticalFlowData::SharedPtr msg) {
+    OpticalFlow_Data = msg;
+    Tau_DH = msg->tau;
+    Tau_DIFF = Tau - Tau_DH;
+    double Tau_difference2 = Tau_CR - Tau_DH;
+    std::cout << "Tau - Tau_DH : " << Tau_DIFF << std::endl;
+    //std::cout << "Tau_CR - Tau_DH : " << Tau_difference2 << std::endl;
+
+    std::cout << "Tau_DH : " << Tau_DH << std::endl;
+    std::cout << "Tau : " << Tau << std::endl;
+    //std::cout << "Tau_CR : " << Tau_CR << std::endl;
+
+}
 
 // LOAD VALUES FROM ROSPARAM SERVER INTO CONTROLLER
 void Controller::loadInitParams()
@@ -834,6 +850,8 @@ void Controller::publishROSParamData(){
     ROSParams_msg.r_ki_z = R_ki_z;
     ROSParams_msg.i_range_r_z = i_range_R_z;
 
+    ROSParams_msg.tau_diff = Tau_DIFF;
+
     ROS_Parmas_Publisher->publish(ROSParams_msg);
     //std::cout << "ROS2 prameters are published" << std::endl;
 }
@@ -875,9 +893,10 @@ void Controller::stabilizerLoop() // MAIN CONTROLLER LOOP
         tick++;
     }
 
-}
-*/
-
+}*/
+//https://github.com/ros-navigation/navigation2/issues/3586
+//https://gazebosim.org/api/sim/8/distributedsimulation.html
+/**/
 void Controller::stabilizerLoop() 
 {
     bool sim_time_enabled = this->get_parameter("use_sim_time").as_bool();
@@ -887,7 +906,7 @@ void Controller::stabilizerLoop()
         RCLCPP_INFO(this->get_logger(), "Real time (wall clock) enabled.");
     }
 
-    // 시뮬레이션 시간이 흐를 때의 시작 시간
+    // Time for staring simulation
     rclcpp::Time last_time = this->get_clock()->now(); 
 
     loadInitParams();
@@ -896,23 +915,23 @@ void Controller::stabilizerLoop()
 
     while (rclcpp::ok())
     {
-        // 현재 시뮬레이션 시간
+        // Current simulation time
         rclcpp::Time current_time = this->get_clock()->now();
         
-        // 시뮬레이션 시간에서 지난 시간 계산
+        //
         rclcpp::Duration time_diff = current_time - last_time;
 
-        // 시뮬레이션 시간이 0.001초 이상 경과했을 때 `tick` 업데이트
+        //
         if (time_diff.seconds() >= 0.001) {
             controllerOutOfTree(&control, &setpoint, &sensorData, &state, tick);
 
-            // 데이터와 디버그 메시지 전송
+            
             Controller::publishCtrlData();
             Controller::publishCtrlDebug();
             Controller::publishROSParamData();
 
-            tick++;  // tick 값을 시뮬레이션 시간에 따라 증가
-            last_time = current_time;  // 마지막 시간을 업데이트
+            tick++;
+            last_time = current_time;  // Update the last_time
         }
     }
 }

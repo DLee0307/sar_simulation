@@ -43,6 +43,7 @@ extern float C_tf;              // Moment Coeff [Nm/N]
 extern float Thrust_max;        // Max thrust per motor [g]
 
 extern float dt;                // Controller cycle time
+//extern uint32_t PrevCrazyswarmTick;
 extern uint32_t prev_tick;
 
 typedef enum {

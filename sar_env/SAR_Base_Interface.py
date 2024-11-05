@@ -21,6 +21,7 @@ from sar_msgs.msg import SARMiscData
 from sar_msgs.msg import ROSParams
 
 from sar_msgs.srv import CTRLCmdSrv
+from sar_msgs.srv import CTRLGetObs
 from sar_msgs.srv import LoggingCMD
 
 YELLOW = '\033[93m'

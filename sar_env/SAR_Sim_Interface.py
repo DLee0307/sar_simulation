@@ -9,7 +9,7 @@ import rclpy
 from rclpy.node import Node
 import sys
 
-
+from sar_msgs.srv import CTRLGetObs
 
 
 #SET PYTHONPATH 
@@ -27,7 +27,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
     def __init__(self, GZ_Timeout=False):
         super().__init__()
-        #self.loadSimParams()\
+        #self.loadSimParams()
 
         ##!! Need to analyze
         self.node = self # If remove this cannot send command?
@@ -52,6 +52,9 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         self._restart_Sim()
         self._start_monitoring_subprocesses()
         #self._wait_for_sim_running()
+        #self._getTick()
+        #print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+
 
     def loadSimParams(self):
         print()
@@ -65,10 +68,15 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         print()
 
     def _getTick(self):
-        print()
+        srv = CTRLGetObs.Request() 
+        
+        result = self.callService('/CTRL/Get_Ob',srv, CTRLGetObs)
+
+        return result.tick
 
     def _getObs(self):        
         print()
+
 
     def sleep(self,time_s):        
         """

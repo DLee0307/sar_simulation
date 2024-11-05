@@ -183,6 +183,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
     #endif
 */
 
+    // POLICY UPDATES
     if (isOFUpdated == true) {
 
         isOFUpdated = false;
@@ -191,6 +192,42 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
             switch (Policy)
             {
+                case DEEP_RL_SB3:
+
+                    // EXECUTE POLICY IF TRIGGERED
+                    if(onceFlag == false){
+
+                        onceFlag = true;
+
+                        // UPDATE AND RECORD TRIGGER VALUES
+                        Trg_Flag = true;  
+                        Pos_B_O_trg = Pos_B_O;
+                        Vel_B_O_trg = Vel_B_O;
+                        Quat_B_O_trg = Quat_B_O;
+                        Omega_B_O_trg = Omega_B_O;
+
+                        Pos_P_B_trg = Pos_P_B;
+                        Vel_B_P_trg = Vel_B_P;
+                        Quat_P_B_trg = Quat_P_B;
+                        Omega_B_P_trg = Omega_B_P;
+
+                        Tau_trg = Tau;
+                        Tau_CR_trg = Tau_CR;
+                        Theta_x_trg = Theta_x;
+                        Theta_y_trg = Theta_y;
+                        D_perp_trg = D_perp;
+                        D_perp_CR_trg = D_perp_CR;
+
+
+                        a_Trg_trg = a_Trg;
+                        a_Rot_trg = a_Rot;
+
+                        M_d.x = 0.0f;
+                        M_d.y = a_Rot*Iyy;
+                        M_d.z = 0.0f;
+                    }
+
+                    break;
 
                 case DEEP_RL_ONBOARD:
 

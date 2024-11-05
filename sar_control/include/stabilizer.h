@@ -15,6 +15,7 @@
 #include "sar_msgs/msg/optical_flow_data.hpp"
 
 #include "sar_msgs/srv/ctrl_cmd_srv.hpp"
+#include "sar_msgs/srv/ctrl_get_obs.hpp"
 
 #include "math3d.h"
 #include <cmath>
@@ -74,13 +75,16 @@ public:
 
     void publishCtrlData(rclcpp::Publisher<sar_msgs::msg::CtrlData>::SharedPtr& publisher);
 
+    // FUNCTION PROTOTYPES
     void Vicon_Update_Callback(const sar_msgs::msg::ViconData::SharedPtr msg);
     void IMU_Update_Callback(const sar_msgs::msg::IMUData::SharedPtr msg);
     void OpticalFlow_Update_Callback(const sar_msgs::msg::OpticalFlowData::SharedPtr msg);
 
-
     void CMD_Service_Resp(const sar_msgs::srv::CTRLCmdSrv::Request::SharedPtr request,
                     sar_msgs::srv::CTRLCmdSrv::Response::SharedPtr response);
+
+    void Get_Obs_Resp(const sar_msgs::srv::CTRLGetObs::Request::SharedPtr request,
+                    sar_msgs::srv::CTRLGetObs::Response::SharedPtr response);                
 
 
     void appLoop();
@@ -107,6 +111,7 @@ private:
 
     // ROS2 Service
     rclcpp::Service<sar_msgs::srv::CTRLCmdSrv>::SharedPtr CMD_Output_Service;
+    rclcpp::Service<sar_msgs::srv::CTRLGetObs>::SharedPtr Get_Obs_Service;
 
 
     // MESSAGES

@@ -36,7 +36,7 @@ void Camera_Plugin::CameraMsg(const gz::msgs::Image &_msg)
   auto current_time = std::chrono::high_resolution_clock::now();
 
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - dataPtr->last_time).count();
-  std::cout << "Time between cycles: " << duration << "ms" << std::endl;
+  //@@std::cout << "Time between cycles: " << duration << "ms" << std::endl;
 
   dataPtr->last_time = current_time;
 
@@ -159,7 +159,7 @@ void Camera_Plugin::OF_Calc_Opt_Sep()
     Eigen::Vector3d b = pinv_X * y;
 
     //std::cout << "Solution vector b: " << b.transpose() << std::endl;
-    std::cout << "Solution vector b: " << 1/b[2] << std::endl;
+    //@@std::cout << "Solution vector b: " << 1/b[2] << std::endl;
 
     sar_msgs::msg::OpticalFlowData msg;
 

@@ -27,6 +27,17 @@ typedef enum {
 } axis_direction;
 extern axis_direction axis;
 
+struct traj_vec{
+  union {
+    struct {
+      float x;
+      float y;
+      float z;
+    };
+    float idx[3];
+  };
+};
+
 extern bool Traj_Active[3];
 extern float s_0_t[3];              // Traj Start Point [m]
 extern float s_f_t[3];              // Traj End Point [m]

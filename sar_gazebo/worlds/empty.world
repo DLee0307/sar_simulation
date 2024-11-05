@@ -250,5 +250,10 @@ gz service -s /world/empty/create \
       <direction>-0.5 0.1 -0.9</direction>
     </light>
 
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libStep_World_Plugin.so"
+        name="gz::sim::systems::Step_World_Plugin">
+    </plugin>
+
   </world>
 </sdf>

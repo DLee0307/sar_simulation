@@ -4,7 +4,7 @@
 // STANDARD INCLUDES
 #include <iostream>
 #include <thread>
-
+#include <memory>
 
 // ROS AND GAZEBO INCLUDES
 #include <gz/sim/System.hh>
@@ -16,8 +16,13 @@
 #include <gz/sim/Model.hh>
 
 // CUSTOM INCLUDE
-//#include "sar_msgs/World_Step.h"
+#include "sar_msgs/srv/world_step.hpp"
 
+#include <rclcpp/rclcpp.hpp>
+#include <gz/sim/World.hh>
+
+#include <gz/msgs/world_control.pb.h>
+#include <gz/msgs/boolean.pb.h>
 
 namespace gz
 {
@@ -26,7 +31,12 @@ namespace sim
 inline namespace GZ_SIM_VERSION_NAMESPACE {
 namespace systems
 {
-  class Step_World_PluginPrivate;
+  class Step_World_PluginPrivate
+  {
+    public:
+      std::shared_ptr<rclcpp::Node> ros_node;
+      std::unique_ptr<gz::transport::Node> gz_node; 
+  };
 
   class Step_World_Plugin:
     public System,
@@ -45,7 +55,13 @@ namespace systems
     public: void PreUpdate(const UpdateInfo &_info,
                            EntityComponentManager &_ecm) final;
 
+    public: void Step_World(const std::shared_ptr<sar_msgs::srv::WorldStep::Request> request,
+                        std::shared_ptr<sar_msgs::srv::WorldStep::Response> response);
+
     private: std::unique_ptr<Step_World_PluginPrivate> dataPtr;
+
+    private: gz::sim::World world_;
+    private: rclcpp::Service<sar_msgs::srv::WorldStep>::SharedPtr step_world_service_;
 
 
   };

@@ -75,7 +75,8 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         """
 
         #self.callService('/ENV/World_Step',World_StepRequest(n_steps),World_Step)
-
+        #gz service -s /world/empty/control --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --timeout 3000 --req 'pause: true, multi_step: 200'
+        
         self.pausePhysics(True)
         self.pausePhysics(False)
         time.sleep(5)

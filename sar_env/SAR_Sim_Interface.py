@@ -7,6 +7,7 @@ import subprocess
 from threading import Thread,Event
 import rclpy
 from rclpy.node import Node
+from rclpy.task import Future
 import sys
 
 from sar_msgs.srv import CTRLGetObs
@@ -51,7 +52,9 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         self._kill_Sim()
         self._restart_Sim()
         self._start_monitoring_subprocesses()
-        #self._wait_for_sim_running()
+        # self.Sim_Status = "Running"
+        self._wait_for_sim_running()
+        
         #self._getTick()
         #print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
@@ -65,18 +68,58 @@ class SAR_Sim_Interface(SAR_Base_Interface):
     
 
     def _iterStep(self,n_steps:int = 10):
-        print()
+        """Update simulation by n timesteps
+
+        Args:
+            n_steps (int, optional): Number of timesteps to step through. Defaults to 10.
+        """
+
+        #self.callService('/ENV/World_Step',World_StepRequest(n_steps),World_Step)
+
+        self.pausePhysics(True)
+        self.pausePhysics(False)
+        time.sleep(5)
+        self.pausePhysics(True)
 
     def _getTick(self):
         srv = CTRLGetObs.Request() 
-        
-        result = self.callService('/CTRL/Get_Ob',srv, CTRLGetObs)
+        #print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        result = self.callService('/CTRL/Get_Obs',srv, CTRLGetObs)
+        #print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+
+        if result:
+            print(f"Service call succeeded: srv_success={result.tick}")
+        else:
+            print("Service call failed")
 
         return result.tick
 
     def _getObs(self):        
-        print()
+        resp = self.callService('/CTRL/Get_Obs',CTRLGetObs.Request(),CTRLGetObs)
 
+        Tau_CR = resp.tau_cr
+        Theta_x = resp.theta_x
+        D_perp_CR = resp.d_perp_cr
+        Plane_Angle_rad = np.radians(resp.plane_angle_deg)
+
+        obs_list = [Tau_CR,Theta_x,D_perp_CR,self.Plane_Angle_rad]
+
+        Tau_CR_scaled = self.scaleValue(Tau_CR,original_range=[-5,5],target_range=[-1,1])
+        Theta_x_scaled = self.scaleValue(Theta_x,original_range=[-20,20],target_range=[-1,1])
+        D_perp_CR_scaled = self.scaleValue(D_perp_CR,original_range=[-0.5,2.0],target_range=[-1,1])
+        Plane_Angle_scaled = self.scaleValue(self.Plane_Angle_deg,original_range=[0,180],target_range=[-1,1])
+
+        scaled_obs_list = [Tau_CR_scaled,Theta_x_scaled,D_perp_CR_scaled,Plane_Angle_scaled]
+
+        ## OBSERVATION VECTOR
+        obs = np.array(scaled_obs_list,dtype=np.float32)
+
+        print("obs : ", obs)
+
+
+        return obs
+
+        
 
     def sleep(self,time_s):        
         """
@@ -117,6 +160,16 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
     def _setModelInertia(self,Mass=0,Inertia=[0,0,0]):        
         print()
+        
+        # ## CREATE SERVICE REQUEST MSG
+        # srv = Inertia_ParamsRequest() 
+        # srv.Mass = Mass
+        # srv.Inertia.x = Inertia[0]
+        # srv.Inertia.y = Inertia[1]
+        # srv.Inertia.z = Inertia[2]
+
+        # ## SEND LOGGING REQUEST VIA SERVICE
+        # self.callService("/SAR_Internal/Inertia_Update",srv,Inertia_Params)
 
     def scaleValue(self,x, original_range=(-1, 1), target_range=(-1, 1)):        
         original_min, original_max = original_range
@@ -294,6 +347,44 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
         print(f"{node_name} has fully launched.")
         return True
+
+    def callService(self, srv_addr, srv_msg, srv_type, num_retries=5, call_timeout=5):
+        """
+        ROS2 callService 함수로 변환. 비동기적으로 서비스를 호출하고, 응답을 처리합니다.
+        """
+        client = self.create_client(srv_type, srv_addr)
+
+        # 서비스가 사용 가능할 때까지 대기
+        if not client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().error(f"[WARNING] Service '{srv_addr}' not available.")
+            return None
+
+        for retry in range(num_retries):
+            self.response = None
+
+            # 비동기 서비스 요청을 보냄
+            future = client.call_async(srv_msg)
+
+            try:
+                # 지정된 timeout 내에 응답을 기다림
+                rclpy.spin_until_future_complete(self, future, timeout_sec=call_timeout)
+
+                if future.done():
+                    try:
+                        response = future.result()
+                        return response
+                    except Exception as e:
+                        self.get_logger().warn(f"[WARNING] Service call failed: {e}")
+            except Exception as e:
+                self.get_logger().warn(f"[WARNING] Attempt {retry + 1} to call service '{srv_addr}' failed: {e}")
+
+            self.get_logger().warn(f"Retrying service call ({retry + 1}/{num_retries}).")
+
+        # 모든 시도가 실패한 경우
+        self.Done = True
+        self.get_logger().error(f"Service '{srv_addr}' call failed after {num_retries} attempts.")
+        return None
+
 
     def pausePhysics(self,pause_flag=True):
 

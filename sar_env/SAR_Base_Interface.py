@@ -56,6 +56,7 @@ class SAR_Base_Interface(Node):
             self.loadBaseParams()
             self._preInit()
 
+
         print(f"{GREEN}")
         print("=============================================")
         print("       SAR Base Interface Initialized        ")
@@ -86,6 +87,7 @@ class SAR_Base_Interface(Node):
         # ## RL DATA PUBLISHERS
         # self.RL_Data_Pub = rospy.Publisher("/RL/Data",RL_Data,queue_size=10)
         # self.RL_History_Pub = rospy.Publisher("/RL/History",RL_History,queue_size=10)
+
 
     def loadBaseParams(self):
         # LOAD BASE PARAMETERS
@@ -187,7 +189,7 @@ class SAR_Base_Interface(Node):
         self.Plane_Pos_y_init = self.get_parameter(f"PLANE_SETTINGS.Pos_Y_init").get_parameter_value().double_value
         self.Plane_Pos_z_init = self.get_parameter(f"PLANE_SETTINGS.Pos_Z_init").get_parameter_value().double_value
         self.Plane_Angle_deg_init = self.get_parameter(f"PLANE_SETTINGS.Plane_Angle_init").get_parameter_value().integer_value
-        
+
         # self.get_logger().info(f'Plane_Type: {self.Plane_Type}')
         # self.get_logger().info(f'Plane_Config: {self.Plane_Config}')
         # self.get_logger().info(f'Plane_Pos_x_init: {self.Plane_Pos_x_init}')
@@ -443,6 +445,9 @@ class SAR_Base_Interface(Node):
         V_mag_Low = V_mag_range[0]
         V_mag_High = V_mag_range[1]
         V_mag = np.random.uniform(low=V_mag_Low,high=V_mag_High)
+
+        #print("Plane_Angle_deg_init value : ", self.Plane_Angle_deg_init)
+        #print("Plane_Angle_deg value : ", self.Plane_Angle_deg)
 
         # Add code from DH
         if np.isnan(getattr(self, 'Plane_Angle_deg', np.nan)):
@@ -1092,6 +1097,8 @@ class SAR_Base_Interface(Node):
             MiscData_msg.plane_pos.y,
             MiscData_msg.plane_pos.z,
         ]
+        #print("self.r_P_O :",self.r_P_O)
+        
 
     def _RL_Publish(self):
         print()

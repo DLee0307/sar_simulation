@@ -174,17 +174,20 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
         if self.Fine_Tuning_Flag:
             
-
             ## SET TESTING CONDITIONS
             Plane_Angle = self.TestingConditions[self.TestCondition_idx][0]
             V_angle_B_O = self.TestingConditions[self.TestCondition_idx][1]
             V_mag_B_O = self.TestingConditions[self.TestCondition_idx][2]
 
+            # Add code from DH
+            if np.isnan(getattr(self, 'Plane_Angle_deg', np.nan)):
+                self.Plane_Angle_deg = 0
+
+            #!!! Need to change
             ## CONVERT GLOBAL ANGLE TO RELATIVE ANGLE
-            self._setPlanePose(self.r_P_O,Plane_Angle)
+            ## self._setPlanePose(self.r_P_O,Plane_Angle)
             self.V_angle = self.Plane_Angle_deg + V_angle_B_O
             self.V_mag = V_mag_B_O
-
 
             ## UPDATE TESTING CONDITION INDEX
             self.TestCondition_idx += 1
@@ -206,9 +209,60 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
             #self._setPlanePose(self.r_P_O,Plane_Angle)
 
             ## SAMPLE VELOCITY AND FLIGHT ANGLE
+            #print("Sampled V_mag:", self.Plane_Angle_deg)
             V_mag,V_angle = self._sampleFlightConditions(self.V_mag_range,self.V_angle_range)
             self.V_mag = V_mag
             self.V_angle = V_angle
+            
+    def _initialStep(self):
+
+        ## DOMAIN RANDOMIZATION (UPDATE INERTIAL VALUES)
+        Iyy_DR = self.Ref_Iyy + np.random.normal(0,self.Iyy_std)
+        Mass_DR = self.Ref_Mass + np.random.normal(0,self.Mass_std)
+        #self._setModelInertia(Mass_DR,[self.Ref_Ixx,Iyy_DR,self.Ref_Izz])
+
+        # Add code from DH
+        if np.isnan(getattr(self, 'Plane_Angle_rad', np.nan)):
+            self.Plane_Angle_rad = 0
+        # Add code from DH
+        if np.isnan(getattr(self, 'r_P_O', [np.nan])[0]):
+            self.r_P_O = [3.0, 0.0, 2.5]
+
+        ## CALC STARTING VELOCITY IN GLOBAL COORDS
+        V_tx = self.V_mag*np.cos(np.deg2rad(self.V_angle))
+        V_perp = self.V_mag*np.sin(np.deg2rad(self.V_angle))
+        V_B_P = np.array([V_tx,0,V_perp])               # {t_x,n_p}
+        V_B_O = self.R_PW(V_B_P,self.Plane_Angle_rad)   # {X_W,Z_W}
+
+        ## CALCULATE STARTING TAU VALUE
+        # self.Tau_CR_start = self.t_rot_max*np.random.uniform(0.9,1.1) # Add noise to starting condition
+        self.Tau_CR_start = 0.5 + np.random.uniform(-0.05,0.05)
+        try:
+            self.Tau_Body_start = (self.Tau_CR_start + self.Collision_Radius/(V_perp+EPS)) # Tau read by body
+        except:
+            print("Exception")
+        self.Tau_Accel_start = 1.0 # Acceleration time to desired velocity conditions [s]
+
+        ## CALC STARTING POSITION IN GLOBAL COORDS
+        # (Derivation: Research_Notes_Book_3.pdf (9/17/23))
+
+        r_P_O = np.array(self.r_P_O)                                        # Plane Position wrt to Origin - {X_W,Z_W}
+        r_P_B = np.array([(self.Tau_CR_start + self.Tau_Accel_start)*V_tx,
+                          0,
+                          (self.Tau_Body_start + self.Tau_Accel_start)*V_perp])  # Body Position wrt to Plane - {t_x,n_p}
+        r_B_O = r_P_O - self.R_PW(r_P_B,self.Plane_Angle_rad)    
+
+        ## LAUNCH QUAD W/ DESIRED VELOCITY
+        self.initial_state = (r_B_O,V_B_O)
+        self.Sim_VelTraj(pos=r_B_O,vel=V_B_O)
+        self._iterStep(n_steps=1000)
+
+        #self._getTick()
+        self._getObs()
+
+
+
+
 
 
 if __name__ == "__main__":
@@ -217,5 +271,9 @@ if __name__ == "__main__":
 
     env = SAR_Sim_DeepRL(Ang_Acc_range=[-90,0],V_mag_range=[1.5,3.5],V_angle_range=[5,175],Plane_Angle_range=[0,180],Render=True,Fine_Tune=False)
 
+    env._setTestingConditions()
+    env._initialStep()    
+
     rclpy.spin(env.node)
+
     #rclpy.shutdown()

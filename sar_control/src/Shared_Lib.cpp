@@ -489,6 +489,10 @@ void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd)
 
             break;
 
+        case 20: // Tumble-Detection
+            TumbleDetect_Flag = CTRL_Cmd->cmd_flag;
+            break;
+
         case 24: // Quad Arming
             Armed_Flag = CTRL_Cmd->cmd_flag;
             break;

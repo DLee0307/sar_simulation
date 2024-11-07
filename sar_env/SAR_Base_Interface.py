@@ -439,7 +439,44 @@ class SAR_Base_Interface(Node):
         print()
 
     def _sampleFlightConditions(self,V_mag_range=[0.5,1.5],V_angle_range=[0,180]):
-        print()
+        ## SAMPLE V_MAG FROM UNIFORM DISTRIBUTION IN MAGNITUDE RANGE
+        V_mag_Low = V_mag_range[0]
+        V_mag_High = V_mag_range[1]
+        V_mag = np.random.uniform(low=V_mag_Low,high=V_mag_High)
+
+        # Add code from DH
+        if np.isnan(getattr(self, 'Plane_Angle_deg', np.nan)):
+            self.Plane_Angle_deg = 0
+
+        ## CONVERT RELATIVE ANGLES TO GLOBAL ANGLE
+        A1 = V_angle_range[0] - self.Plane_Angle_deg
+        A2 = V_angle_range[1] - self.Plane_Angle_deg
+        
+
+        ## ANGLE CAPS TO ENSURE +X DIRECTION
+        B1 = -90
+        B2 = 90
+
+        ## CAP ANGLES TO BE WITHIN -90 to 90 DEGREES
+        A1 = np.clip(A1,B1,B2)
+        A2 = np.clip(A2,B1,B2)
+
+        ## CONVERT ANGLES BACK TO RELATIVE VALUES
+        V_angle_Low = A1 + self.Plane_Angle_deg
+        V_angle_High = A2 + self.Plane_Angle_deg
+
+        ## SAMPLE RELATIVE V_ANGLE FROM A WEIGHTED SET OF UNIFORM DISTRIBUTIONS
+        V_Angle_range = V_angle_High - V_angle_Low
+        Dist_Num = np.random.choice([0,1,2],p=[0.1,0.8,0.1]) # Probability of sampling distribution
+
+        if Dist_Num == 0: # Low Range
+            Flight_Angle = np.random.default_rng().uniform(low=V_angle_Low, high=V_angle_Low + 0.1*V_Angle_range)
+        elif Dist_Num == 1: # Medium Range
+            Flight_Angle = np.random.default_rng().uniform(low=V_angle_Low + 0.1*V_Angle_range, high=V_angle_High - 0.1*V_Angle_range)
+        elif Dist_Num == 2: # High Range
+            Flight_Angle = np.random.default_rng().uniform(low=V_angle_High - 0.1*V_Angle_range, high=V_angle_High)
+       
+        return V_mag,Flight_Angle
 
     def userInput(self,input_string,dataType=float):
         """Processes user input and return values as either indiviual value or list

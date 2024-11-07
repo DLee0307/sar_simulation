@@ -97,7 +97,20 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         print()
 
     def resetPose(self,z_0=0.5): 
-        print()
+        #!!! Need to Change
+
+        #self.sendCmd('GZ_StickyPads',cmd_flag=0)
+        #self.sendCmd('Tumble_Detect',cmd_vals=[1.0,1.0,1.0],cmd_flag=0)
+        #self.sendCmd('Ctrl_Reset')
+        #self._setModelState(pos=[0,0,z_0])
+        #self._iterStep(10)
+
+        self.sendCmd('Tumble_Detect',cmd_vals=[1.0,1.0,1.0],cmd_flag=1)
+        #self.sendCmd('Ctrl_Reset')
+        #self._setModelState(pos=[0,0,z_0])
+        #self._iterStep(100) # Give time for drone to settle
+
+        #self.sendCmd('GZ_StickyPads',cmd_flag=1)
 
     def _setModelState(self,pos=[0,0,0.5],quat=[0,0,0,1],vel=[0,0,0],ang_vel=[0,0,0]):
         print()
@@ -198,7 +211,8 @@ class SAR_Sim_Interface(SAR_Base_Interface):
             time.sleep(0.5)
 
     def _wait_for_sim_running(self,timeout=600):
-        print()
+        #!!! Need to change
+        time.sleep(5)
 
     def _ping_service(self, service_name, timeout=5, silence_errors=False):
         cmd = f"ros2 service call {service_name} sar_msgs/srv/CTRLCmdSrv '{{}}'"

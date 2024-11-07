@@ -150,11 +150,11 @@ void Controller::OpticalFlow_Update_Callback(const sar_msgs::msg::OpticalFlowDat
     Tau_DH = msg->tau;
     Tau_DIFF = Tau - Tau_DH;
     double Tau_difference2 = Tau_CR - Tau_DH;
-    std::cout << "Tau - Tau_DH : " << Tau_DIFF << std::endl;
+    //!!!std::cout << "Tau - Tau_DH : " << Tau_DIFF << std::endl;
     //std::cout << "Tau_CR - Tau_DH : " << Tau_difference2 << std::endl;
 
-    std::cout << "Tau_DH : " << Tau_DH << std::endl;
-    std::cout << "Tau : " << Tau << std::endl;
+    //!!!std::cout << "Tau_DH : " << Tau_DH << std::endl;
+    //!!!std::cout << "Tau : " << Tau << std::endl;
     //std::cout << "Tau_CR : " << Tau_CR << std::endl;
 
 }

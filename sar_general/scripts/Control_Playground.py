@@ -36,7 +36,7 @@ def cmd_send(env):
             11: env.handle_Global_Vel_traj,
             #12: env.handle_Rel_Vel_traj,
             13: env.handle_Impact_traj,
-            #20: env.handle_Tumble_Detect,
+            20: env.handle_Tumble_Detect,
             #21: env.handle_Load_Params,
             22: env.handle_Start_Logging,
             #23: env.handle_Cap_Logging,

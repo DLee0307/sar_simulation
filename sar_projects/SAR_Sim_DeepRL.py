@@ -1,5 +1,7 @@
 import gymnasium as gym
 from gymnasium import spaces
+# Qt Issue : pippip uninstall opencv-python pip install opencv-python-headless
+# https://github.com/NVlabs/instant-ngp/discussions/300
 
 import numpy as np
 from threading import Thread,Event
@@ -29,7 +31,7 @@ RESET = '\033[0m'  # Reset to default color
 
 class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
-    def __init__(self,Ang_Acc_range=[-90,0],V_mag_range=[1.5,3.5],V_angle_range=[5,175],Plane_Angle_range=[0,0],Render=True,Fine_Tune=True,GZ_Timeout=False):
+    def __init__(self,Ang_Acc_range=[-90,0],V_mag_range=[1.5,3.5],V_angle_range=[5,175],Plane_Angle_range=[0,180],Render=True,Fine_Tune=True,GZ_Timeout=False):
         SAR_Sim_Interface.__init__(self, GZ_Timeout=GZ_Timeout)
         gym.Env.__init__(self)
 
@@ -113,11 +115,107 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         self.action_space = spaces.Box(low=-1, high=1, shape=(2,), dtype=np.float32)
         self.action_trg = np.zeros(self.action_space.shape,dtype=np.float32) # Action values at triggering
 
+        self._start_RealTimeTimer()
+
+    def _start_RealTimeTimer(self):
+        
+        self.start_time_real = time.time()
+        RealTimeTimer_thread = Thread(target=self._RealTimeTimer)
+        RealTimeTimer_thread.daemon = True
+        RealTimeTimer_thread.start()
+
+    def _RealTimeTimer(self):
+
+        ## IF REAL TIME EXCEEDS TIMEOUT VALUE THEN RESTART SIM
+        while True:
+            if (time.time() - self.start_time_real > self.t_real_max) and not self.Done:
+                self.Done = True
+                print(YELLOW + f"Real Time Exceeded: {time.time() - self.start_time_real:.3f} s" + RESET)
+                print(YELLOW + f"Sim Likely Frozen: Restarting Simulation Env" + RESET)
+
+                self._kill_Sim()
+                
+            time.sleep(1)
+
+    #!!! Need to change
+    def reset(self,seed=None,options=None):
+
+        self._wait_for_sim_running()
+
+        self.start_time_real = time.time()
+        self.resetPose()
+        
+        print("!!!!!!!!!!!!!!")
+
+    def _resetParams(self):
+
+        ######################
+        #    GENERAL CONFIGS
+        ######################
+
+        ## RESET LEARNING/REWARD CONDITIONS
+        self.K_ep += 1
+        self.Done = False
+        self.reward = 0
+        self.reward_vals = np.array([0,0,0,0,0,0,0])
+
+        self.D_perp_CR_min = np.inf
+        self.D_perp_pad_min = np.inf
+        self.Tau_CR_trg = np.inf
+        self.Tau_trg = np.inf
+
+        self.obs_trg = np.full(self.obs_trg.shape[0],np.nan)
+        self.action_trg = np.full(self.action_trg.shape[0],np.nan)
+
+        self.a_Trg_trg = np.nan
+        self.a_Rot_trg = np.nan
+
+    def _setTestingConditions(self):
+
+        if self.Fine_Tuning_Flag:
+            
+
+            ## SET TESTING CONDITIONS
+            Plane_Angle = self.TestingConditions[self.TestCondition_idx][0]
+            V_angle_B_O = self.TestingConditions[self.TestCondition_idx][1]
+            V_mag_B_O = self.TestingConditions[self.TestCondition_idx][2]
+
+            ## CONVERT GLOBAL ANGLE TO RELATIVE ANGLE
+            self._setPlanePose(self.r_P_O,Plane_Angle)
+            self.V_angle = self.Plane_Angle_deg + V_angle_B_O
+            self.V_mag = V_mag_B_O
+
+
+            ## UPDATE TESTING CONDITION INDEX
+            self.TestCondition_idx += 1
+            if self.TestCondition_idx >= len(self.TestingConditions):
+
+                if self.TestCondition_Wrap == True:
+                    self.Fine_Tuning_Flag = False
+                    self.TestCondition_idx = np.nan
+
+                self.TestCondition_idx = 0
+                self.TestCondition_Wrap = True
+            
+        else:
+
+            ## SAMPLE SET PLANE POSE
+            Plane_Angle_Low = self.Plane_Angle_range[0]
+            Plane_Angle_High = self.Plane_Angle_range[1]
+            Plane_Angle = np.random.uniform(Plane_Angle_Low,Plane_Angle_High)
+            #self._setPlanePose(self.r_P_O,Plane_Angle)
+
+            ## SAMPLE VELOCITY AND FLIGHT ANGLE
+            V_mag,V_angle = self._sampleFlightConditions(self.V_mag_range,self.V_angle_range)
+            self.V_mag = V_mag
+            self.V_angle = V_angle
+
 
 if __name__ == "__main__":
 
     rclpy.init()
 
-    env = SAR_Sim_DeepRL(Ang_Acc_range=[-90,0],V_mag_range=[1.5,3.5],V_angle_range=[5,175],Plane_Angle_range=[0,0],Render=True,Fine_Tune=False)
+    env = SAR_Sim_DeepRL(Ang_Acc_range=[-90,0],V_mag_range=[1.5,3.5],V_angle_range=[5,175],Plane_Angle_range=[0,180],Render=True,Fine_Tune=False)
 
-    rclpy.shutdown()
+    rclpy.spin(env.node)
+    #rclpy.shutdown()

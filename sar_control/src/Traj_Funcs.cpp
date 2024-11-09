@@ -206,6 +206,43 @@ void const_velocity_Traj()
     
 }
 
+void const_velocity_GZ_Traj()
+{
+    // ITERATE THROUGH EACH AXIS
+    for(int i = 0; i<3; i++)
+    {
+        // CALCULATE ONLY DESIRED TRAJECTORIES
+        if(Traj_Active[i] == true)
+        {
+            float t = t_traj[i];
+           
+            float pos_val = 0.0f;
+            float vel_val = 0.0f;
+            float acc_val = 0.0f;
+
+
+            // CONSTANT VELOCITY TRAJECTORIES W/O ACCELERATION
+            acc_val = 0.0f;
+            vel_val = v_t[i];
+            pos_val = v_t[i] * t;
+
+            // UPDATE RELATIVE TO STARTING POSITION
+            pos_val += s_0_t[i];
+
+            // UPDATE DESIRED STATE VECTORS
+            set_vec_element(&x_d, i, pos_val);
+            set_vec_element(&v_d, i, vel_val);
+            set_vec_element(&a_d, i, acc_val);
+            
+
+            // INCREMENT TIME COUNTER FOR TRAJECTORY CALCULATIONS
+            t_traj[i] += dt;
+        }
+
+    } 
+
+}
+
 void set_vec_element(struct vec *v, int index, float value) {
 
     switch (index) {

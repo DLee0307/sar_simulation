@@ -76,11 +76,29 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
         #self.callService('/ENV/World_Step',World_StepRequest(n_steps),World_Step)
         #gz service -s /world/empty/control --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --timeout 3000 --req 'pause: true, multi_step: 200'
+
+        # Pause the simulation
+        self.pausePhysics(True)
+        time.sleep(0.5)
+
+        # Use subprocess to call the GZ service for pausing and advancing steps
+        cmd = [
+            'gz', 'service', '-s', '/world/empty/control',
+            '--reqtype', 'gz.msgs.WorldControl',
+            '--reptype', 'gz.msgs.Boolean',
+            '--timeout', '3000',
+            '--req', f'pause: true, multi_step: {n_steps}'
+        ]
         
-        self.pausePhysics(True)
-        self.pausePhysics(False)
-        time.sleep(5)
-        self.pausePhysics(True)
+        # Run the command
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        
+        # Check the output
+        if result.returncode == 0:
+            print("Successfully advanced the simulation by", n_steps, "steps.")
+        else:
+            print("Error:", result.stderr)
+
 
     def _getTick(self):
         srv = CTRLGetObs.Request() 
@@ -137,8 +155,28 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
         return True
 
-    def Sim_VelTraj(self,pos,vel):         
-        print()
+    def Sim_VelTraj(self,pos,vel):
+        """
+        Args:
+            pos (list): Launch position [m]   | [x,y,z]
+            vel (list): Launch velocity [m/s] | [Vx,Vy,Vz]
+        """
+        ## PUBLISH MODEL STATE SERVICE REQUEST
+        self.pausePhysics(pause_flag=True)
+        #self.callService('/gazebo/set_model_state',state_srv,SetModelState)
+        self._iterStep(2)
+
+        ## SET DESIRED VEL IN CONTROLLER
+        self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,vel[0],0],cmd_flag=0)
+        self._iterStep(2)
+        self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,vel[1],0],cmd_flag=1)
+        self._iterStep(2)
+        self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,vel[2],0],cmd_flag=2)
+        self._iterStep(2)
+        self.sendCmd('Activate_traj',cmd_vals=[1,1,1])
+
+        ## ROUND OUT TO 10 ITER STEPS (0.01s) TO MATCH 100Hz CONTROLLER 
+        self._iterStep(2)
 
     def resetPose(self,z_0=0.5): 
         #!!! Need to Change
@@ -204,19 +242,19 @@ class SAR_Sim_Interface(SAR_Base_Interface):
     #     self.resetPose()
     #     self.pausePhysics(pause_flag=False)
 
-    # def handle_GZ_Global_Vel_traj(self):
+    def handle_GZ_Global_Vel_traj(self):
 
-    #     # GET GLOBAL VEL CONDITIONS 
-    #     V_mag,V_angle = self.userInput("Flight Velocity (V_mag,V_angle):",float)
+        # GET GLOBAL VEL CONDITIONS 
+        V_mag,V_angle = self.userInput("Flight Velocity (V_mag,V_angle):",float)
 
-    #     # CALC GLOBAL VELOCITIES
-    #     Vx = V_mag*np.cos(np.radians(V_angle))
-    #     Vy = 0
-    #     Vz = V_mag*np.sin(np.radians(V_angle))
-    #     V_B_O = [Vx,Vy,Vz]
+        # CALC GLOBAL VELOCITIES
+        Vx = V_mag*np.cos(np.radians(V_angle))
+        Vy = 0
+        Vz = V_mag*np.sin(np.radians(V_angle))
+        V_B_O = [Vx,Vy,Vz]
 
-    #     self.Sim_VelTraj(self.r_B_O,V_B_O)
-    #     self.pausePhysics(False)
+        self.Sim_VelTraj(self.r_B_O,V_B_O)
+        self.pausePhysics(False)
 
     # def handle_GZ_Rel_Vel_traj(self):
 
@@ -351,11 +389,11 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
     def callService(self, srv_addr, srv_msg, srv_type, num_retries=5, call_timeout=5):
         """
-        ROS2 callService 함수로 변환. 비동기적으로 서비스를 호출하고, 응답을 처리합니다.
+        Asynchronously call the service and handle the response.
         """
         client = self.create_client(srv_type, srv_addr)
 
-        # 서비스가 사용 가능할 때까지 대기
+        # Wait until the service is available.
         if not client.wait_for_service(timeout_sec=1.0):
             self.get_logger().error(f"[WARNING] Service '{srv_addr}' not available.")
             return None
@@ -363,11 +401,11 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         for retry in range(num_retries):
             self.response = None
 
-            # 비동기 서비스 요청을 보냄
+            # Send asynchronous service request
             future = client.call_async(srv_msg)
 
             try:
-                # 지정된 timeout 내에 응답을 기다림
+                # Wait for a response within the specified timeout
                 rclpy.spin_until_future_complete(self, future, timeout_sec=call_timeout)
 
                 if future.done():
@@ -381,7 +419,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
             self.get_logger().warn(f"Retrying service call ({retry + 1}/{num_retries}).")
 
-        # 모든 시도가 실패한 경우
+        # In case all attempts fail
         self.Done = True
         self.get_logger().error(f"Service '{srv_addr}' call failed after {num_retries} attempts.")
         return None

@@ -428,6 +428,10 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                 const_velocity_Traj();
                 //std::cout << "CONST_VEL" <<  std::endl;
                 break;
+
+            case GZ_CONST_VEL:
+                const_velocity_GZ_Traj();
+                break;
         }
     }    
 

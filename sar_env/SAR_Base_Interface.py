@@ -24,6 +24,8 @@ from sar_msgs.srv import CTRLCmdSrv
 from sar_msgs.srv import CTRLGetObs
 from sar_msgs.srv import LoggingCMD
 
+from rosgraph_msgs.msg import Clock
+
 YELLOW = '\033[93m'
 RED = '\033[91m'
 GREEN = '\033[92m'
@@ -76,6 +78,7 @@ class SAR_Base_Interface(Node):
         # NOTE: Queue sizes=1 so that we are always looking at the most current data and 
         #       not data at back of a queue waiting to be processed by callbacks
         #self.r_B_O = [0,0,0]
+        self.clock_subscriber = self.create_subscription(Clock,'/clock',self._clockCallback,1)
         self.StateData_subscriber = self.create_subscription(SARStateData,'/SAR_DC/StateData',self._SAR_StateDataCallback,1)
         self.TriggerData_subscriber = self.create_subscription(SARTriggerData,'/SAR_DC/TriggerData',self._SAR_TriggerDataCallback,1)
         self.ImpactData_subscriber = self.create_subscription(SARImpactData,'/SAR_DC/ImpactData',self._SAR_ImpactDataCallback,1)
@@ -883,7 +886,8 @@ class SAR_Base_Interface(Node):
         self.r_P_O = np.full([3],np.nan)
 
     def _clockCallback(self,msg):
-        print()
+        
+        self.t = msg.clock.sec + msg.clock.nanosec * 1e-9
 
 
 #!!!! time need to solve

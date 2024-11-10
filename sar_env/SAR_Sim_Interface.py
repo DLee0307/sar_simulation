@@ -133,8 +133,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         ## OBSERVATION VECTOR
         obs = np.array(scaled_obs_list,dtype=np.float32)
 
-        print("obs : ", obs)
-
+        #print("obs : ", obs)
 
         return obs
 
@@ -155,28 +154,93 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
         return True
 
+# Need to Change
     def Sim_VelTraj(self,pos,vel):
         """
         Args:
             pos (list): Launch position [m]   | [x,y,z]
             vel (list): Launch velocity [m/s] | [Vx,Vy,Vz]
         """
+
+        model_name = self.SAR_Config
+        x, y, z = pos[0], pos[1], pos[2]
+
+        self.pausePhysics(pause_flag=True)
+
+        # Use subprocess to call the GZ service for setting pose
+        # Need to chane "SAR_Config"
+        cmd = [
+            'gz', 'service', '-s', '/world/empty/set_pose',
+            '--reqtype', 'gz.msgs.Pose',
+            '--reptype', 'gz.msgs.Boolean',
+            '--timeout', '3000',
+            '--req', f'name: "A30_L200, position: {{x: {x}, y: {y}, z: {z}}}, orientation: {{x: 0, y: 0, z: 0, w: 1}}'
+        ]
+
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        # print the result of execution
+        if result.returncode == 0:
+            print("Pose set successfully:", result.stdout)
+        else:
+            print("Error setting pose:", result.stderr)
+
+        # Run the command
+        self.sendCmd('Pos',cmd_vals=pos,cmd_flag=1)
+        self._iterStep(100)
+
+        model_name = self.SAR_Config
+        x, y, z = pos[0], pos[1], pos[2]
+
+        self.pausePhysics(pause_flag=True)
+
+        # Use subprocess to call the GZ service for setting pose
+        # Need to chane "SAR_Config"
+        cmd = [
+            'gz', 'service', '-s', '/world/empty/set_pose',
+            '--reqtype', 'gz.msgs.Pose',
+            '--reptype', 'gz.msgs.Boolean',
+            '--timeout', '3000',
+            '--req', f'name: "A30_L200", position: {{x: {x}, y: {y}, z: {z}}}, orientation: {{x: 0, y: 0, z: 0, w: 1}}'
+        ]
+
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        # print the result of execution
+        if result.returncode == 0:
+            print("Pose set successfully:", result.stdout)
+        else:
+            print("Error setting pose:", result.stderr)
+
         ## PUBLISH MODEL STATE SERVICE REQUEST
         self.pausePhysics(pause_flag=True)
         #self.callService('/gazebo/set_model_state',state_srv,SetModelState)
         self._iterStep(2)
 
+        # ## SET DESIRED VEL IN CONTROLLER
+        # self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,vel[0],0.0],cmd_flag=0)
+        # self._iterStep(2)
+        # #self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,vel[1],0.0],cmd_flag=1)
+        # self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,0.0,0.0],cmd_flag=1)
+        # self._iterStep(2)
+        # self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,vel[2],0.0],cmd_flag=2)
+        # self._iterStep(2)
+        # self.sendCmd('Activate_traj',cmd_vals=[1.0,1.0,1.0])
+
+        time.sleep(1)
         ## SET DESIRED VEL IN CONTROLLER
-        self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,vel[0],0],cmd_flag=0)
+        self.sendCmd('Const_Vel_traj',cmd_vals=[vel[0],self.TrajAcc_Max[0],self.TrajJerk_Max[0]],cmd_flag=0)
         self._iterStep(2)
-        self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,vel[1],0],cmd_flag=1)
+        #self.sendCmd('Const_Vel_traj',cmd_vals=[np.nan,vel[1],0.0],cmd_flag=1)
+        #self.sendCmd('Const_Vel_traj',cmd_vals=[np.nan,0.0,0.0],cmd_flag=1)
         self._iterStep(2)
-        self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,vel[2],0],cmd_flag=2)
+        self.sendCmd('Const_Vel_traj',cmd_vals=[vel[2],self.TrajAcc_Max[2],self.TrajJerk_Max[2]],cmd_flag=2)
         self._iterStep(2)
-        self.sendCmd('Activate_traj',cmd_vals=[1,1,1])
+        self.sendCmd('Activate_traj',cmd_vals=[1.0,1.0,1.0])
 
         ## ROUND OUT TO 10 ITER STEPS (0.01s) TO MATCH 100Hz CONTROLLER 
         self._iterStep(2)
+        #print("!!!!!!!!!!!!!!!!!!!!! vel :", vel)
 
     def resetPose(self,z_0=0.5): 
         #!!! Need to Change

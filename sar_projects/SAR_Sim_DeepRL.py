@@ -251,19 +251,138 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
                           0,
                           (self.Tau_Body_start + self.Tau_Accel_start)*V_perp])  # Body Position wrt to Plane - {t_x,n_p}
         r_B_O = r_P_O - self.R_PW(r_P_B,self.Plane_Angle_rad)    
+        #print("r_P_B : ", r_P_B)
 
         ## LAUNCH QUAD W/ DESIRED VELOCITY
         self.initial_state = (r_B_O,V_B_O)
         self.Sim_VelTraj(pos=r_B_O,vel=V_B_O)
         self._iterStep(n_steps=1000)
+        
+        # Add code from DH : Beacause lock step?
+        time.sleep(5)
 
-        #self._getTick()
-        #self._getObs()
+        ## ROUND OUT STEPS TO BE IN SYNC WITH CONTROLLER
+        if self._getTick()%10 != 0:
+            n_steps = 10 - (self._getTick()%10)
+            self._iterStep(n_steps=n_steps)
+
+        ## RESET/UPDATE TIME CONDITIONS
+        self.start_time_ep = self._getTime()
+        print("_getTime:", self.start_time_ep)
+        self.start_time_trg = np.nan
+        self.start_time_impact = np.nan
+        self.t_flight_max = self.Tau_Body_start*2.0   # [s]
+        self.t_trg_max = self.Tau_Body_start*2.5 # [s]
+
+        # print("self.SAR_Type", self.SAR_Type)
+        # print("self.SAR_Config", self.SAR_Config)
+        # print("self.Policy_Type", self.Policy_Type)
+
+    def step(self, action):
+
+        # 1. TAKE ACTION
+        # 2. UPDATE STATE
+        # 3. CALC REWARD
+        # 4. CHECK TERMINATION
+        # 5. RETURN VALUES
+
+        self._wait_for_sim_running()
+
+        ## ROUND OUT STEPS TO BE IN SYNC WITH CONTROLLER
+        if self._getTick()%10 != 0:
+            n_steps = 10 - (self._getTick()%10)
+            self._iterStep(n_steps=n_steps)
+
+        a_Trg = action[0]
+        a_Rot = self.scaleValue(action[1],original_range=[-1,1], target_range=self.Ang_Acc_range)
+
+        if self.Policy_Type != "DEEP_RL_SB3":
+            a_Trg = 1.0
+
+        ########## POLICY PRE-TRIGGER ##########
+        if a_Trg <= self.Pol_Trg_Threshold:
+
+            ## 2) UPDATE STATE
+            self._iterStep(n_steps=10)
+            t_now = self._getTime()
+
+            # UPDATE RENDER
+            self.render()
+
+            # GRAB NEXT OBS
+            next_obs = self._getObs()
+
+            # 3) CALCULATE REWARD
+            reward = 0.0
+
+            # 4) CHECK TERMINATION/TRUNCATED
+
+            # ============================
+            ##    Termination Criteria 
+            # ============================
+
+            if self.Done == True:
+                self.error_str = "Episode Completed: Done [Terminated]"
+                terminated = True
+                truncated = False
+                # print(YELLOW,self.error_str,RESET)
+            
+            ## IMPACT TERMINATION
+            elif self.Impact_Flag_Ext == True:
+                self.error_str = "Episode Completed: Impact [Terminated]"
+                terminated = True
+                truncated = False
+                # print(YELLOW,self.error_str,RESET)
+
+            ## EPISODE TIMEOUT
+            elif (t_now - self.start_time_ep) > self.t_flight_max:
+                self.error_str = "Episode Completed: Time Exceeded [Truncated]"
+                terminated = False
+                truncated = True
+                # print(YELLOW,self.error_str,RESET)
+
+            ## REAL-TIME TIMEOUT
+            elif (time.time() - self.start_time_real) > self.t_real_max:
+                self.error_str = "Episode Completed: Episode Time Exceeded [Truncated] "
+                terminated = False
+                truncated = True
+                # print(YELLOW,self.error_str,f"{(time.time() - self.start_time_real):.3f} s",RESET)
+
+            else:
+                terminated = False
+                truncated = False
+
+            info_dict = {
+                "reward_vals": self.reward_vals,
+                "reward": reward,
+                "a_Rot": a_Rot,
+                "Trg_Flag": self.Trg_Flag,
+                "Impact_Flag_Ext": self.Impact_Flag_Ext,
+                "D_perp_pad_min": self.D_perp_pad_min,
+                "Tau_CR_trg": self.Tau_CR_trg,
+                "Plane_Angle": self.Plane_Angle_deg,
+                "V_mag": self.V_mag,
+                "V_angle": self.V_angle,
+                "TestCondition_idx": self.TestCondition_idx,
+            }
+            
+            # 5) RETURN VALUES
+            return(
+                next_obs,
+                reward,
+                terminated,
+                truncated,
+                info_dict,
+            )
 
 
+    def render(self):
+        ## DO NOTHING ##
+        return
 
-
-
+    def close(self):
+        ## DO NOTHING ##
+        return
 
 if __name__ == "__main__":
 
@@ -271,8 +390,14 @@ if __name__ == "__main__":
 
     env = SAR_Sim_DeepRL(Ang_Acc_range=[-90,0],V_mag_range=[1.5,3.5],V_angle_range=[5,175],Plane_Angle_range=[0,180],Render=True,Fine_Tune=False)
 
-    #env._setTestingConditions()
-    #env._initialStep()    
+    time.sleep(5)
+    env._setTestingConditions()
+    env._initialStep()
+    print("_initialStep is done")
+    action = env.action_space.sample()
+    action[0] = 0
+    action[1] = -1.0
+    env.step(action)
 
     rclpy.spin(env.node)
 

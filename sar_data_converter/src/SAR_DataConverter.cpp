@@ -22,10 +22,19 @@ SAR_DataConverter::SAR_DataConverter()
             RCLCPP_INFO(this->get_logger(), "/cf231/Cmd_ctrl service is available");
         }*/
 
+        // GAZEBO PIPELINE
+        cf1_States_B_O_Sub = this->create_subscription<crazyflie_interfaces::msg::LogDataGeneric>("/cf1/States_B_O", 1, std::bind(&SAR_DataConverter::cf1_States_B_O_Callback, this, std::placeholders::_1));
+
         // INTERNAL SENSOR SUBSCRIBERS
         CTRL_Data_Sub = this->create_subscription<sar_msgs::msg::CtrlData>("/CTRL/data", 1, std::bind(&SAR_DataConverter::CtrlData_Callback, this, std::placeholders::_1));
         CTRL_Debug_Sub = this->create_subscription<sar_msgs::msg::CtrlDebug>("/CTRL/debug", 1, std::bind(&SAR_DataConverter::CtrlDebug_Callback, this, std::placeholders::_1));
 
+        // GAZEBO PIPELINE
+        SAR_Sticky_Pad_Connect_Sub_1 = this->create_subscription<sar_msgs::msg::StickyPadConnect>("/SAR_Internal/Leg_Connections1", 1, std::bind(&SAR_DataConverter::Pad_Connections_Callback_1, this, std::placeholders::_1));
+        SAR_Sticky_Pad_Connect_Sub_2 = this->create_subscription<sar_msgs::msg::StickyPadConnect>("/SAR_Internal/Leg_Connections2", 1, std::bind(&SAR_DataConverter::Pad_Connections_Callback_2, this, std::placeholders::_1));
+        SAR_Sticky_Pad_Connect_Sub_3 = this->create_subscription<sar_msgs::msg::StickyPadConnect>("/SAR_Internal/Leg_Connections3", 1, std::bind(&SAR_DataConverter::Pad_Connections_Callback_3, this, std::placeholders::_1));
+        SAR_Sticky_Pad_Connect_Sub_4 = this->create_subscription<sar_msgs::msg::StickyPadConnect>("/SAR_Internal/Leg_Connections4", 1, std::bind(&SAR_DataConverter::Pad_Connections_Callback_4, this, std::placeholders::_1));
+            
         // CRAZYSWARM PIPELINE
         cf1_States_B_O_Sub = this->create_subscription<crazyflie_interfaces::msg::LogDataGeneric>("/cf1/States_B_O", 1, std::bind(&SAR_DataConverter::cf1_States_B_O_Callback, this, std::placeholders::_1));
         cf1_States_B_P_Sub = this->create_subscription<crazyflie_interfaces::msg::LogDataGeneric>("/cf1/States_B_P", 1, std::bind(&SAR_DataConverter::cf1_States_B_P_Callback, this, std::placeholders::_1));

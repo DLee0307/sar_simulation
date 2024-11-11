@@ -20,6 +20,7 @@
 #include "sar_msgs/msg/sar_misc_data.hpp"
 #include "sar_msgs/msg/ros_params.hpp"
 #include "sar_msgs/msg/generic_log_data.hpp"
+#include "sar_msgs/msg/sticky_pad_connect.hpp"
 
 #include "sar_msgs/srv/ctrl_cmd_srv.hpp"
 #include "sar_msgs/srv/logging_cmd.hpp"
@@ -42,10 +43,20 @@ public:
     void LoggingLoop();
     
     // =======================
+    //     GAZEBO FUNCTIONS
+    // =======================
+
+
+    // =======================
     //     GAZEBO CALLBACKS
     // =======================
     void CtrlData_Callback(const sar_msgs::msg::CtrlData::SharedPtr msg);
     void CtrlDebug_Callback(const sar_msgs::msg::CtrlDebug::SharedPtr msg);
+
+    void Pad_Connections_Callback_1(const sar_msgs::msg::StickyPadConnect::SharedPtr msg);
+    void Pad_Connections_Callback_2(const sar_msgs::msg::StickyPadConnect::SharedPtr msg);
+    void Pad_Connections_Callback_3(const sar_msgs::msg::StickyPadConnect::SharedPtr msg);
+    void Pad_Connections_Callback_4(const sar_msgs::msg::StickyPadConnect::SharedPtr msg);
 
     // =================================
     //     EXPERIMENT DATA CALLBACKS
@@ -161,7 +172,10 @@ private:
     rclcpp::Subscription<sar_msgs::msg::CtrlData>::SharedPtr CTRL_Data_Sub;
     rclcpp::Subscription<sar_msgs::msg::CtrlDebug>::SharedPtr CTRL_Debug_Sub;
 
-
+    rclcpp::Subscription<sar_msgs::msg::StickyPadConnect>::SharedPtr SAR_Sticky_Pad_Connect_Sub_1;
+    rclcpp::Subscription<sar_msgs::msg::StickyPadConnect>::SharedPtr SAR_Sticky_Pad_Connect_Sub_2;
+    rclcpp::Subscription<sar_msgs::msg::StickyPadConnect>::SharedPtr SAR_Sticky_Pad_Connect_Sub_3;
+    rclcpp::Subscription<sar_msgs::msg::StickyPadConnect>::SharedPtr SAR_Sticky_Pad_Connect_Sub_4;
 
     // ===========================
     //     ROS2 Parameter

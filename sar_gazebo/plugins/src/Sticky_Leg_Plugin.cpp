@@ -1,7 +1,6 @@
 #include "Sticky_Leg_Plugin.h"
 //joint_entity = creator_->CreateEntities(&joint);
 
-#include <std_msgs/msg/string.hpp>
 
 using namespace gz;
 using namespace sim;
@@ -47,7 +46,6 @@ class gz::sim::systems::Sticky_Leg_PluginPrivate
     public: Entity childLinkEntity{kNullEntity};
     public: Entity detachableJointEntity{kNullEntity};
 
-    public: rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher;
     public: rclcpp::Publisher<sar_msgs::msg::StickyPadConnect>::SharedPtr Sticky_Pad_Connect_Publisher;
     public: sar_msgs::msg::StickyPadConnect Sticky_Leg_Connect_msg;
     

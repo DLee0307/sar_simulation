@@ -4,13 +4,17 @@
 #include <stdio.h>
 #include <iostream>
 
-//#include <boost/circular_buffer.hpp>
+#include <boost/circular_buffer.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <math.h> 
 #include <thread>
 
 #include <ncurses.h>
 #include <Eigen/Dense>
+
+#include <gz/transport/Node.hh>
+#include <gz/msgs/contacts.pb.h>
+#include <gz/msgs/contact.pb.h>
 
 #include "sar_msgs/msg/ctrl_data.hpp"
 #include "sar_msgs/msg/ctrl_debug.hpp"
@@ -36,6 +40,8 @@ class SAR_DataConverter : public rclcpp::Node
 {
 public:
     SAR_DataConverter();
+
+    gz::transport::Node node;
 
     void MainInit();
     void MainLoop();
@@ -104,6 +110,9 @@ public:
     // =======================
     inline void quat2euler(float quat[],float eul[]);
     inline void euler2quat(float quat[],float eul[]);
+
+    void Surface_Contact_Callback(const gz::msgs::Contacts &_msg);
+    void ExtractCollisionName(const std::string& full_name);
 
 private:
 
@@ -355,11 +364,11 @@ private:
     double Impact_Magnitude = 0.0; // Current impact force magnitude
 
     // CIRCULAR BUFFERES TO LAG IMPACT STATE DATA (WE WANT STATE DATA THE INSTANT BEFORE IMPACT)
-    //boost::circular_buffer<geometry_msgs::msg::Pose> Pose_B_O_impact_buff {2};
-    //boost::circular_buffer<geometry_msgs::msg::Vector3> Eul_B_O_impact_buff {2};
+    boost::circular_buffer<geometry_msgs::msg::Pose> Pose_B_O_impact_buff {2};
+    boost::circular_buffer<geometry_msgs::msg::Vector3> Eul_B_O_impact_buff {2};
 
-    //boost::circular_buffer<geometry_msgs::msg::Twist> Twist_P_B_impact_buff {2};
-    //boost::circular_buffer<geometry_msgs::msg::Vector3> Eul_P_B_impact_buff {2};
+    boost::circular_buffer<geometry_msgs::msg::Twist> Twist_P_B_impact_buff {2};
+    boost::circular_buffer<geometry_msgs::msg::Vector3> Eul_P_B_impact_buff {2};
 
     // ==================
     //     MISC DATA

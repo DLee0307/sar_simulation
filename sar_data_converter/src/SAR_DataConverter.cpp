@@ -66,6 +66,7 @@ SAR_DataConverter::SAR_DataConverter()
         ConsoleOutput_Thread = std::thread(&SAR_DataConverter::ConsoleLoop, this);
         Logging_Thread = std::thread(&SAR_DataConverter::LoggingLoop, this);
 
+        this->node.Subscribe("/ENV/SurfaceContact", &SAR_DataConverter::Surface_Contact_Callback, this);
 }
 
 bool SAR_DataConverter::CMD_SAR_DC_Callback(const sar_msgs::srv::CTRLCmdSrv::Request::SharedPtr request,

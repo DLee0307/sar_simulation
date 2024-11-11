@@ -16,6 +16,12 @@ find_package(Curses REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(crazyflie_interfaces REQUIRED)
 
+find_package(gz-sim8 REQUIRED)
+find_package(gz-sensors8 REQUIRED)
+find_package(gz-msgs10 REQUIRED)
+find_package(gz-cmake3 REQUIRED)
+find_package(sensor_msgs REQUIRED)
+
 include_directories(
   include
   ${rclcpp_INCLUDE_DIRS}
@@ -25,7 +31,7 @@ include_directories(
   ${EIGEN3_INCLUDE_DIR}
  )
 
-# controller
+# SAR_DataConverter
 add_executable(SAR_DataConverter 
 	src/SAR_DataConverter.cpp
 	src/Data_Parsing.cpp
@@ -33,7 +39,16 @@ add_executable(SAR_DataConverter
 	src/Debug_Console.cpp
 	src/Logging_Funcs.cpp
 	src/Gazebo_Funcs.cpp)
-ament_target_dependencies(SAR_DataConverter rclcpp std_msgs sar_msgs std_srvs crazyflie_interfaces)
+ament_target_dependencies(SAR_DataConverter 
+	rclcpp 
+	std_msgs 
+	sar_msgs 
+	std_srvs 
+	crazyflie_interfaces
+  	gz-sim8
+  	gz-sensors8
+	)
+
 
 target_link_libraries(SAR_DataConverter ${CURSES_LIBRARIES} Eigen3::Eigen)
 

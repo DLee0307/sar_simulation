@@ -140,11 +140,11 @@ void SAR_DataConverter::CtrlData_Callback(const sar_msgs::msg::CtrlData::SharedP
     a_Trg = ctrl_msg->a_trg;
     a_Rot = ctrl_msg->a_rot;
 
-    //Pose_B_O_impact_buff.push_back(Pose_B_O);
-    //Eul_B_O_impact_buff.push_back(Eul_B_O);
+    Pose_B_O_impact_buff.push_back(Pose_B_O);
+    Eul_B_O_impact_buff.push_back(Eul_B_O);
 
-    //Twist_P_B_impact_buff.push_back(Twist_B_P);
-    //Eul_P_B_impact_buff.push_back(Eul_P_B);
+    Twist_P_B_impact_buff.push_back(Twist_B_P);
+    Eul_P_B_impact_buff.push_back(Eul_P_B);
 
 
     // =================

@@ -1,7 +1,7 @@
 # Request
 uint16 cmd_type
 geometry_msgs/Vector3 cmd_vals
-uint16 cmd_flag
+float32 cmd_flag
 bool cmd_rx
 ---
 # Response

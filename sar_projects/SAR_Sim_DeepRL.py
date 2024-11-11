@@ -375,6 +375,108 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
                 info_dict,
             )
 
+        ########## POLICY POST-TRIGGER ##########
+        elif a_Trg >= self.Pol_Trg_Threshold:
+            print("**************************************")
+
+            # GRAB TERMINAL OBS/ACTION
+            self.obs_trg = self._getObs()
+            self.action_trg = action
+
+            # 2) FINISH EPISODE
+            self.start_time_trg = self._getTime()
+            terminated,truncated = self._finishSim(a_Rot)
+            self.Done = terminated 
+
+    def _finishSim(self,a_Rot):
+        
+        OnceFlag_Trg = False
+        OnceFlag_Impact = False
+
+        terminated = False
+        truncated = False
+
+        ## SEND TRIGGER ACTION TO CONTROLLER
+        self.sendCmd("Policy",[0.0,a_Rot,self.Ang_Acc_range[0]],cmd_flag=self.Ang_Acc_range[1])
+        print("Policy is sent", self.Ang_Acc_range[1])
+
+        ## RUN REMAINING STEPS AT FULL SPEED
+        self.pausePhysics(False)
+
+        while not (terminated or truncated):
+
+            t_now = self._getTime()
+
+            ## START TRIGGER AND IMPACT TERMINATION TIMERS
+            if (self.Trg_Flag == True and OnceFlag_Trg == False):
+                self.start_time_trg = t_now     # Starts countdown for when to reset run
+                OnceFlag_Trg = True             # Turns on to make sure this only runs once per rollout
+
+            if (self.Impact_Flag_Ext and OnceFlag_Impact == False):
+                self.start_time_trg = np.nan    # Nullify trigger timer
+                self.start_time_impact = t_now
+                OnceFlag_Impact = True
+
+
+            # 4) CHECK TERMINATION/TRUNCATED
+            r_B_O =  self.r_B_O
+            V_B_O = self.V_B_O
+            r_P_B = self.R_WP(self.r_P_O - r_B_O,self.Plane_Angle_rad) # {t_x,n_p}
+            V_B_P = self.R_WP(V_B_O,self.Plane_Angle_rad) # {t_x,n_p}
+
+            # ============================
+            ##    Termination Criteria 
+            # ============================
+
+            if self.Done == True:
+                self.error_str = "Episode Completed: Done [Terminated] "
+                terminated = True
+                truncated = False
+                # print(YELLOW,self.error_str,RESET)
+
+            ## TRIGGER TIMEOUT  
+            elif (t_now - self.start_time_trg) > self.t_trg_max:
+                self.error_str = "Episode Completed: Pitch Timeout [Truncated] "
+                terminated = False
+                truncated = True
+                # print(YELLOW,self.error_str,f"{(t_now - self.start_time_trg):.3f} s",RESET)
+
+            ## IMPACT TIMEOUT
+            elif (t_now - self.start_time_impact) > self.t_impact_max:
+                self.error_str = "Episode Completed: Impact Timeout [Truncated] "
+                terminated = False
+                truncated = True
+                # print(YELLOW,self.error_str,f"{(t_now - self.start_time_impact):.3f} s",RESET)
+
+            elif r_B_O[2] < -15:
+                self.error_str = "Episode Completed: Out of bounds [Terminated]"
+                terminated = True
+                truncated = False
+                # print(YELLOW,self.error_str,RESET)
+
+            elif np.abs(r_P_B[0]) > 1.4 and (self.D_perp < 1.5*self.L_eff) and (self.D_perp >= 0):
+                self.error_str = "Episode Completed: Out of Bounds [Terminated]"
+                terminated = True
+                truncated = False
+                # print(YELLOW,self.error_str,RESET)
+
+            ## REAL-TIME TIMEOUT
+            elif (time.time() - self.start_time_real) > self.t_real_max:
+                self.error_str = "Episode Completed: Episode Time Exceeded [Truncated] "
+                terminated = False
+                truncated = True
+                # print(YELLOW,self.error_str,f"{(time.time() - self.start_time_real):.3f} s",RESET)
+
+            else:
+                terminated = False
+                truncated = False
+
+        return terminated,truncated
+
+    def _CalcReward(self):
+        if self.Impact_Flag_Ext:
+            V_B_O_impact = self.R_PW(self.V_B_P_impact_Ext,self.Plane_Angle_rad)    # {X_W,Y_W,Z_W}
+            V_hat_impact = V_B_O_impact/np.linalg.norm(V_B_O_impact)                # {X_W,Y_W,Z_W}
 
     def render(self):
         ## DO NOTHING ##
@@ -393,11 +495,12 @@ if __name__ == "__main__":
     time.sleep(5)
     env._setTestingConditions()
     env._initialStep()
-    print("_initialStep is done")
+    #print("_initialStep is done")
     action = env.action_space.sample()
-    action[0] = 0
+    action[0] = 1.0
     action[1] = -1.0
     env.step(action)
+    print("env.step(action) is done")
 
     rclpy.spin(env.node)
 

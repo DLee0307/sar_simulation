@@ -69,14 +69,14 @@ void Controller::CMD_Service_Resp(const sar_msgs::srv::CTRLCmdSrv::Request::Shar
     CTRL_Cmd.cmd_val3 = request->cmd_vals.z;
     CTRL_Cmd.cmd_flag = request->cmd_flag;
     CTRL_Cmd.cmd_rx = request->cmd_rx;
-
-    //std::cout << request->cmd_type <<  std::endl;                    
-    //std::cout << "cmd_type: " << request->cmd_type <<  std::endl;
-    //std::cout << "cmd_val1: " << request->cmd_vals.x <<  std::endl;
-    //std::cout << "cmd_val2: " << request->cmd_vals.y <<  std::endl;
-    //std::cout << "cmd_val3: " << request->cmd_vals.z <<  std::endl;
-    //std::cout << "cmd_flag: " << request->cmd_flag <<  std::endl;
-    //std::cout << "cmd_rx: " << request->cmd_rx <<  std::endl;
+/**/
+    std::cout << request->cmd_type <<  std::endl;                    
+    std::cout << "cmd_type: " << request->cmd_type <<  std::endl;
+    std::cout << "cmd_val1: " << request->cmd_vals.x <<  std::endl;
+    std::cout << "cmd_val2: " << request->cmd_vals.y <<  std::endl;
+    std::cout << "cmd_val3: " << request->cmd_vals.z <<  std::endl;
+    std::cout << "cmd_flag: " << request->cmd_flag <<  std::endl;
+    std::cout << "cmd_rx: " << request->cmd_rx <<  std::endl;
 
 
 }

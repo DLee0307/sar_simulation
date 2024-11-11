@@ -30,7 +30,7 @@ def cmd_send(env):
             2: env.handle_Vel_Cmd,
             5: env.handle_Stop,
             #7: env.handle_Ang_Accel,
-            #8: env.handle_Policy,
+            8: env.handle_Policy,
             9: env.handle_Plane_Pose,
             10: env.handle_P2P_traj,
             11: env.handle_Global_Vel_traj,

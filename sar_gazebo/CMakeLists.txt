@@ -127,6 +127,9 @@ ament_target_dependencies(Sticky_Leg_Plugin
   gz-sim8
   gz-sensors8
   rclcpp
+  std_msgs
+  sar_msgs
+  geometry_msgs
 )
 
 target_link_libraries(Sticky_Leg_Plugin

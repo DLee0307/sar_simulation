@@ -1,6 +1,8 @@
 #include "Sticky_Leg_Plugin.h"
 //joint_entity = creator_->CreateEntities(&joint);
 
+#include <std_msgs/msg/string.hpp>
+
 using namespace gz;
 using namespace sim;
 using namespace systems;
@@ -45,6 +47,10 @@ class gz::sim::systems::Sticky_Leg_PluginPrivate
     public: Entity childLinkEntity{kNullEntity};
     public: Entity detachableJointEntity{kNullEntity};
 
+    public: rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher;
+    public: rclcpp::Publisher<sar_msgs::msg::StickyPadConnect>::SharedPtr Sticky_Pad_Connect_Publisher;
+    public: sar_msgs::msg::StickyPadConnect Sticky_Leg_Connect_msg;
+    
 /*
     /// \brief Create sensors that correspond to entities in the simulation
     /// \param[in] _ecm Mutable reference to ECM.
@@ -71,6 +77,7 @@ class gz::sim::systems::Sticky_Leg_PluginPrivate
 //////////////////////////////////////////////////
 Sticky_Leg_Plugin::Sticky_Leg_Plugin() : System(), dataPtr(std::make_unique<Sticky_Leg_PluginPrivate>())
 {
+  
 }
 
 //////////////////////////////////////////////////
@@ -351,6 +358,11 @@ void Sticky_Leg_Plugin::Configure(const Entity &_entity,
     }
   }
 
+  if (!rclcpp::ok()) {
+      rclcpp::init(0, nullptr);
+  }
+  this->dataPtr->ros_node = std::make_shared<rclcpp::Node>("sticky_leg_plugin_node_" + std::to_string(this->dataPtr->Leg_Number));
+  this->dataPtr->Sticky_Pad_Connect_Publisher = this->dataPtr->ros_node->create_publisher<sar_msgs::msg::StickyPadConnect>("/SAR_Internal/Leg_Connections" + std::to_string(this->dataPtr->Leg_Number), 5);
   this->SubscribeToContacts();
 }
 
@@ -387,9 +399,32 @@ void Sticky_Leg_Plugin::PreUpdate(const UpdateInfo &/*_info*/,
 
       this->dataPtr->attach_flag = true;
       gzdbg << "Entity attached." << std::endl;
-    }
+
+      switch(this->dataPtr->Leg_Number)
+      {
+          case 1:
+            this->dataPtr->Sticky_Leg_Connect_msg.pad1_contact = 1;
+              break;
+          case 2:
+            this->dataPtr->Sticky_Leg_Connect_msg.pad2_contact = 1;
+              break;
+          case 3:
+            this->dataPtr->Sticky_Leg_Connect_msg.pad3_contact = 1;
+              break;
+          case 4:
+            this->dataPtr->Sticky_Leg_Connect_msg.pad4_contact = 1;
+              break;
+      }
+
+      //std::cout << "Sticky_Leg_Connect_msg : " << Sticky_Leg_Connect_msg.pad1_contact << std::endl;
+      /**/
+      this->dataPtr->Sticky_Pad_Connect_Publisher->publish(this->dataPtr->Sticky_Leg_Connect_msg);
+      }
 
   }
+
+
+    
 }
 
 //////////////////////////////////////////////////
@@ -435,7 +470,7 @@ void Sticky_Leg_PluginPrivate::Update(const EntityComponentManager &_ecm)
 bool Sticky_Leg_PluginPrivate::Service_Callback(const sar_msgs::srv::ActivateStickyPads::Request::SharedPtr request,
                                                 sar_msgs::srv::ActivateStickyPads::Response::SharedPtr response)
 {
-
+  return true;
 }
 
 GZ_ADD_PLUGIN(Sticky_Leg_Plugin, System,

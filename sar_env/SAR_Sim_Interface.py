@@ -186,7 +186,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
             print("Error setting pose:", result.stderr)
 
         # Run the command
-        self.sendCmd('Pos',cmd_vals=pos,cmd_flag=1)
+        self.sendCmd('Pos',cmd_vals=pos,cmd_flag=1.0)
         self._iterStep(100)
 
         model_name = self.SAR_Config
@@ -218,23 +218,23 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         self._iterStep(2)
 
         # ## SET DESIRED VEL IN CONTROLLER
-        # self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,vel[0],0.0],cmd_flag=0)
+        # self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,vel[0],0.0],cmd_flag=0.0)
         # self._iterStep(2)
-        # #self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,vel[1],0.0],cmd_flag=1)
-        # self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,0.0,0.0],cmd_flag=1)
+        # #self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,vel[1],0.0],cmd_flag=1.0)
+        # self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,0.0,0.0],cmd_flag=1.0)
         # self._iterStep(2)
-        # self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,vel[2],0.0],cmd_flag=2)
+        # self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,vel[2],0.0],cmd_flag=2.0)
         # self._iterStep(2)
         # self.sendCmd('Activate_traj',cmd_vals=[1.0,1.0,1.0])
 
         time.sleep(1)
         ## SET DESIRED VEL IN CONTROLLER
-        self.sendCmd('Const_Vel_traj',cmd_vals=[vel[0],self.TrajAcc_Max[0],self.TrajJerk_Max[0]],cmd_flag=0)
+        self.sendCmd('Const_Vel_traj',cmd_vals=[vel[0],self.TrajAcc_Max[0],self.TrajJerk_Max[0]],cmd_flag=0.0)
         self._iterStep(2)
-        #self.sendCmd('Const_Vel_traj',cmd_vals=[np.nan,vel[1],0.0],cmd_flag=1)
-        #self.sendCmd('Const_Vel_traj',cmd_vals=[np.nan,0.0,0.0],cmd_flag=1)
+        #self.sendCmd('Const_Vel_traj',cmd_vals=[np.nan,vel[1],0.0],cmd_flag=1.0)
+        #self.sendCmd('Const_Vel_traj',cmd_vals=[np.nan,0.0,0.0],cmd_flag=1.0)
         self._iterStep(2)
-        self.sendCmd('Const_Vel_traj',cmd_vals=[vel[2],self.TrajAcc_Max[2],self.TrajJerk_Max[2]],cmd_flag=2)
+        self.sendCmd('Const_Vel_traj',cmd_vals=[vel[2],self.TrajAcc_Max[2],self.TrajJerk_Max[2]],cmd_flag=2.0)
         self._iterStep(2)
         self.sendCmd('Activate_traj',cmd_vals=[1.0,1.0,1.0])
 
@@ -245,18 +245,18 @@ class SAR_Sim_Interface(SAR_Base_Interface):
     def resetPose(self,z_0=0.5): 
         #!!! Need to Change
 
-        #self.sendCmd('GZ_StickyPads',cmd_flag=0)
-        #self.sendCmd('Tumble_Detect',cmd_vals=[1.0,1.0,1.0],cmd_flag=0)
+        #self.sendCmd('GZ_StickyPads',cmd_flag=0.0)
+        #self.sendCmd('Tumble_Detect',cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
         #self.sendCmd('Ctrl_Reset')
         #self._setModelState(pos=[0,0,z_0])
         #self._iterStep(10)
 
-        self.sendCmd('Tumble_Detect',cmd_vals=[1.0,1.0,1.0],cmd_flag=1)
+        self.sendCmd('Tumble_Detect',cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
         #self.sendCmd('Ctrl_Reset')
         #self._setModelState(pos=[0,0,z_0])
         #self._iterStep(100) # Give time for drone to settle
 
-        #self.sendCmd('GZ_StickyPads',cmd_flag=1)
+        #self.sendCmd('GZ_StickyPads',cmd_flag=1.0)
 
     def _setModelState(self,pos=[0,0,0.5],quat=[0,0,0,1],vel=[0,0,0],ang_vel=[0,0,0]):
         print()
@@ -298,7 +298,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
     #     self.sendCmd("Load_Params")
         
     # def handle_GZ_StickyPads(self):
-    #     cmd_flag = self.userInput("Turn sticky pads On/Off (1,0): ",int)
+    #     cmd_flag = self.userInput("Turn sticky pads On/Off (1,0): ",float)
     #     self.sendCmd("GZ_StickyPads",cmd_flag=cmd_flag)
 
     # def handle_GZ_Pose_Reset(self):

@@ -38,7 +38,6 @@
 #include "sar_msgs/srv/activate_sticky_pads.hpp"
 
 
-
 namespace gz
 {
 namespace sim
@@ -106,7 +105,6 @@ namespace systems
     
     /// \brief Private data pointer.
     private: std::unique_ptr<Sticky_Leg_PluginPrivate> dataPtr;
-
 
 
   };

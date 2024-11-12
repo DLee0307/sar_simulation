@@ -32,19 +32,23 @@ void SAR_DataConverter::Surface_Contact_Callback(const gz::msgs::Contacts &msg)
             //std::cout << "Body Contact Detected" << std::endl;
         }
 
+        //!!! Need to Change if ForelegContact_Flag is true, cant HindlegContact_Flag be true? > need to check with rewardfunction in SAR_Sim_DeepRL.py
         // Check if the msg contain "Foot_Collision"
-        if (collision_name.find("Foot_Collision") != std::string::npos) {
-            //std::cout << "Foot Collision Detected: " << collision_name << std::endl;
-            if (collision_name.back() == '1' || collision_name.back() == '4') {
-                ForelegContact_Flag = true;
-                //std::cout << "Foreleg Contact Detected" << std::endl;
+        if (ForelegContact_Flag == false && HindlegContact_Flag == false){
+            
+            if (collision_name.find("Foot_Collision") != std::string::npos) {
+                //std::cout << "Foot Collision Detected: " << collision_name << std::endl;
+                if (collision_name.back() == '1' || collision_name.back() == '4') {
+                    ForelegContact_Flag = true;
+                    std::cout << "Foreleg Contact Detected" << std::endl;
+                }
+                else if (collision_name.back() == '2' || collision_name.back() == '3') {
+                    HindlegContact_Flag = true;
+                    std::cout << "Hindleg Contact Detected" << std::endl;
+                }
             }
-            else if (collision_name.back() == '2' || collision_name.back() == '3') {
-                HindlegContact_Flag = true;
-                //std::cout << "Hindleg Contact Detected" << std::endl;
-            }
-        }
 
+        }
         // LOCK IN STATE DATA WHEN INITIAL IMPACT DETECTED
         if (Impact_Flag_Ext == false && (BodyContact_Flag == true || ForelegContact_Flag == true || HindlegContact_Flag == true))
         {

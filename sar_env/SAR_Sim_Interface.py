@@ -215,7 +215,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         ## PUBLISH MODEL STATE SERVICE REQUEST
         self.pausePhysics(pause_flag=True)
         #self.callService('/gazebo/set_model_state',state_srv,SetModelState)
-        self._iterStep(2)
+        self._iterStep(1000)
 
         # ## SET DESIRED VEL IN CONTROLLER
         # self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,vel[0],0.0],cmd_flag=0.0)
@@ -228,7 +228,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         # self.sendCmd('Activate_traj',cmd_vals=[1.0,1.0,1.0])
 
         time.sleep(1)
-        ## SET DESIRED VEL IN CONTROLLER
+        # ## SET DESIRED VEL IN CONTROLLER
         self.sendCmd('Const_Vel_traj',cmd_vals=[vel[0],self.TrajAcc_Max[0],self.TrajJerk_Max[0]],cmd_flag=0.0)
         self._iterStep(2)
         #self.sendCmd('Const_Vel_traj',cmd_vals=[np.nan,vel[1],0.0],cmd_flag=1.0)
@@ -239,7 +239,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         self.sendCmd('Activate_traj',cmd_vals=[1.0,1.0,1.0])
 
         ## ROUND OUT TO 10 ITER STEPS (0.01s) TO MATCH 100Hz CONTROLLER 
-        self._iterStep(2)
+        self._iterStep(4)
         #print("!!!!!!!!!!!!!!!!!!!!! vel :", vel)
 
     def resetPose(self,z_0=0.5): 

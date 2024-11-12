@@ -69,15 +69,15 @@ void Camera_Plugin::OF_Calc_Opt_Sep()
     float FoV = 82.22; //Field of View [deg]
 
     float w = 3.6e-6;
-    //float f = 0.033e-3; //for 16*16
-    float f = 0.33e-3; // for 64*64
+    float f = 0.033e-3; //for 16*16
+    //float f = 0.33e-3; // for 64*64
     float delta_t = 0.01;
 
-    //int HEIGHT_PIXELS = 16;
-    //int WIDTH_PIXELS = 16;
+    int HEIGHT_PIXELS = 16;
+    int WIDTH_PIXELS = 16;
 
-    int HEIGHT_PIXELS = 64;
-    int WIDTH_PIXELS = 64;
+    //int HEIGHT_PIXELS = 64;
+    //int WIDTH_PIXELS = 64;
     
     int O_up = WIDTH_PIXELS / 2;
     int O_vp = HEIGHT_PIXELS / 2;

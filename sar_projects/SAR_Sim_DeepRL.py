@@ -253,6 +253,22 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         r_B_O = r_P_O - self.R_PW(r_P_B,self.Plane_Angle_rad)    
         #print("r_P_B : ", r_P_B)
 
+        ## DESIRED ACCELERATION VALUES
+        Acc = self.TrajAcc_Max
+    
+        a_x = Acc[0]
+        a_z = Acc[2]
+
+        ## CALC OFFSET POSITIONS
+        t_x = V_B_O[0]/a_x    # Time required to reach Vx
+        t_z = V_B_O[2]/a_z    # Time required to reach Vz
+
+        x_0 = r_B_O[0] - V_B_O[0]**2/(2*a_x) - V_B_O[0]*t_z     # X-position Vel reached
+        y_0 = r_B_O[1]                                          # Y-position Vel reached
+        z_0 = r_B_O[2] - V_B_O[2]**2/(2*a_z)                    # Z-position Vel reached  
+
+        r_B_O = np.array([x_0,y_0,z_0])
+
         ## LAUNCH QUAD W/ DESIRED VELOCITY
         self.initial_state = (r_B_O,V_B_O)
         self.Sim_VelTraj(pos=r_B_O,vel=V_B_O)
@@ -388,6 +404,37 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
             terminated,truncated = self._finishSim(a_Rot)
             self.Done = terminated 
 
+            # 3) CALC REWARD
+            try:
+                reward = self._CalcReward()  
+            except (UnboundLocalError,ValueError) as e:
+                reward = np.nan
+                print(RED + f"Error: {e}" + RESET)
+
+            info_dict = {
+                "reward_vals": self.reward_vals,
+                "reward": reward,
+                "a_Rot": a_Rot,
+                "Trg_Flag": self.Trg_Flag,
+                "Impact_Flag_Ext": self.Impact_Flag_Ext,
+                "D_perp_pad_min": self.D_perp_pad_min,
+                "Tau_CR_trg": self.Tau_CR_trg,
+                "Plane_Angle": self.Plane_Angle_deg,
+                "V_mag": self.V_mag,
+                "V_angle": self.V_angle,
+                "TestCondition_idx": self.TestCondition_idx,
+            }
+
+
+            # 5) RETURN VALUES
+            return(
+                self.obs_trg,
+                reward,
+                terminated,
+                truncated,
+                info_dict,
+            )
+        
     def _finishSim(self,a_Rot):
         
         OnceFlag_Trg = False
@@ -492,12 +539,12 @@ if __name__ == "__main__":
 
     env = SAR_Sim_DeepRL(Ang_Acc_range=[-90,0],V_mag_range=[1.5,3.5],V_angle_range=[5,175],Plane_Angle_range=[0,180],Render=True,Fine_Tune=False)
 
-    time.sleep(5)
+    time.sleep(3)
     env._setTestingConditions()
     env._initialStep()
-    #print("_initialStep is done")
+    print("_initialStep is done")
     action = env.action_space.sample()
-    action[0] = 1.0
+    action[0] = 0.0
     action[1] = -1.0
     env.step(action)
     print("env.step(action) is done")

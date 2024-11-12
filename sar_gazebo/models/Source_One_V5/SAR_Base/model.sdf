@@ -305,8 +305,8 @@
           </save>
           <horizontal_fov>1.435</horizontal_fov>
           <image>
-            <width>64</width>
-            <height>64</height>
+            <width>16</width>
+            <height>16</height>
             <!--64<format>R8G8B8</format>-->
             <format>L8</format>
           </image>

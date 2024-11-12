@@ -49,7 +49,7 @@ void SAR_DataConverter::Surface_Contact_Callback(const gz::msgs::Contacts &msg)
         if (Impact_Flag_Ext == false && (BodyContact_Flag == true || ForelegContact_Flag == true || HindlegContact_Flag == true))
         {
             Impact_Flag_Ext = true;
-/**/
+
             // RECORD IMPACT STATE DATA FROM END OF CIRCULAR BUFFER WHEN IMPACT FLAGGED
             //Time_impact_Ext = ros::Time::now();
             Time_impact_Ext = clock_->now();
@@ -59,7 +59,8 @@ void SAR_DataConverter::Surface_Contact_Callback(const gz::msgs::Contacts &msg)
             Eul_P_B_impact_Ext = Eul_P_B_impact_buff.front();
             Rot_Sum_impact_Ext = Rot_Sum;
 
-            std::cout << "Impact_Flag_Ext = true" << std::endl;
+            std::cout << "Impact_Flag_Ext = "<< Impact_Flag_Ext << std::endl;
+
         }
 
     }

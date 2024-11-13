@@ -13,7 +13,7 @@ import rclpy
 workspace_path = os.path.expanduser('~/ros2_ws')
 BASE_PATH = os.path.join(workspace_path, 'src', 'sar_simulation')
 
-
+# python3 T1_Policy_Pre-Training.py --TrainConfig /home/dlee/ros2_ws/src/sar_simulation/sar_projects/DeepRL/Config_Files/SOV5_3D_Sim/SOV5_A30_L200_0deg_aRot90_S3D.json
 ## ARGUMENT PARSER
 parser = argparse.ArgumentParser(description='Policy Pre-Training Script')
 parser.add_argument('--TrainConfig',    help='Path to training config file', required=True)
@@ -57,8 +57,8 @@ if __name__ == '__main__':
     ## CREATE RL MANAGER
     RL_Manager = RL_Training_Manager(env,args.GroupName,TrainConfig['LogName'],env_kwargs=env_kwargs,S3_Upload=args.S3_Upload)
 
-    # ## CREATE MODEL AND TRAIN
-    # RL_Manager.create_model()
-    # RL_Manager.train_model(reset_timesteps=False,t_step_max=TrainConfig['t_step_limit'])
+    ## CREATE MODEL AND TRAIN
+    RL_Manager.create_model()
+    RL_Manager.train_model(reset_timesteps=False,t_step_max=TrainConfig['t_step_limit'])
 
     rclpy.shutdown()

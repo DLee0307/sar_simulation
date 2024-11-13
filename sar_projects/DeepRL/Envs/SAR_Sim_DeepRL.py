@@ -108,6 +108,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         self.Iyy_std = 0.00*self.Ref_Iyy
 
         ## DEFINE OBSERVATION SPACE
+        ## need change : observation space 4 Tau, theta_x, D_Perp, Plane angle
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(4,), dtype=np.float32)
         self.obs_trg = np.zeros(self.observation_space.shape,dtype=np.float32) # Obs values at triggering
 

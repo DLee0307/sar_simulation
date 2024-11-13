@@ -262,6 +262,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         ## CALC OFFSET POSITIONS
         t_x = V_B_O[0]/a_x    # Time required to reach Vx
         t_z = V_B_O[2]/a_z    # Time required to reach Vz
+        t_total = t_x + t_z + 1
 
         x_0 = r_B_O[0] - V_B_O[0]**2/(2*a_x) - V_B_O[0]*t_z     # X-position Vel reached
         y_0 = r_B_O[1]                                          # Y-position Vel reached
@@ -271,8 +272,10 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
         ## LAUNCH QUAD W/ DESIRED VELOCITY
         self.initial_state = (r_B_O,V_B_O)
-        self.Sim_VelTraj(pos=r_B_O,vel=V_B_O)
-        self._iterStep(n_steps=1000)
+        print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& r_B_O :",r_B_O)
+        print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& V_B_O :",V_B_O)
+        self.Sim_VelTraj(pos=r_B_O,vel=V_B_O,t_total=t_total)
+        self._iterStep(n_steps=100)
         
         # Add code from DH : Beacause lock step?
         time.sleep(5)
@@ -317,7 +320,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
         ########## POLICY PRE-TRIGGER ##########
         if a_Trg <= self.Pol_Trg_Threshold:
-
+            print("r_B_O[2]", self.r_B_O[2])
             ## 2) UPDATE STATE
             self._iterStep(n_steps=10)
             t_now = self._getTime()
@@ -470,6 +473,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
             V_B_O = self.V_B_O
             r_P_B = self.R_WP(self.r_P_O - r_B_O,self.Plane_Angle_rad) # {t_x,n_p}
             V_B_P = self.R_WP(V_B_O,self.Plane_Angle_rad) # {t_x,n_p}
+            #print("r_B_O[2]", r_B_O[2])
 
             # ============================
             ##    Termination Criteria 
@@ -755,7 +759,7 @@ if __name__ == "__main__":
     env._initialStep()
     print("_initialStep is done")
     action = env.action_space.sample()
-    action[0] = 1.0
+    action[0] = 0.0
     action[1] = -1.0
     env.step(action)
     print("env.step(action) is done")

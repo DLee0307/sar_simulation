@@ -155,7 +155,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         return True
 
 # Need to Change
-    def Sim_VelTraj(self,pos,vel):
+    def Sim_VelTraj(self,pos,vel,t_total:float = 1.0):
         """
         Args:
             pos (list): Launch position [m]   | [x,y,z]
@@ -240,21 +240,22 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
         ## ROUND OUT TO 10 ITER STEPS (0.01s) TO MATCH 100Hz CONTROLLER 
         self._iterStep(4)
+        self._iterStep(round(t_total * 1000))
         #print("!!!!!!!!!!!!!!!!!!!!! vel :", vel)
 
     def resetPose(self,z_0=0.5): 
         #!!! Need to Change
 
         #self.sendCmd('GZ_StickyPads',cmd_flag=0.0)
-        #self.sendCmd('Tumble_Detect',cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
+        self.sendCmd('Tumble_Detect',cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
         #self.sendCmd('Ctrl_Reset')
         #self._setModelState(pos=[0,0,z_0])
-        #self._iterStep(10)
+        self._iterStep(10)
 
         self.sendCmd('Tumble_Detect',cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
         #self.sendCmd('Ctrl_Reset')
         #self._setModelState(pos=[0,0,z_0])
-        #self._iterStep(100) # Give time for drone to settle
+        self._iterStep(100) # Give time for drone to settle
 
         #self.sendCmd('GZ_StickyPads',cmd_flag=1.0)
 

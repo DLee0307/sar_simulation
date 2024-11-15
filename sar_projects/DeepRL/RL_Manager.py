@@ -115,13 +115,16 @@ class RL_Training_Manager():
                                          S3_upload_freq=S3_upload_freq,
                                          reward_check_freq=reward_check_freq
                                          )
+        #!! DH added for debugging there is an error for initializing self.locals
+        #reward_callback._on_step()
+        #print(self.locals)
 
-        # self.model.learn(
-        #     total_timesteps=int(t_step_max),
-        #     callback=reward_callback,
-        #     tb_log_name="TB_Log",
-        #     reset_num_timesteps=reset_timesteps,
-        # )
+        self.model.learn(
+            total_timesteps=int(t_step_max),
+            callback=reward_callback,
+            tb_log_name="TB_Log",
+            reset_num_timesteps=reset_timesteps,
+        )
 
         print("RL_Manager train_model function is done")
 
@@ -227,6 +230,11 @@ class RewardCallback(BaseCallback):
         self.reward_grid = np.full((len(self.Vx_bins), len(self.Vz_bins)), np.nan)
 
         print("RL_Manager RewardCallback initializion is done")
+        
 
     def _on_step(self) -> bool:
-        print()
+        
+        ep_info_buffer = self.locals['self'].ep_info_buffer
+
+
+        print("RL_Manager RewardCallback class's _on_step function is done")

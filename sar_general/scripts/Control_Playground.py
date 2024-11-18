@@ -28,7 +28,7 @@ def cmd_send(env):
             0: env.handle_Ctrl_Reset,
             1: env.handle_Pos_Cmd,
             2: env.handle_Vel_Cmd,
-            #3: env.handle_DH_Reset,
+            3: env.handle_DH_Reset,
             5: env.handle_Stop,
             #7: env.handle_Ang_Accel,
             8: env.handle_Policy,

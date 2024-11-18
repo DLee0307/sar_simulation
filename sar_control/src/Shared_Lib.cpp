@@ -386,9 +386,14 @@ void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd)
             kd_xf = CTRL_Cmd->cmd_flag;
             break;
 
-        // case 3: // DH_Rest
-        //     std::cout << "Case 3:" << std::endl;
-        //     break;
+        case 3: // DH_Rest
+            x_d.x = 0;
+            x_d.y = 0;
+            x_d.z = 0.4;
+            v_d.x = 0;
+            v_d.y = 0;
+            v_d.z = 0;
+            break;
 
         case 5: // Hard Set All Motorspeeds to Zero
             //std::cout << "Case 5:" << std::endl;

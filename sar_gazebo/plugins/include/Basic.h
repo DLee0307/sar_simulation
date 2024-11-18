@@ -45,8 +45,6 @@ namespace systems
     public: void PostUpdate(const gz::sim::UpdateInfo &_info,
                            const gz::sim::EntityComponentManager &_ecm) override;
 
-    private: void CameraMsg(const gz::msgs::Image &_msg);
-
     private: std::unique_ptr<Camera_PluginPrivate> dataPtr;
   };
 }

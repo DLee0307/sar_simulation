@@ -27,10 +27,6 @@ class gz::sim::systems::Sticky_Leg_PluginPrivate
     public: std::shared_ptr<rclcpp::Node> ros_node;
     public: rclcpp::Service<sar_msgs::srv::ActivateStickyPads>::SharedPtr Leg_Connect_Service;
 
-    /// ROS2 Callback for thrust subscription \param[in] _msg thrust message
-    public: bool Service_Callback(const sar_msgs::srv::ActivateStickyPads::Request::SharedPtr request,
-                                        sar_msgs::srv::ActivateStickyPads::Response::SharedPtr response);
-
     public: bool contact_flag{false};
     public: bool attach_flag{false};
 
@@ -361,6 +357,9 @@ void Sticky_Leg_Plugin::Configure(const Entity &_entity,
   }
   this->dataPtr->ros_node = std::make_shared<rclcpp::Node>("sticky_leg_plugin_node_" + std::to_string(this->dataPtr->Leg_Number));
   this->dataPtr->Sticky_Pad_Connect_Publisher = this->dataPtr->ros_node->create_publisher<sar_msgs::msg::StickyPadConnect>("/SAR_Internal/Leg_Connections" + std::to_string(this->dataPtr->Leg_Number), 5);
+  this->dataPtr->Leg_Connect_Service = this->dataPtr->ros_node->create_service<sar_msgs::srv::ActivateStickyPads>("/SAR_Internal/Sticky_Leg_" + std::to_string(this->dataPtr->Leg_Number), std::bind(&Sticky_Leg_Plugin::Service_Callback, this, std::placeholders::_1, std::placeholders::_2));
+  std::cout << "Service Name: /SAR_Internal/Sticky_Leg_" << this->dataPtr->Leg_Number << std::endl;
+
   this->SubscribeToContacts();
 }
 
@@ -369,6 +368,7 @@ void Sticky_Leg_Plugin::PreUpdate(const UpdateInfo &/*_info*/,
     EntityComponentManager &_ecm)
 {
   GZ_PROFILE("Sticky_Leg_Plugin::PreUpdate");
+  rclcpp::spin_some(this->dataPtr->ros_node);
   //std::cout << "contact_flag : " << this->dataPtr->contact_flag << std::endl;
   
   // Run
@@ -465,9 +465,25 @@ void Sticky_Leg_PluginPrivate::Update(const EntityComponentManager &_ecm)
 */
 
 //////////////////////////////////////////////////////////////
-bool Sticky_Leg_PluginPrivate::Service_Callback(const sar_msgs::srv::ActivateStickyPads::Request::SharedPtr request,
+bool Sticky_Leg_Plugin::Service_Callback(const sar_msgs::srv::ActivateStickyPads::Request::SharedPtr request,
                                                 sar_msgs::srv::ActivateStickyPads::Response::SharedPtr response)
 {
+  // TURN OFF STICKY BEHAVIOR
+    // std::cout << "[Debug] Service Callback Invoked with sticky_flag: "
+    //           << request->sticky_flag << std::endl;
+
+    if (request->sticky_flag == false)
+    {
+        this->Sticky_Flag = false;
+        std::cout << "[Leg_" << this->dataPtr->Leg_Number << "]: Sticky Disabled" << std::endl;
+    }
+    else if (request->sticky_flag == true)
+    {
+        this->Sticky_Flag = true;
+        std::cout << "[Leg_" << this->dataPtr->Leg_Number << "]: Sticky Enabled" << std::endl;
+    }
+
+  response->cmd_success = true;
   return true;
 }
 

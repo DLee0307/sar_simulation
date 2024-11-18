@@ -445,6 +445,12 @@
         <!--<link_name>Prop_1</link_name>-->
         <link_name>SAR_Body</link_name>
     </plugin>
+<!--
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libSet_Velocity_Plugin.so"
+        name="gz::sim::systems::Set_Velocity_Plugin">
+    </plugin>
+-->
 <!---->
     <plugin
         filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libCamera_Plugin.so"

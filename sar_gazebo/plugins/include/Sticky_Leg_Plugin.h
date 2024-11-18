@@ -76,6 +76,10 @@ namespace systems
     /// Documentation inherited
     public: void PostUpdate(const UpdateInfo &_info,
                             const EntityComponentManager &_ecm) final;
+
+    /// ROS2 Callback for thrust subscription \param[in] _msg thrust message
+    public: bool Service_Callback(const sar_msgs::srv::ActivateStickyPads::Request::SharedPtr request,
+                                        sar_msgs::srv::ActivateStickyPads::Response::SharedPtr response);
 /*
     public: void Load(const sdf::ElementPtr &_sdf, const std::string &_topic,
                       const std::vector<Entity> &_collisionEntities);
@@ -105,6 +109,9 @@ namespace systems
     
     /// \brief Private data pointer.
     private: std::unique_ptr<Sticky_Leg_PluginPrivate> dataPtr;
+
+    private: bool Sticky_Flag = false;
+    private: bool Attached_Flag = false;
 
 
   };

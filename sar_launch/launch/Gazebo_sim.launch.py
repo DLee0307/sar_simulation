@@ -74,7 +74,7 @@ def generate_launch_description():
     GROUND_SPAWN = Node(
         package='ros_gz_sim',
         executable='create',
-        arguments=['-file', Ground_SDF_Path, '-z', '-10.0'],
+        arguments=['-file', Ground_SDF_Path, '-z', '-17.5'],
         output='screen',
     )    
 
@@ -108,7 +108,7 @@ def generate_launch_description():
         gazebo,
         SAR_SPAWN,
         PLANE_SPAWN,
-        #GROUND_SPAWN,
+        GROUND_SPAWN,
         CLOCK_BRIDGE,
         #SAR_CONTROLLER
         controller_terminal_command

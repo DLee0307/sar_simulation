@@ -278,11 +278,13 @@ class SAR_Sim_Interface(SAR_Base_Interface):
             print("Error setting pose:", result.stderr)
 
         #self._setModelState(pos=[0,0,z_0])
-        self._iterStep(1000)
+        self._iterStep(10)
 
         self.sendCmd('Tumble_Detect',cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
         self.sendCmd("Ctrl_Reset", cmd_vals=[1.0,1.0,1.0])
         self.sendCmd("DH_Reset", cmd_vals=[1.0,1.0,1.0])
+# https://github.com/gazebosim/gz-sim/pull/2440
+# https://github.com/gazebosim/gz-sim/issues/2318
 
         # Use subprocess to call the GZ service for setting pose
         # Need to chane "SAR_Config"
@@ -303,31 +305,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
             print("Error setting pose:", result.stderr)
 
         #self._setModelState(pos=[0,0,z_0])
-        self._iterStep(1000) # Give time for drone to settle
-
-        self.sendCmd("Ctrl_Reset", cmd_vals=[1.0,1.0,1.0])
-        self.sendCmd("DH_Reset", cmd_vals=[1.0,1.0,1.0])
-
-        # Use subprocess to call the GZ service for setting pose
-        # Need to chane "SAR_Config"
-        cmd = [
-            'gz', 'service', '-s', '/world/empty/set_pose',
-            '--reqtype', 'gz.msgs.Pose',
-            '--reptype', 'gz.msgs.Boolean',
-            '--timeout', '3000',
-            '--req', f'name: "A30_L200", position: {{x: 0, y: 0, z: {z_0}}}, orientation: {{x: 0, y: 0, z: 0, w: 1}}'
-        ]
-
-        result = subprocess.run(cmd, capture_output=True, text=True)
-
-        # print the result of execution
-        if result.returncode == 0:
-            print("Pose set successfully:", result.stdout)
-        else:
-            print("Error setting pose:", result.stderr)
-
-        #self._setModelState(pos=[0,0,z_0])
-        self._iterStep(1000) # Give time for drone to settle
+        self._iterStep(100) # Give time for drone to settle
 
         #self.sendCmd('GZ_StickyPads',cmd_flag=1.0)
 
@@ -370,9 +348,9 @@ class SAR_Sim_Interface(SAR_Base_Interface):
     #     self.loadSimParams()
     #     self.sendCmd("Load_Params")
         
-    # def handle_GZ_StickyPads(self):
-    #     cmd_flag = self.userInput("Turn sticky pads On/Off (1,0): ",float)
-    #     self.sendCmd("GZ_StickyPads",cmd_flag=cmd_flag)
+    def handle_GZ_StickyPads(self):
+        cmd_flag = self.userInput("Turn sticky pads On/Off (1,0): ",float)
+        self.sendCmd("GZ_StickyPads",cmd_vals=[1.0,1.0,1.0],cmd_flag=cmd_flag)
 
     # def handle_GZ_Pose_Reset(self):
     #     print("Reset Pos/Vel -- Sticky off -- Controller Reset\n")

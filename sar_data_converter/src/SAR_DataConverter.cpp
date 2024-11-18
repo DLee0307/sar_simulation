@@ -34,7 +34,12 @@ SAR_DataConverter::SAR_DataConverter()
         SAR_Sticky_Pad_Connect_Sub_2 = this->create_subscription<sar_msgs::msg::StickyPadConnect>("/SAR_Internal/Leg_Connections2", 1, std::bind(&SAR_DataConverter::Pad_Connections_Callback_2, this, std::placeholders::_1));
         SAR_Sticky_Pad_Connect_Sub_3 = this->create_subscription<sar_msgs::msg::StickyPadConnect>("/SAR_Internal/Leg_Connections3", 1, std::bind(&SAR_DataConverter::Pad_Connections_Callback_3, this, std::placeholders::_1));
         SAR_Sticky_Pad_Connect_Sub_4 = this->create_subscription<sar_msgs::msg::StickyPadConnect>("/SAR_Internal/Leg_Connections4", 1, std::bind(&SAR_DataConverter::Pad_Connections_Callback_4, this, std::placeholders::_1));
-            
+        
+        activate_stickypads_service_1 = this->create_client<sar_msgs::srv::ActivateStickyPads>("/SAR_Internal/Sticky_Leg_1");
+        activate_stickypads_service_2 = this->create_client<sar_msgs::srv::ActivateStickyPads>("/SAR_Internal/Sticky_Leg_2");
+        activate_stickypads_service_3 = this->create_client<sar_msgs::srv::ActivateStickyPads>("/SAR_Internal/Sticky_Leg_3");
+        activate_stickypads_service_4 = this->create_client<sar_msgs::srv::ActivateStickyPads>("/SAR_Internal/Sticky_Leg_4");
+
         // CRAZYSWARM PIPELINE
         cf1_States_B_O_Sub = this->create_subscription<crazyflie_interfaces::msg::LogDataGeneric>("/cf1/States_B_O", 1, std::bind(&SAR_DataConverter::cf1_States_B_O_Callback, this, std::placeholders::_1));
         cf1_States_B_P_Sub = this->create_subscription<crazyflie_interfaces::msg::LogDataGeneric>("/cf1/States_B_P", 1, std::bind(&SAR_DataConverter::cf1_States_B_P_Callback, this, std::placeholders::_1));
@@ -84,6 +89,20 @@ bool SAR_DataConverter::CMD_SAR_DC_Callback(const sar_msgs::srv::CTRLCmdSrv::Req
     req_copy_sim->cmd_vals = request->cmd_vals;
     req_copy_sim->cmd_flag = request->cmd_flag;
     req_copy_sim->cmd_rx = request->cmd_rx;
+
+    if(request->cmd_type == 91){
+        if(request->cmd_flag == 0.0){
+            Sticky_Flag = false;
+        }
+        else{
+            Sticky_Flag = true;
+            //std::cout << "case 91 " << std::endl;
+        }
+        // auto request_ASP = std::make_shared<sar_msgs::srv::ActivateStickyPads::Request>();
+        // request_ASP->sticky_flag = Sticky_Flag;
+        // auto result_ASP = activate_stickypads_service_1->async_send_request(request_ASP);
+        SAR_DataConverter::activateStickyFeet();
+    }
 /*
     std::cout << "Service is requested in DataConverter" << std::endl;
     std::cout << "cmd_type: " << request->cmd_type << std::endl;

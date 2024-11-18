@@ -28,6 +28,7 @@
 
 #include "sar_msgs/srv/ctrl_cmd_srv.hpp"
 #include "sar_msgs/srv/logging_cmd.hpp"
+#include "sar_msgs/srv/activate_sticky_pads.hpp"
 
 #include "crazyflie_interfaces/msg/log_data_generic.hpp" // Added
 
@@ -47,11 +48,16 @@ public:
     void MainLoop();
     void ConsoleLoop();
     void LoggingLoop();
-    
+
+    rclcpp::Client<sar_msgs::srv::ActivateStickyPads>::SharedPtr activate_stickypads_service_1;
+    rclcpp::Client<sar_msgs::srv::ActivateStickyPads>::SharedPtr activate_stickypads_service_2;
+    rclcpp::Client<sar_msgs::srv::ActivateStickyPads>::SharedPtr activate_stickypads_service_3;
+    rclcpp::Client<sar_msgs::srv::ActivateStickyPads>::SharedPtr activate_stickypads_service_4;
+
     // =======================
     //     GAZEBO FUNCTIONS
     // =======================
-
+    void activateStickyFeet();
 
     // =======================
     //     GAZEBO CALLBACKS

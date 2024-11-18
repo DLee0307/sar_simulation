@@ -45,7 +45,7 @@ def cmd_send(env):
             #30: env.handle_Thrust_CMD,
             #31: env.handle_Motor_CMD,
             #90: env.handle_GZ_Pose_Reset,
-            #91: env.handle_GZ_StickyPads,
+            91: env.handle_GZ_StickyPads,
             92: env.handle_GZ_Global_Vel_traj,
             #93: env.handle_GZ_Rel_Vel_traj,
 

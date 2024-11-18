@@ -16,15 +16,6 @@ Camera_Plugin::Camera_Plugin() : System(), dataPtr(std::make_unique<Camera_Plugi
 
 }
 
-//////////////////////////////////////////////////
-void Camera_Plugin::CameraMsg(const gz::msgs::Image &_msg)
-{
-  auto width = _msg.width();
-  std::cout << "width: "<< width << std::endl;
-  auto height = _msg.height();
-  std::cout << "height: "<< height << std::endl;
-
-}
 
 void Camera_Plugin::Configure(const Entity &_entity,
                          const std::shared_ptr<const sdf::Element> &_sdf,

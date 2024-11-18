@@ -26,6 +26,7 @@ find_package(sar_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(gz-msgs10 REQUIRED)
+#find_package(gz-physics REQUIRED)
 
 gz_find_package(gz-physics7
   COMPONENTS
@@ -70,6 +71,29 @@ target_link_libraries(Practice
 )
 
 install(TARGETS Practice
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin)
+
+# Set_Velocity_Plugin
+add_library(Set_Velocity_Plugin SHARED plugins/src/Set_Velocity_Plugin.cpp)
+
+ament_target_dependencies(Set_Velocity_Plugin
+  gz-sim8
+  gz-sensors8
+  rclcpp
+  sar_msgs
+)
+
+target_link_libraries(Set_Velocity_Plugin
+  gz-sim8::gz-sim8
+  gz-sensors8::gz-sensors8
+  gz-msgs10::gz-msgs10
+  ${rclcpp_LIBRARIES}
+
+)
+
+install(TARGETS Set_Velocity_Plugin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin)

@@ -39,7 +39,7 @@ https://gazebosim.org/api/gazebo/4.2/createsystemplugins.html
 https://gazebosim.org/api/gazebo/4.2/migrationplugins.html
 -->
 
-    <world name="sar_world">
+    <world name="sar_world4">
         <physics name="1ms" type="ignored">
             <max_step_size>0.001</max_step_size>
             <real_time_factor>1.0</real_time_factor>
@@ -1054,6 +1054,13 @@ https://gazebosim.org/api/gazebo/4.2/migrationplugins.html
                 <Turning_Direction>cw</Turning_Direction>
                 <Visual_Slowdown>200</Visual_Slowdown>               
             </plugin>
+<!---->
+	    <plugin
+		filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libSet_Velocity_Plugin.so"
+		name="gz::sim::systems::Set_Velocity_Plugin">
+		<linear_velocity>10.0 10.0 10.0</linear_velocity>
+	    </plugin>
+
 <!--
             !! previous test
             <plugin

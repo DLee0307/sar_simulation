@@ -11,6 +11,7 @@ from rclpy.task import Future
 import sys
 
 from sar_msgs.srv import CTRLGetObs
+from sar_msgs.srv import CTRLGetTcon
 
 
 #SET PYTHONPATH 
@@ -93,11 +94,11 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         # Run the command
         result = subprocess.run(cmd, capture_output=True, text=True)
         
-        # Check the output
-        if result.returncode == 0:
-            print("Successfully advanced the simulation by", n_steps, "steps.")
-        else:
-            print("Error:", result.stderr)
+        # # Check the output
+        # if result.returncode == 0:
+        #     print("Successfully advanced the simulation by", n_steps, "steps.")
+        # else:
+        #     print("Error:", result.stderr)
 
 
     def _getTick(self):
@@ -106,10 +107,10 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         result = self.callService('/CTRL/Get_Obs',srv, CTRLGetObs)
         #print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
-        if result:
-            print(f"Service call succeeded: srv_success={result.tick}")
-        else:
-            print("Service call failed")
+        # if result:
+        #     print(f"Service call succeeded: srv_success={result.tick}")
+        # else:
+        #     print("Service call failed")
 
         return result.tick
 
@@ -137,7 +138,14 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
         return obs
 
+    def _get_Tcondition_Obs(self): # For getting Terminate and Truncate condition.
+        resp = self.callService('/CTRL/Get_Tcon',CTRLGetTcon.Request(),CTRLGetTcon)
         
+        self.r_B_O = np.round([resp.pose_b_o.position.x,
+                                resp.pose_b_o.position.y,
+                                resp.pose_b_o.position.z],3)
+        return self.r_B_O
+
 
     def sleep(self,time_s):        
         """
@@ -530,13 +538,22 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
     def pausePhysics(self,pause_flag=True):
 
-        if pause_flag == True:
-            cmd = f"gz service -s /world/empty/control --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --timeout 3000 --req 'pause: true'"
-            self.pause_simulation_process = subprocess.Popen(cmd, shell=True)
+        # # With Output Message
+        # if pause_flag == True:
+        #     cmd = f"gz service -s /world/empty/control --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --timeout 3000 --req 'pause: true'"
+        #     self.pause_simulation_process = subprocess.Popen(cmd, shell=True)
 
+        # else:
+        #     cmd = f"gz service -s /world/empty/control --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --timeout 3000 --req 'pause: false'"
+        #     self.pause_simulation_process = subprocess.Popen(cmd, shell=True)
+
+        # Without Output Message
+        if pause_flag:
+            cmd = f"gz service -s /world/empty/control --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --timeout 3000 --req 'pause: true'"
+            self.pause_simulation_process = subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         else:
             cmd = f"gz service -s /world/empty/control --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --timeout 3000 --req 'pause: false'"
-            self.pause_simulation_process = subprocess.Popen(cmd, shell=True)
+            self.pause_simulation_process = subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     def spin(self):
         rclpy.spin(self.node)

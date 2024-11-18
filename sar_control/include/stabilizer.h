@@ -16,6 +16,7 @@
 
 #include "sar_msgs/srv/ctrl_cmd_srv.hpp"
 #include "sar_msgs/srv/ctrl_get_obs.hpp"
+#include "sar_msgs/srv/ctrl_get_tcon.hpp"
 
 #include "math3d.h"
 #include <cmath>
@@ -86,6 +87,8 @@ public:
     void Get_Obs_Resp(const sar_msgs::srv::CTRLGetObs::Request::SharedPtr request,
                     sar_msgs::srv::CTRLGetObs::Response::SharedPtr response);                
 
+    void Get_Tcon_Resp(const sar_msgs::srv::CTRLGetTcon::Request::SharedPtr request,
+                    sar_msgs::srv::CTRLGetTcon::Response::SharedPtr response);  
 
     void appLoop();
     void stabilizerLoop();
@@ -112,6 +115,7 @@ private:
     // ROS2 Service
     rclcpp::Service<sar_msgs::srv::CTRLCmdSrv>::SharedPtr CMD_Output_Service;
     rclcpp::Service<sar_msgs::srv::CTRLGetObs>::SharedPtr Get_Obs_Service;
+    rclcpp::Service<sar_msgs::srv::CTRLGetTcon>::SharedPtr Get_Tcon_Service;
 
 
     // MESSAGES

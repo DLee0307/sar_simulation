@@ -1,0 +1,6 @@
+# Request
+
+---
+# Response
+geometry_msgs/Pose pose_b_o
+geometry_msgs/Pose pose_p_b

@@ -117,6 +117,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         self.action_trg = np.zeros(self.action_space.shape,dtype=np.float32) # Action values at triggering
 
         self._start_RealTimeTimer()
+        self.current_state_data = None
 
     def _start_RealTimeTimer(self):
         
@@ -145,8 +146,13 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
         self.start_time_real = time.time()
         self.resetPose()
-        
-        print("!!!!!!!!!!!!!!")
+
+        self._resetParams()
+        self._setTestingConditions()
+        self._initialStep()
+       
+        return self._getObs(), {}
+
 
     def _resetParams(self):
 
@@ -469,12 +475,16 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
                 OnceFlag_Impact = True
 
 
+            self._get_Tcondition_Obs()
             # 4) CHECK TERMINATION/TRUNCATED
             r_B_O =  self.r_B_O
             V_B_O = self.V_B_O
             r_P_B = self.R_WP(self.r_P_O - r_B_O,self.Plane_Angle_rad) # {t_x,n_p}
             V_B_P = self.R_WP(V_B_O,self.Plane_Angle_rad) # {t_x,n_p}
-            #print("r_B_O[2]", r_B_O[2])
+            
+            print("r_B_O[2]: ",r_B_O[2])
+            
+            #r_B_O[2] =  -17
 
             # ============================
             ##    Termination Criteria 
@@ -484,40 +494,40 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
                 self.error_str = "Episode Completed: Done [Terminated] "
                 terminated = True
                 truncated = False
-                # print(YELLOW,self.error_str,RESET)
+                print(YELLOW,self.error_str,RESET)
 
             ## TRIGGER TIMEOUT  
             elif (t_now - self.start_time_trg) > self.t_trg_max:
                 self.error_str = "Episode Completed: Pitch Timeout [Truncated] "
                 terminated = False
                 truncated = True
-                # print(YELLOW,self.error_str,f"{(t_now - self.start_time_trg):.3f} s",RESET)
+                print(YELLOW,self.error_str,f"{(t_now - self.start_time_trg):.3f} s",RESET)
 
             ## IMPACT TIMEOUT
             elif (t_now - self.start_time_impact) > self.t_impact_max:
                 self.error_str = "Episode Completed: Impact Timeout [Truncated] "
                 terminated = False
                 truncated = True
-                # print(YELLOW,self.error_str,f"{(t_now - self.start_time_impact):.3f} s",RESET)
+                print(YELLOW,self.error_str,f"{(t_now - self.start_time_impact):.3f} s",RESET)
 
             elif r_B_O[2] < -15:
                 self.error_str = "Episode Completed: Out of bounds [Terminated]"
                 terminated = True
                 truncated = False
-                # print(YELLOW,self.error_str,RESET)
+                print(YELLOW,self.error_str,RESET)
 
             elif np.abs(r_P_B[0]) > 1.4 and (self.D_perp < 1.5*self.L_eff) and (self.D_perp >= 0):
                 self.error_str = "Episode Completed: Out of Bounds [Terminated]"
                 terminated = True
                 truncated = False
-                # print(YELLOW,self.error_str,RESET)
+                print(YELLOW,self.error_str,RESET)
 
             ## REAL-TIME TIMEOUT
             elif (time.time() - self.start_time_real) > self.t_real_max:
                 self.error_str = "Episode Completed: Episode Time Exceeded [Truncated] "
                 terminated = False
                 truncated = True
-                # print(YELLOW,self.error_str,f"{(time.time() - self.start_time_real):.3f} s",RESET)
+                print(YELLOW,self.error_str,f"{(time.time() - self.start_time_real):.3f} s",RESET)
 
             else:
                 terminated = False

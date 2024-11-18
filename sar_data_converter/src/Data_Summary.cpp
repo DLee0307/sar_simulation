@@ -84,7 +84,7 @@ void SAR_DataConverter::Publish_StateData()
 
     // PUBLISH STATE DATA RECEIVED FROM CONTROLLER
     StateData_Pub->publish(StateData_msg);
-    //std::cout << "StateData is published: " << std::endl; 
+    //std::cout << "StateData is published: " << Pose_B_O.position.z << std::endl; 
 }
 
 void SAR_DataConverter::Publish_TriggerData()

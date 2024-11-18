@@ -35,6 +35,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/WorldStep.srv"
   "srv/LoggingCMD.srv"
   "srv/ActivateStickyPads.srv"
+  "srv/CTRLGetTcon.srv"
   DEPENDENCIES std_msgs geometry_msgs builtin_interfaces
 )
 

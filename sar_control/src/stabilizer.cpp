@@ -25,6 +25,7 @@ Controller::Controller()
 
     CMD_Output_Service = this->create_service<sar_msgs::srv::CTRLCmdSrv>("/CTRL/Cmd_ctrl", std::bind(&Controller::CMD_Service_Resp, this, std::placeholders::_1, std::placeholders::_2));
     Get_Obs_Service = this->create_service<sar_msgs::srv::CTRLGetObs>("/CTRL/Get_Obs", std::bind(&Controller::Get_Obs_Resp, this, std::placeholders::_1, std::placeholders::_2));
+    Get_Tcon_Service = this->create_service<sar_msgs::srv::CTRLGetTcon>("/CTRL/Get_Tcon", std::bind(&Controller::Get_Tcon_Resp, this, std::placeholders::_1, std::placeholders::_2));
 
     // ROS2 PARAMETERS PUBLISHERS
     ROS_Parmas_Publisher = this->create_publisher<sar_msgs::msg::ROSParams>("/ROS2/PARAMETER", 1);
@@ -91,6 +92,16 @@ void Controller::Get_Obs_Resp(const sar_msgs::srv::CTRLGetObs::Request::SharedPt
     response->d_perp = D_perp;
     response->d_perp_cr = D_perp_CR;
     response->plane_angle_deg = Plane_Angle_deg;
+
+}
+
+void Controller::Get_Tcon_Resp(const sar_msgs::srv::CTRLGetTcon::Request::SharedPtr request,
+                     sar_msgs::srv::CTRLGetTcon::Response::SharedPtr response) {
+
+    response->pose_b_o.position.x = state.position.x;
+    response->pose_b_o.position.y = state.position.y;
+    response->pose_b_o.position.z = state.position.z;
+
 
 }
 
@@ -328,6 +339,7 @@ void Controller::loadInitParams()
 
     /// Load parameters from YAML file
     loadParametersFromModel_TypesFile("/home/dlee/ros2_ws/src/sar_simulation/sar_config/Model_Types.yaml");
+    //When I change to Model_Types.bryan got error
 
 
     /// Get PARAMETERS from Model_Types.yaml

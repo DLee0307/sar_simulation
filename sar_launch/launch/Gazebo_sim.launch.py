@@ -108,7 +108,7 @@ def generate_launch_description():
         gazebo,
         SAR_SPAWN,
         PLANE_SPAWN,
-        GROUND_SPAWN,
+        #GROUND_SPAWN,
         CLOCK_BRIDGE,
         #SAR_CONTROLLER
         controller_terminal_command

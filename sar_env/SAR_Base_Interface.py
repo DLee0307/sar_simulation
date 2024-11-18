@@ -527,6 +527,10 @@ class SAR_Base_Interface(Node):
         cmd_vals = self.userInput("Set desired velocity values (x,y,z): ",float)
         cmd_flag = self.userInput("Vel control On/Off (1,0): ",float)
         self.sendCmd("Vel",cmd_vals,cmd_flag)
+    
+    # def handle_DH_Reset(self):
+    #     print("Reset DH controller to default values\n")
+    #     self.sendCmd("DH_Reset", cmd_vals=[1.0,1.0,1.0])
 
     def handle_Ang_Accel(self):
         cmd_vals = self.userInput("Set desired angular acceleration values (x,y,z): ",float)
@@ -741,6 +745,7 @@ class SAR_Base_Interface(Node):
             'Ctrl_Reset':0,
             'Pos':1,
             'Vel':2,
+            # 'DH_Reset':3,
 
             'Stop':5,
             'Ang_Accel':7,
@@ -948,8 +953,11 @@ class SAR_Base_Interface(Node):
         self.Tau_CR = np.round(StateData_msg.tau_cr,3)
         
         #self.t_prev = self.t # Save t value for next callback iteration
-
+        
         #self.get_logger().info("Callback function executed successfully.")
+
+        #print("_SAR_StateDataCallback is run")
+
 
 
 #!!!!! Time and NNoutput need to solve

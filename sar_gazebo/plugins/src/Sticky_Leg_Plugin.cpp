@@ -244,7 +244,7 @@ void Sticky_Leg_Plugin::SubscribeToContacts()
 //////////////////////////////////////////////////
 void Sticky_Leg_Plugin::OnContactsMsg(const gz::msgs::Contacts &_msg)
 {
-    std::cout << "Received contacts message:" << this->dataPtr->Leg_Number << std::endl;
+    //std::cout << "Received contacts message:" << this->dataPtr->Leg_Number << std::endl;
     
 
     for (const auto &contact : _msg.contact())
@@ -370,58 +370,107 @@ void Sticky_Leg_Plugin::PreUpdate(const UpdateInfo &/*_info*/,
   GZ_PROFILE("Sticky_Leg_Plugin::PreUpdate");
   rclcpp::spin_some(this->dataPtr->ros_node);
   //std::cout << "contact_flag : " << this->dataPtr->contact_flag << std::endl;
-  
-  // Run
-  //std::cout << "CreateSensors : " << std::endl;
-  //this->dataPtr->CreateSensors(_ecm);
-  if (this->dataPtr->contact_flag && !this->dataPtr->attach_flag)
-  {
-    Entity modelEntity = _ecm.EntityByComponents(
-        components::Model(), components::Name(this->dataPtr->Parent_Model_Name));
-    //std::cout << "modelEntity : " << modelEntity << std::endl;
-    
-    this->dataPtr->parentLinkEntity = _ecm.EntityByComponents(
-        components::Link(), components::ParentEntity(modelEntity),
-        components::Name(this->dataPtr->Parent_Link_Name)); 
-    //std::cout << "childLinkEntity : " << this->dataPtr->childLinkEntity << std::endl;
+  //std::cout << "Attached_Flag : " << Attached_Flag << std::endl;
 
-    //std::cout << "parentLinkEntity : " << this->dataPtr->parentLinkEntity << std::endl;
+  if(Sticky_Flag == true && Attached_Flag == false){
 
-    if (kNullEntity != this->dataPtr->parentLinkEntity)
+    // Run
+    //std::cout << "CreateSensors : " << std::endl;
+    //this->dataPtr->CreateSensors(_ecm);
+    if (this->dataPtr->contact_flag && !this->dataPtr->attach_flag)
     {
-      this->dataPtr->detachableJointEntity = _ecm.CreateEntity();
-      _ecm.CreateComponent(
-          this->dataPtr->detachableJointEntity,
-          components::DetachableJoint({this->dataPtr->parentLinkEntity,
-                                       this->dataPtr->childLinkEntity, "fixed"}));
+      Entity modelEntity = _ecm.EntityByComponents(
+          components::Model(), components::Name(this->dataPtr->Parent_Model_Name));
+      //std::cout << "modelEntity : " << modelEntity << std::endl;
+      
+      this->dataPtr->parentLinkEntity = _ecm.EntityByComponents(
+          components::Link(), components::ParentEntity(modelEntity),
+          components::Name(this->dataPtr->Parent_Link_Name)); 
+      //std::cout << "childLinkEntity : " << this->dataPtr->childLinkEntity << std::endl;
 
-      this->dataPtr->attach_flag = true;
-      gzdbg << "Entity attached." << std::endl;
+      //std::cout << "parentLinkEntity : " << this->dataPtr->parentLinkEntity << std::endl;
 
-      switch(this->dataPtr->Leg_Number)
+      if (kNullEntity != this->dataPtr->parentLinkEntity)
       {
-          case 1:
-            this->dataPtr->Sticky_Leg_Connect_msg.pad1_contact = 1;
-              break;
-          case 2:
-            this->dataPtr->Sticky_Leg_Connect_msg.pad2_contact = 1;
-              break;
-          case 3:
-            this->dataPtr->Sticky_Leg_Connect_msg.pad3_contact = 1;
-              break;
-          case 4:
-            this->dataPtr->Sticky_Leg_Connect_msg.pad4_contact = 1;
-              break;
-      }
+        this->dataPtr->detachableJointEntity = _ecm.CreateEntity();
+        _ecm.CreateComponent(
+            this->dataPtr->detachableJointEntity,
+            components::DetachableJoint({this->dataPtr->parentLinkEntity,
+                                        this->dataPtr->childLinkEntity, "fixed"}));
 
-      //std::cout << "Sticky_Leg_Connect_msg : " << Sticky_Leg_Connect_msg.pad1_contact << std::endl;
-      /**/
-      this->dataPtr->Sticky_Pad_Connect_Publisher->publish(this->dataPtr->Sticky_Leg_Connect_msg);
+        Attached_Flag = true;
+
+        this->dataPtr->attach_flag = true;
+        gzdbg << "Entity attached." << std::endl;
+
+        switch(this->dataPtr->Leg_Number)
+        {
+            case 1:
+              this->dataPtr->Sticky_Leg_Connect_msg.pad1_contact = 1;
+                break;
+            case 2:
+              this->dataPtr->Sticky_Leg_Connect_msg.pad2_contact = 1;
+                break;
+            case 3:
+              this->dataPtr->Sticky_Leg_Connect_msg.pad3_contact = 1;
+                break;
+            case 4:
+              this->dataPtr->Sticky_Leg_Connect_msg.pad4_contact = 1;
+                break;
+        }
+
+        //std::cout << "Sticky_Leg_Connect_msg : " << Sticky_Leg_Connect_msg.pad1_contact << std::endl;
+        /**/
+        this->dataPtr->Sticky_Pad_Connect_Publisher->publish(this->dataPtr->Sticky_Leg_Connect_msg);
+        }
+
+    }
+  }
+  else if(Sticky_Flag == false){
+      if (kNullEntity != this->dataPtr->detachableJointEntity)
+      {
+        std::cout << "detachableJointEntity is not null : " << std::endl;
+
+        // // DetachableJoint 삭제
+        // _ecm.RemoveComponent<components::DetachableJoint>(this->dataPtr->detachableJointEntity);
+        // if (_ecm.Component<components::DetachableJoint>(this->dataPtr->detachableJointEntity) != nullptr) {
+        //     std::cerr << "Failed to remove DetachableJoint component for entity: " 
+        //               << this->dataPtr->detachableJointEntity << std::endl;
+        // } else {
+        //     std::cout << "DetachableJoint successfully removed." << std::endl;
+        // }
+        //_ecm.RemoveEntity(this->dataPtr->detachableJointEntity);
+        _ecm.RequestRemoveEntity(this->dataPtr->detachableJointEntity);
+
+        // 플래그 초기화
+        this->dataPtr->detachableJointEntity = kNullEntity;
+        Attached_Flag = false;
+        this->dataPtr->attach_flag = false;
+
+        std::cout << "[Leg_" << this->dataPtr->Leg_Number << "]: Detachable joint removed." << std::endl;
+
+        // // StickyPadConnect 메시지 업데이트 및 발행
+        // switch(this->dataPtr->Leg_Number)
+        // {
+        //     case 1:
+        //         this->dataPtr->Sticky_Leg_Connect_msg.pad1_contact = 0;
+        //         break;
+        //     case 2:
+        //         this->dataPtr->Sticky_Leg_Connect_msg.pad2_contact = 0;
+        //         break;
+        //     case 3:
+        //         this->dataPtr->Sticky_Leg_Connect_msg.pad3_contact = 0;
+        //         break;
+        //     case 4:
+        //         this->dataPtr->Sticky_Leg_Connect_msg.pad4_contact = 0;
+        //         break;
+        // }
+        // this->dataPtr->Sticky_Pad_Connect_Publisher->publish(this->dataPtr->Sticky_Leg_Connect_msg);
       }
+  }
+  else{
 
   }
-
-
     
 }
 

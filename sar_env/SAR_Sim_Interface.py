@@ -278,7 +278,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
             print("Error setting pose:", result.stderr)
 
         #self._setModelState(pos=[0,0,z_0])
-        self._iterStep(10)
+        self._iterStep(50)
 
         self.sendCmd('Tumble_Detect',cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
         self.sendCmd("Ctrl_Reset", cmd_vals=[1.0,1.0,1.0])
@@ -305,7 +305,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
             print("Error setting pose:", result.stderr)
 
         #self._setModelState(pos=[0,0,z_0])
-        self._iterStep(100) # Give time for drone to settle
+        self._iterStep(500) # Give time for drone to settle
 
         #self.sendCmd('GZ_StickyPads',cmd_flag=1.0)
 

@@ -146,6 +146,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
         self.start_time_real = time.time()
         self.resetPose()
+        time.sleep(1) ## From DH
 
         self._resetParams()
         self._setTestingConditions()
@@ -463,6 +464,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         while not (terminated or truncated):
 
             t_now = self._getTime()
+            #rclpy.spin_once(self)
 
             ## START TRIGGER AND IMPACT TERMINATION TIMERS
             if (self.Trg_Flag == True and OnceFlag_Trg == False):

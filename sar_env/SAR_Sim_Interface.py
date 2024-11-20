@@ -254,7 +254,8 @@ class SAR_Sim_Interface(SAR_Base_Interface):
     def resetPose(self,z_0=0.4): 
         #!!! Need to Change
 
-        #self.sendCmd('GZ_StickyPads',cmd_flag=0.0)
+        self.sendCmd('GZ_StickyPads',cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
+        self._iterStep(10)
         self.sendCmd('Tumble_Detect',cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
         self.sendCmd("Ctrl_Reset", cmd_vals=[1.0,1.0,1.0])
         self.sendCmd("DH_Reset", cmd_vals=[1.0,1.0,1.0])
@@ -280,6 +281,10 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         #self._setModelState(pos=[0,0,z_0])
         self._iterStep(50)
 
+        self.sendCmd('GZ_StickyPads',cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
+        self._iterStep(10)
+        self.sendCmd('GZ_StickyPads',cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
+        self._iterStep(10)
         self.sendCmd('Tumble_Detect',cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
         self.sendCmd("Ctrl_Reset", cmd_vals=[1.0,1.0,1.0])
         self.sendCmd("DH_Reset", cmd_vals=[1.0,1.0,1.0])
@@ -306,7 +311,11 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
         #self._setModelState(pos=[0,0,z_0])
         self._iterStep(500) # Give time for drone to settle
+        #rclpy.spin_once(self)
+        time.sleep(1)
 
+        self.sendCmd('GZ_StickyPads',cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
+        
         #self.sendCmd('GZ_StickyPads',cmd_flag=1.0)
 
     def _setModelState(self,pos=[0,0,0.5],quat=[0,0,0,1],vel=[0,0,0],ang_vel=[0,0,0]):

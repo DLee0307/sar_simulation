@@ -117,7 +117,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         self.action_trg = np.zeros(self.action_space.shape,dtype=np.float32) # Action values at triggering
 
         self._start_RealTimeTimer()
-        self.current_state_data = None
+        # self.current_state_data = None
 
     def _start_RealTimeTimer(self):
         
@@ -261,7 +261,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         r_B_O = r_P_O - self.R_PW(r_P_B,self.Plane_Angle_rad)    
         #print("r_P_B : ", r_P_B)
 
-        ## DESIRED ACCELERATION VALUES
+        ## DESIRED ACCELERATION VALUES Added by DH
         Acc = self.TrajAcc_Max
     
         a_x = Acc[0]
@@ -285,7 +285,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         self.Sim_VelTraj(pos=r_B_O,vel=V_B_O,t_total=t_total)
         self._iterStep(n_steps=100)
         
-        # Add code from DH : Beacause lock step?
+        # Add code from DH : Beacause of lock step?
         time.sleep(5)
 
         ## ROUND OUT STEPS TO BE IN SYNC WITH CONTROLLER
@@ -332,6 +332,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         ########## POLICY PRE-TRIGGER ##########
         if a_Trg <= self.Pol_Trg_Threshold:
             print("r_B_O[2]", self.r_B_O[2])
+            
             ## 2) UPDATE STATE
             self._iterStep(n_steps=10)
             t_now = self._getTime()
@@ -546,7 +547,6 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         
         return terminated,truncated
 
-    ## Need to check if it works well
     def _CalcReward(self):
 
         if self.Impact_Flag_Ext:
@@ -682,7 +682,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         ## REWARD: TAU_CR TRIGGER
         R_tau_cr = self.Reward_Exp_Decay(self.Tau_CR_trg,0.15,k=2.5)
 
-
+        ## Need to check if it works well especially 2 leg
         ## REWARD: PAD CONNECTIONS
         if self.Pad_Connections >= 3: 
             R_Legs = 1.0

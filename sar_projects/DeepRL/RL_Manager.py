@@ -104,7 +104,8 @@ class RL_Training_Manager():
     def load_model(self,t_step_load: int, GroupName=None, LogName=None, Params_only=False, load_replay_buffer=False):
       print()
 
-    def train_model(self,model_save_freq=2e3,reward_check_freq=500,S3_upload_freq=1000,reset_timesteps=False,t_step_max=500e3):
+    # model_save_freq=2e3
+    def train_model(self,model_save_freq=200,reward_check_freq=500,S3_upload_freq=1000,reset_timesteps=False,t_step_max=500e3):
         if reset_timesteps == True:
 
             self.model.tensorboard_log = self.TB_Log_Dir
@@ -127,6 +128,39 @@ class RL_Training_Manager():
         )
 
         print("RL_Manager train_model function is done")
+
+    def test_policy(self,V_mag=None,V_angle=None,Plane_Angle=None):
+
+        if V_mag != None:
+            self.env.V_mag_range = [V_mag,V_mag]
+
+        if V_angle != None:
+            self.env.V_angle_range = [V_angle,V_angle]
+
+        if Plane_Angle != None:
+            self.env.Plane_Angle_range = [Plane_Angle,Plane_Angle]
+
+        obs,_ = self.env.reset()
+        terminated = False
+        truncated = False
+ 
+        while not (terminated or truncated):
+            action,_ = self.model.predict(obs)
+            obs,reward,terminated,truncated,_ = self.env.step(action)
+
+        return obs,reward
+
+    def sweep_policy(self,Plane_Angle_Step=45,V_mag_Step=0.5,V_angle_Step=10,n=1):
+        print()
+
+    def collect_landing_performance(self,fileName=None,Plane_Angle_Step=45,V_mag_Step=0.5,V_angle_Step=10,n=1):
+        print()
+
+    def plot_landing_performance(self,PlaneAngle=0,fileName=None,saveFig=False,showFig=True):
+        print()
+
+    def save_NN_to_C_header(self):
+        print()
 
     def write_config_file(self):
         config_path = os.path.join(self.Log_Dir,"Config.yaml")
@@ -190,10 +224,11 @@ class RL_Training_Manager():
         self.env.setAngAcc_range(config_dict['ENV_SETTINGS']['Ang_Acc_Limits'])
 
 class RewardCallback(BaseCallback):
+    # model_save_freq: int = 5_000
     def __init__(self, RLM, 
                  reward_check_freq: int = 500, 
                  S3_upload_freq: int = 500,
-                 model_save_freq: int = 5_000, 
+                 model_save_freq: int = 200, 
                  keep_last_n_models: int = 5,
                  verbose=0):
         super(RewardCallback, self).__init__(verbose)
@@ -326,6 +361,9 @@ class RewardCallback(BaseCallback):
         ## UPLOAD TB LOG TO SB3
         if self.num_timesteps % self.S3_upload_freq == 0:
             
+            # print("self.num_timesteps", self.num_timesteps)
+            # print("self.S3_upload_freq",self.S3_upload_freq)
+
             self.RLM.upload_file_to_S3(local_file_path=self.TB_Log_file_path,S3_file_path=os.path.join("S3_TB_Logs",self.RLM.Group_Name,self.RLM.Log_Name,"TB_Logs/TB_Log_0",self.TB_Log))
 
         #print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
@@ -416,9 +454,9 @@ class RewardCallback(BaseCallback):
         self.model.save(model_path)
         self.model.save_replay_buffer(replay_buffer_path)
 
-        ## UPLOAD MODEL AND REPLAY BUFFER TO S3
-        self.RLM.upload_file_to_S3(local_file_path=model_path, S3_file_path=os.path.join("S3_TB_Logs",self.RLM.Group_Name,self.RLM.Log_Name,"Models",model_name))
-        self.RLM.upload_file_to_S3(local_file_path=replay_buffer_path, S3_file_path=os.path.join("S3_TB_Logs",self.RLM.Group_Name,self.RLM.Log_Name,"Models",replay_buffer_name))
+        # ## UPLOAD MODEL AND REPLAY BUFFER TO S3
+        # self.RLM.upload_file_to_S3(local_file_path=model_path, S3_file_path=os.path.join("S3_TB_Logs",self.RLM.Group_Name,self.RLM.Log_Name,"Models",model_name))
+        # self.RLM.upload_file_to_S3(local_file_path=replay_buffer_path, S3_file_path=os.path.join("S3_TB_Logs",self.RLM.Group_Name,self.RLM.Log_Name,"Models",replay_buffer_name))
 
         print("_save_model_and_replay_buffer function is done")
 
@@ -438,8 +476,8 @@ class RewardCallback(BaseCallback):
         self.model.save_replay_buffer(replay_buffer_path)
 
         ## UPLOAD MODEL AND REPLAY BUFFER TO S3
-        self.RLM.upload_file_to_S3(local_file_path=model_path, S3_file_path=os.path.join("S3_TB_Logs",self.RLM.Group_Name,self.RLM.Log_Name,"Models",model_name))
-        self.RLM.upload_file_to_S3(local_file_path=replay_buffer_path, S3_file_path=os.path.join("S3_TB_Logs",self.RLM.Group_Name,self.RLM.Log_Name,"Models",replay_buffer_name))
+        # self.RLM.upload_file_to_S3(local_file_path=model_path, S3_file_path=os.path.join("S3_TB_Logs",self.RLM.Group_Name,self.RLM.Log_Name,"Models",model_name))
+        # self.RLM.upload_file_to_S3(local_file_path=replay_buffer_path, S3_file_path=os.path.join("S3_TB_Logs",self.RLM.Group_Name,self.RLM.Log_Name,"Models",replay_buffer_name))
 
 
         if self.verbose > 0:

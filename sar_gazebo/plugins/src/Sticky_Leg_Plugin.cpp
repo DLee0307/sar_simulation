@@ -389,7 +389,7 @@ void Sticky_Leg_Plugin::PreUpdate(const UpdateInfo &/*_info*/,
         //std::cout << "childLinkEntity : " << this->dataPtr->childLinkEntity << std::endl;
 
         //std::cout << "parentLinkEntity : " << this->dataPtr->parentLinkEntity << std::endl;
-        std::cout << "[Leg_" << this->dataPtr->Leg_Number << "Parent_Link_Name : " << this->dataPtr->Parent_Link_Name << std::endl;
+        //std::cout << "[Leg_" << this->dataPtr->Leg_Number << "Parent_Link_Name : " << this->dataPtr->Parent_Link_Name << std::endl;
 
         if (this->dataPtr->Parent_Link_Name.find("Plane") != std::string::npos)
         {

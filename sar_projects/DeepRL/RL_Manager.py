@@ -328,7 +328,7 @@ class RewardCallback(BaseCallback):
             
             self.RLM.upload_file_to_S3(local_file_path=self.TB_Log_file_path,S3_file_path=os.path.join("S3_TB_Logs",self.RLM.Group_Name,self.RLM.Log_Name,"TB_Logs/TB_Log_0",self.TB_Log))
 
-        print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+        #print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
         print("RL_Manager RewardCallback class's _on_step function is done")
 
         return True

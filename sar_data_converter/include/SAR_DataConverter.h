@@ -30,12 +30,20 @@
 #include "sar_msgs/srv/logging_cmd.hpp"
 #include "sar_msgs/srv/activate_sticky_pads.hpp"
 
+//!!!!!DH If pad_connections does work well(2 leg landing?) it can need service for Pad_Connections = Pad1_Contact + Pad2_Contact + Pad3_Contact + Pad4_Contact;
+// #include "sar_msgs/srv/pad_connections.hpp"
+
 #include "crazyflie_interfaces/msg/log_data_generic.hpp" // Added
 
 #include "crazyflie_interfaces/srv/ctrl_cmd_srv.hpp" // Added
 
 
 #include "quatcompress.h"
+
+#include <locale.h>
+#include <unistd.h>
+#include <ctime>
+
 
 class SAR_DataConverter : public rclcpp::Node
 {
@@ -53,17 +61,25 @@ public:
     rclcpp::Client<sar_msgs::srv::ActivateStickyPads>::SharedPtr activate_stickypads_service_2;
     rclcpp::Client<sar_msgs::srv::ActivateStickyPads>::SharedPtr activate_stickypads_service_3;
     rclcpp::Client<sar_msgs::srv::ActivateStickyPads>::SharedPtr activate_stickypads_service_4;
+    // rclcpp::Client<sar_msgs::srv::PadConnections>::SharedPtr pad_connections_service;
 
     // =======================
     //     GAZEBO FUNCTIONS
     // =======================
     void activateStickyFeet();
+    // void checkSlowdown();
+    // void adjustSimSpeed(float speed_mult);
+    // void setLandingSurfacePose(float Pos_x, float Pos_y, float Pos_z, float Plane_Angle_deg);
 
     // =======================
     //     GAZEBO CALLBACKS
     // =======================
     void CtrlData_Callback(const sar_msgs::msg::CtrlData::SharedPtr msg);
     void CtrlDebug_Callback(const sar_msgs::msg::CtrlDebug::SharedPtr msg);
+
+    // void SurfaceFT_Sensor_Callback(const geometry_msgs::WrenchStamped::ConstPtr &msg);
+    void Surface_Contact_Callback(const gz::msgs::Contacts &_msg);
+    void ExtractCollisionName(const std::string& full_name);
 
     void Pad_Connections_Callback_1(const sar_msgs::msg::StickyPadConnect::SharedPtr msg);
     void Pad_Connections_Callback_2(const sar_msgs::msg::StickyPadConnect::SharedPtr msg);
@@ -102,10 +118,17 @@ public:
     bool DataLogging_Callback(const sar_msgs::srv::LoggingCMD::Request::SharedPtr request,
                              sar_msgs::srv::LoggingCMD::Response::SharedPtr response);
     void create_CSV();
+    // void append_CSV_states();
+    // void append_CSV_misc();
+    // void append_CSV_Trg();
+    // void append_CSV_impact();
+    // void append_CSV_blank();
+
 
     // =================================
     //     ORGANIZED DATA PUBLISHERS
     // =================================
+    // void RL_Data_Callback(const sar_msgs::RL_Data::ConstPtr &msg);
     void Publish_StateData();
     void Publish_TriggerData();
     void Publish_ImpactData();
@@ -116,15 +139,19 @@ public:
     // =======================
     inline void quat2euler(float quat[],float eul[]);
     inline void euler2quat(float quat[],float eul[]);
+    // inline void loadInitParams();
+    // inline void updateParams();
+    inline void resetStateData();
+    inline void resetTriggerData();
+    inline void resetImpactData();
 
-    void Surface_Contact_Callback(const gz::msgs::Contacts &_msg);
-    void ExtractCollisionName(const std::string& full_name);
 
 private:
 
     std::thread SAR_DC_Thread;
     std::thread ConsoleOutput_Thread;
     std::thread Logging_Thread;
+    // std::thread CrazyswarmPing_Thread;
 
     // =====================
     //     SYSTEM PARAMS
@@ -187,10 +214,16 @@ private:
     rclcpp::Subscription<sar_msgs::msg::CtrlData>::SharedPtr CTRL_Data_Sub;
     rclcpp::Subscription<sar_msgs::msg::CtrlDebug>::SharedPtr CTRL_Debug_Sub;
 
+    // ros::Subscriber Surface_ForceTorque_Sub;
+    // ros::Subscriber Surface_Contact_Sub;
+
     rclcpp::Subscription<sar_msgs::msg::StickyPadConnect>::SharedPtr SAR_Sticky_Pad_Connect_Sub_1;
     rclcpp::Subscription<sar_msgs::msg::StickyPadConnect>::SharedPtr SAR_Sticky_Pad_Connect_Sub_2;
     rclcpp::Subscription<sar_msgs::msg::StickyPadConnect>::SharedPtr SAR_Sticky_Pad_Connect_Sub_3;
     rclcpp::Subscription<sar_msgs::msg::StickyPadConnect>::SharedPtr SAR_Sticky_Pad_Connect_Sub_4;
+
+    // ros::ServiceClient Landing_Surface_Pose_Client;
+    // ros::ServiceClient GZ_SimSpeed_Client;
 
     // ===========================
     //     ROS2 Parameter
@@ -201,6 +234,7 @@ private:
     //     CTRL COMMAND OBJECTS
     // ===========================
     rclcpp::Service<sar_msgs::srv::CTRLCmdSrv>::SharedPtr cmd_input_service_;
+    // ros::ServiceServer CMD_Service_Dashboard;
     rclcpp::Client<sar_msgs::srv::CTRLCmdSrv>::SharedPtr CMD_Output_Service_Sim;
     rclcpp::Client<crazyflie_interfaces::srv::CTRLCmdSrv>::SharedPtr CMD_Output_Service_Exp;
 
@@ -272,13 +306,13 @@ private:
     geometry_msgs::msg::Vector3 v_d;
     geometry_msgs::msg::Vector3 a_d;
 
-/*
-    boost::array<double,4> FM{0,0,0,0};
-    boost::array<double,4> MotorThrusts{0,0,0,0};
-    boost::array<uint16_t,4> Motor_CMD{0,0,0,0};
 
-    boost::array<double,4> NN_Output{NAN,NAN,NAN,NAN};
-*/
+    // boost::array<double,4> FM{0,0,0,0};
+    // boost::array<double,4> MotorThrusts{0,0,0,0};
+    // boost::array<uint16_t,4> Motor_CMD{0,0,0,0};
+
+    // boost::array<double,4> NN_Output{NAN,NAN,NAN,NAN};
+
     //!!!!! Need to compare with Boost!
     std::array<double, 4> FM{0, 0, 0, 0};
     std::array<double, 4> MotorThrusts{0, 0, 0, 0};
@@ -438,6 +472,85 @@ private:
     std::string error_string = "No_Data";    
 
 };
+
+inline void SAR_DataConverter::resetStateData()
+{
+    D_perp_pad_min = INFINITY;
+}
+
+inline void SAR_DataConverter::resetTriggerData()
+{
+    Trg_Flag = false;
+    OnceFlag_Trg = false;
+    Time_trg = rclcpp::Time(0);
+
+    // STATES WRT ORIGIN
+    Pose_B_O_trg = geometry_msgs::msg::Pose();
+    Twist_B_O_trg = geometry_msgs::msg::Twist();
+    Eul_B_O_trg = geometry_msgs::msg::Vector3();
+
+    // STATES WRT PLANE
+    Pose_P_B_trg = geometry_msgs::msg::Pose();
+    Twist_B_P_trg = geometry_msgs::msg::Twist();
+    Eul_P_B_trg = geometry_msgs::msg::Vector3();
+    Vel_mag_B_P_trg = NAN;
+    Vel_angle_B_P_trg = NAN;
+    D_perp_trg = NAN;
+    D_perp_CR_trg = NAN;
+
+    // OPTICAL FLOW
+    Optical_Flow_trg = geometry_msgs::msg::Vector3();
+    Tau_CR_trg = NAN;
+
+    // POLICY ACTIONS
+    a_Trg_trg = NAN;
+    a_Rot_trg = NAN;
+}
+
+inline void SAR_DataConverter::resetImpactData()
+{
+    Impact_Flag = false;
+
+    // ONBOARD IMPACT DATA
+    Impact_Flag_OB = false;
+    OnceFlag_Impact_OB = false;
+    Time_impact_OB = rclcpp::Time(0);
+
+    Pose_B_O_impact_OB = geometry_msgs::msg::Pose();
+    Eul_B_O_impact_OB = geometry_msgs::msg::Vector3();
+
+    Twist_B_P_impact_OB = geometry_msgs::msg::Twist();
+    Eul_P_B_impact_OB = geometry_msgs::msg::Vector3();
+    dOmega_B_O_y_impact_OB = NAN;
+
+    // EXTERNAL IMPACT DATA
+    Impact_Flag_Ext = false;
+    Time_impact_Ext = rclcpp::Time(0);
+
+    BodyContact_Flag = false;
+    ForelegContact_Flag = false;
+    HindlegContact_Flag = false;
+
+    Pose_B_O_impact_Ext = geometry_msgs::msg::Pose();
+    Eul_B_O_impact_Ext = geometry_msgs::msg::Vector3();
+
+    Twist_B_P_impact_Ext = geometry_msgs::msg::Twist();
+    Eul_P_B_impact_Ext = geometry_msgs::msg::Vector3();
+    Rot_Sum = 0.0;
+    Rot_Sum_impact_Ext = NAN;
+
+    // IMPACT FORCE DATA
+    Force_impact = geometry_msgs::msg::Vector3();
+    Impact_Magnitude = 0.0;
+
+    // STICKY PAD CONTACTS
+    Pad_Connections = 0;
+    Pad1_Contact = 0;
+    Pad2_Contact = 0;
+    Pad3_Contact = 0;
+    Pad4_Contact = 0;
+
+}
 
 // CONVERT QUATERNION TO EULER ANGLES (YZX NOTATION)
 inline void SAR_DataConverter::quat2euler(float quat[], float eul[]){

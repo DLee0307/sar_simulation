@@ -15,69 +15,6 @@ void SAR_DataConverter::activateStickyFeet()
 
     //std::cout << "activateStickyFeet is run" << std::endl;
 
-    // // Sticky Leg 1 호출
-    // if (!activate_stickypads_service_1->wait_for_service(std::chrono::seconds(1)))
-    // {
-    //     RCLCPP_ERROR(this->get_logger(), "Service /SAR_Internal/Sticky_Leg_1 is not available.");
-    //     return;
-    // }
-    // auto result1 = activate_stickypads_service_1->async_send_request(request);
-    // if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result1) == rclcpp::FutureReturnCode::SUCCESS)
-    // {
-    //     RCLCPP_INFO(this->get_logger(), "Sticky Leg 1 activated successfully.");
-    // }
-    // else
-    // {
-    //     RCLCPP_ERROR(this->get_logger(), "Failed to activate Sticky Leg 1.");
-    // }
-
-    // // Sticky Leg 2 호출
-    // if (!activate_stickypads_service_2->wait_for_service(std::chrono::seconds(1)))
-    // {
-    //     RCLCPP_ERROR(this->get_logger(), "Service /SAR_Internal/Sticky_Leg_2 is not available.");
-    //     return;
-    // }
-    // auto result2 = activate_stickypads_service_2->async_send_request(request);
-    // if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result2) == rclcpp::FutureReturnCode::SUCCESS)
-    // {
-    //     RCLCPP_INFO(this->get_logger(), "Sticky Leg 2 activated successfully.");
-    // }
-    // else
-    // {
-    //     RCLCPP_ERROR(this->get_logger(), "Failed to activate Sticky Leg 2.");
-    // }
-
-    // // Sticky Leg 3 호출
-    // if (!activate_stickypads_service_3->wait_for_service(std::chrono::seconds(1)))
-    // {
-    //     RCLCPP_ERROR(this->get_logger(), "Service /SAR_Internal/Sticky_Leg_3 is not available.");
-    //     return;
-    // }
-    // auto result3 = activate_stickypads_service_3->async_send_request(request);
-    // if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result3) == rclcpp::FutureReturnCode::SUCCESS)
-    // {
-    //     RCLCPP_INFO(this->get_logger(), "Sticky Leg 3 activated successfully.");
-    // }
-    // else
-    // {
-    //     RCLCPP_ERROR(this->get_logger(), "Failed to activate Sticky Leg 3.");
-    // }
-
-    // // Sticky Leg 4 호출
-    // if (!activate_stickypads_service_4->wait_for_service(std::chrono::seconds(1)))
-    // {
-    //     RCLCPP_ERROR(this->get_logger(), "Service /SAR_Internal/Sticky_Leg_4 is not available.");
-    //     return;
-    // }
-    // auto result4 = activate_stickypads_service_4->async_send_request(request);
-    // if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result4) == rclcpp::FutureReturnCode::SUCCESS)
-    // {
-    //     RCLCPP_INFO(this->get_logger(), "Sticky Leg 4 activated successfully.");
-    // }
-    // else
-    // {
-    //     RCLCPP_ERROR(this->get_logger(), "Failed to activate Sticky Leg 4.");
-    // }
 
 }
 
@@ -110,7 +47,7 @@ void SAR_DataConverter::Surface_Contact_Callback(const gz::msgs::Contacts &msg)
         std::string collision_name = contact.collision2().name();
         if (collision_name.find("Body_Collision") != std::string::npos) {
             BodyContact_Flag = true;
-            //std::cout << "Body Contact Detected" << std::endl;
+            std::cout << "Body Contact Detected" << std::endl;
         }
 
         //!!! Need to Change if ForelegContact_Flag is true, cant HindlegContact_Flag be true? > need to check with rewardfunction in SAR_Sim_DeepRL.py

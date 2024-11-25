@@ -305,8 +305,10 @@
           </save>
           <horizontal_fov>1.435</horizontal_fov>
           <image>
-            <width>16</width>
-            <height>16</height>
+            <!-- <width>16</width>
+            <height>16</height> -->
+            <width>64</width>
+            <height>64</height>
             <!--64<format>R8G8B8</format>-->
             <format>L8</format>
           </image>
@@ -451,12 +453,12 @@
         name="gz::sim::systems::Set_Velocity_Plugin">
     </plugin>
 -->
-<!---->
+<!--
     <plugin
         filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libCamera_Plugin.so"
         name="gz::sim::systems::Camera_Plugin">
     </plugin>
-
+-->
 
     <plugin
         filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libMotor_Plugin.so"

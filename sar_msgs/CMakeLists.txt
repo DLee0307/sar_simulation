@@ -36,6 +36,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/LoggingCMD.srv"
   "srv/ActivateStickyPads.srv"
   "srv/CTRLGetTcon.srv"
+  "srv/PadConnections.srv"
   DEPENDENCIES std_msgs geometry_msgs builtin_interfaces
 )
 

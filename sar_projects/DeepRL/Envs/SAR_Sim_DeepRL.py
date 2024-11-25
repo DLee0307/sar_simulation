@@ -223,7 +223,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
             self.V_angle = V_angle
             
     def _initialStep(self):
-
+        print("_initialStep is run")
         ## DOMAIN RANDOMIZATION (UPDATE INERTIAL VALUES)
         Iyy_DR = self.Ref_Iyy + np.random.normal(0,self.Iyy_std)
         Mass_DR = self.Ref_Mass + np.random.normal(0,self.Mass_std)
@@ -280,8 +280,8 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
         ## LAUNCH QUAD W/ DESIRED VELOCITY
         self.initial_state = (r_B_O,V_B_O)
-        print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& r_B_O :",r_B_O)
-        print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& V_B_O :",V_B_O)
+        #print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& r_B_O :",r_B_O)
+        #print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& V_B_O :",V_B_O)
         self.Sim_VelTraj(pos=r_B_O,vel=V_B_O,t_total=t_total)
         self._iterStep(n_steps=100)
         
@@ -299,13 +299,16 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         self.start_time_trg = np.nan
         self.start_time_impact = np.nan
         self.t_flight_max = self.Tau_Body_start*2.0   # [s]
-        self.t_trg_max = self.Tau_Body_start*2.5 # [s]
+        self.t_trg_max = self.Tau_Body_start*2.5 # DH_ changed Previous 2.5 not /5 [s]
 
         # print("self.SAR_Type", self.SAR_Type)
         # print("self.SAR_Config", self.SAR_Config)
         # print("self.Policy_Type", self.Policy_Type)
 
+        print("_initialStep is completed")
+
     def step(self, action):
+        print("step is started")
 
         # 1. TAKE ACTION
         # 2. UPDATE STATE
@@ -338,6 +341,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
             # GRAB NEXT OBS
             next_obs = self._getObs()
+            #rclpy.spin_once(self)
 
             # 3) CALCULATE REWARD
             reward = 0.0
@@ -352,28 +356,28 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
                 self.error_str = "Episode Completed: Done [Terminated]"
                 terminated = True
                 truncated = False
-                # print(YELLOW,self.error_str,RESET)
+                print(YELLOW,self.error_str,RESET)
             
             ## IMPACT TERMINATION
             elif self.Impact_Flag_Ext == True:
                 self.error_str = "Episode Completed: Impact [Terminated]"
                 terminated = True
                 truncated = False
-                # print(YELLOW,self.error_str,RESET)
+                print(YELLOW,self.error_str,RESET)
 
             ## EPISODE TIMEOUT
             elif (t_now - self.start_time_ep) > self.t_flight_max:
                 self.error_str = "Episode Completed: Time Exceeded [Truncated]"
                 terminated = False
                 truncated = True
-                # print(YELLOW,self.error_str,RESET)
+                print(YELLOW,self.error_str,RESET)
 
             ## REAL-TIME TIMEOUT
             elif (time.time() - self.start_time_real) > self.t_real_max:
                 self.error_str = "Episode Completed: Episode Time Exceeded [Truncated] "
                 terminated = False
                 truncated = True
-                # print(YELLOW,self.error_str,f"{(time.time() - self.start_time_real):.3f} s",RESET)
+                print(YELLOW,self.error_str,f"{(time.time() - self.start_time_real):.3f} s",RESET)
 
             else:
                 terminated = False
@@ -404,7 +408,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
         ########## POLICY POST-TRIGGER ##########
         elif a_Trg >= self.Pol_Trg_Threshold:
-            print("**************************************")
+            #print("**************************************")
 
             # GRAB TERMINAL OBS/ACTION
             self.obs_trg = self._getObs()
@@ -417,7 +421,9 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
             # 3) CALC REWARD
             try:
+                rclpy.spin_once(self)
                 reward = self._CalcReward()  
+
             except (UnboundLocalError,ValueError) as e:
                 reward = np.nan
                 print(RED + f"Error: {e}" + RESET)
@@ -445,9 +451,9 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
                 truncated,
                 info_dict,
             )
-        
+
     def _finishSim(self,a_Rot):
-        
+        print("_finishSim is started")
         OnceFlag_Trg = False
         OnceFlag_Impact = False
 
@@ -456,7 +462,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
         ## SEND TRIGGER ACTION TO CONTROLLER
         self.sendCmd("Policy",[0.0,a_Rot,self.Ang_Acc_range[0]],cmd_flag=self.Ang_Acc_range[1])
-        print("Policy is sent", self.Ang_Acc_range[1])
+        #print("Policy is sent", self.Ang_Acc_range[1])
 
         ## RUN REMAINING STEPS AT FULL SPEED
         self.pausePhysics(False)
@@ -484,7 +490,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
             r_P_B = self.R_WP(self.r_P_O - r_B_O,self.Plane_Angle_rad) # {t_x,n_p}
             V_B_P = self.R_WP(V_B_O,self.Plane_Angle_rad) # {t_x,n_p}
             
-            print("r_B_O[2]: ",r_B_O[2])
+            #print("r_B_O[2]: ",r_B_O[2])
             
             #r_B_O[2] =  -17
 
@@ -504,6 +510,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
                 terminated = False
                 truncated = True
                 print(YELLOW,self.error_str,f"{(t_now - self.start_time_trg):.3f} s",RESET)
+                time.sleep(1.5)
 
             ## IMPACT TIMEOUT
             elif (t_now - self.start_time_impact) > self.t_impact_max:
@@ -535,6 +542,8 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
                 terminated = False
                 truncated = False
 
+        print("_finishSim is completed")
+        
         return terminated,truncated
 
     ## Need to check if it works well
@@ -661,6 +670,8 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
             R_LT = 0
             R_GM = 0
             R_Phi = self.Reward_ImpactAngle(Phi_P_B_impact_deg,self.Phi_P_B_impact_Min_deg,Phi_B_P_Impact_Condition)
+        
+        print("self.Eul_B_O_impact_Ext[1]", self.Eul_B_O_impact_Ext[1])
 
         ## REWARD: MINIMUM DISTANCE AFTER TRIGGER
         if self.Tau_CR_trg < np.inf:
@@ -689,6 +700,14 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         # print(f"R_t_norm: {R_t/self.W_max:.3f}")
         # print(np.round(self.reward_vals,2))
 
+        print("R_dist : ", R_dist)
+        print("R_tau_cr : ", R_tau_cr)
+        print("R_tx : ", R_tx)
+        print("R_LT : ", R_LT)
+        print("R_GM : ", R_GM)
+        print("R_Phi : ", R_Phi)
+        print("R_Legs : ", R_Legs)
+
         return R_t/self.W_max
 
     def Reward_Exp_Decay(self,x,threshold,k=10):
@@ -700,7 +719,10 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
             return 0
 
     def Reward_ImpactAngle(self,Phi_deg,Phi_min,Impact_condition):
-
+        print("Phi_deg is :",Phi_deg)
+        print("Phi_min is :",Phi_min)
+        print("Impact_condition is :",Impact_condition)
+        
         if Impact_condition == -1:
             Phi_deg = -Phi_deg
 
@@ -710,20 +732,28 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         Phi_b = Phi_w/2
 
         if Phi_deg <= -2*Phi_min:
+            print("Reward_ImpactAngle Case1")
             return 0.0
         elif -2*Phi_min < Phi_deg <= Phi_min:
+            print("Reward_ImpactAngle Case2")
             return 0.5/(3*Phi_min - 0) * (Phi_deg - Phi_min) + 0.50
         elif Phi_min < Phi_deg <= Phi_min + Phi_b:
+            print("Reward_ImpactAngle Case3")
             return 0.5/((Phi_min + Phi_b) - Phi_min) * (Phi_deg - Phi_min) + 0.5
         elif Phi_min + Phi_b < Phi_deg <= Phi_TD:
+            print("Reward_ImpactAngle Case4")
             return -0.25/(Phi_TD - (Phi_min + Phi_b)) * (Phi_deg - Phi_TD) + 0.75
         elif Phi_TD < Phi_deg <= Phi_TD + Phi_b:
+            print("Reward_ImpactAngle Case5")
             return 0.25/((Phi_TD + Phi_b) - Phi_TD) * (Phi_deg - Phi_TD) + 0.75
         elif (Phi_TD + Phi_b) < Phi_deg <= (Phi_TD + Phi_w):
+            print("Reward_ImpactAngle Case6")
             return -0.5/((Phi_TD + Phi_w) - (Phi_TD + Phi_b)) * (Phi_deg - (Phi_TD + Phi_w)) + 0.5
         elif (Phi_TD + Phi_w) < Phi_deg <= (360 + 2*Phi_min):
+            print("Reward_ImpactAngle Case7")
             return -0.5/(3*Phi_min) * (Phi_deg - ((Phi_TD + Phi_w))) + 0.5
         elif (360 + 2*Phi_min) <= Phi_deg:
+            print("Reward_ImpactAngle Case8")
             return 0.0
 
     def Reward_LT(self,CP_angle_deg,ForelegContact_Flag,HindlegContact_Flag):

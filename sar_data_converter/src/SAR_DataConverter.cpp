@@ -39,6 +39,7 @@ SAR_DataConverter::SAR_DataConverter()
         activate_stickypads_service_2 = this->create_client<sar_msgs::srv::ActivateStickyPads>("/SAR_Internal/Sticky_Leg_2");
         activate_stickypads_service_3 = this->create_client<sar_msgs::srv::ActivateStickyPads>("/SAR_Internal/Sticky_Leg_3");
         activate_stickypads_service_4 = this->create_client<sar_msgs::srv::ActivateStickyPads>("/SAR_Internal/Sticky_Leg_4");
+        // pad_connections_service = this->create_client<sar_msgs::srv::PadConnections>("/SAR_Internal/Pad_Connections");
 
         // CRAZYSWARM PIPELINE
         cf1_States_B_O_Sub = this->create_subscription<crazyflie_interfaces::msg::LogDataGeneric>("/cf1/States_B_O", 1, std::bind(&SAR_DataConverter::cf1_States_B_O_Callback, this, std::placeholders::_1));
@@ -90,19 +91,64 @@ bool SAR_DataConverter::CMD_SAR_DC_Callback(const sar_msgs::srv::CTRLCmdSrv::Req
     req_copy_sim->cmd_flag = request->cmd_flag;
     req_copy_sim->cmd_rx = request->cmd_rx;
 
-    if(request->cmd_type == 91){
-        if(request->cmd_flag == 0.0){
-            Sticky_Flag = false;
-        }
-        else{
-            Sticky_Flag = true;
-            //std::cout << "case 91 " << std::endl;
-        }
-        // auto request_ASP = std::make_shared<sar_msgs::srv::ActivateStickyPads::Request>();
-        // request_ASP->sticky_flag = Sticky_Flag;
-        // auto result_ASP = activate_stickypads_service_1->async_send_request(request_ASP);
-        SAR_DataConverter::activateStickyFeet();
+    switch (request->cmd_type)
+    {
+        case 0:
+
+            resetStateData();
+            resetTriggerData();
+            resetImpactData();
+            
+            // std::cout << "resetTriggerData is run " << std::endl;
+
+            // if (DATA_TYPE.compare("SIM") == 0)
+            // {
+            //     // RESET SIM SPEED
+            //     SAR_DataConverter::adjustSimSpeed(SIM_SPEED);
+            //     SLOWDOWN_TYPE = 0;
+            // }            
+            
+            break;
+
+        case 91:
+            if(request->cmd_flag == 0.0){
+                Sticky_Flag = false;
+                // SAR_DataConverter::activateStickyFeet();
+                // std::cout << "case 91 " << std::endl;
+                // std::cout << "activateStickyFeet is run " << std::endl;
+            }
+            else{
+                Sticky_Flag = true;
+                //SAR_DataConverter::activateStickyFeet();
+                //std::cout << "case 91 " << std::endl;
+                //std::cout << "activateStickyFeet is run " << std::endl;
+            }
+            // auto request_ASP = std::make_shared<sar_msgs::srv::ActivateStickyPads::Request>();
+            // request_ASP->sticky_flag = Sticky_Flag;
+            // auto result_ASP = activate_stickypads_service_1->async_send_request(request_ASP);
+            SAR_DataConverter::activateStickyFeet();
+            //std::cout << "activateStickyFeet is run " << std::endl;
+
+            break;
+
+        default:
+            break;
     }
+
+    // if(request->cmd_type == 91){
+    //     if(request->cmd_flag == 0.0){
+    //         Sticky_Flag = false;
+    //     }
+    //     else{
+    //         Sticky_Flag = true;
+    //         //std::cout << "case 91 " << std::endl;
+    //     }
+    //     // auto request_ASP = std::make_shared<sar_msgs::srv::ActivateStickyPads::Request>();
+    //     // request_ASP->sticky_flag = Sticky_Flag;
+    //     // auto result_ASP = activate_stickypads_service_1->async_send_request(request_ASP);
+    //     SAR_DataConverter::activateStickyFeet();
+    // }
+
 /*
     std::cout << "Service is requested in DataConverter" << std::endl;
     std::cout << "cmd_type: " << request->cmd_type << std::endl;

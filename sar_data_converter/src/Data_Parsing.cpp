@@ -151,6 +151,7 @@ void SAR_DataConverter::CtrlData_Callback(const sar_msgs::msg::CtrlData::SharedP
     //   TRIGGER DATA
     // =================
 
+    //!!!DH Rot_Sum need to check if it is correct
     Trg_Flag = ctrl_msg->trg_flag;
     if(ctrl_msg->trg_flag == true && OnceFlag_Trg == false)
     {   

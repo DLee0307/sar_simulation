@@ -267,7 +267,7 @@ class SAR_Base_Interface(Node):
             cmd_vals (list, optional): Command values typically in [x,y,z] notation. Defaults to [0,0,0].
             cmd_flag (float, optional): Used as either a on/off flag for command or an extra float value if needed. Defaults to 1.
         """        
-        print("sendCmd in SAR_Base_Interface.py is started")
+        #print("sendCmd in SAR_Base_Interface.py is started")
 
         ## CREATE SERVICE REQUEST MSG
         srv = CTRLCmdSrv.Request() 
@@ -280,14 +280,14 @@ class SAR_Base_Interface(Node):
         srv.cmd_rx = True
 
         ## TO SAR_DataConverter
-        print(f"Sending request: cmd_type={srv.cmd_type}, cmd_vals=({srv.cmd_vals.x}, {srv.cmd_vals.y}, {srv.cmd_vals.z}), cmd_flag={srv.cmd_flag}, cmd_rx={srv.cmd_rx}")
+        #print(f"Sending request: cmd_type={srv.cmd_type}, cmd_vals=({srv.cmd_vals.x}, {srv.cmd_vals.y}, {srv.cmd_vals.z}), cmd_flag={srv.cmd_flag}, cmd_rx={srv.cmd_rx}")
         result = self.callService('/SAR_DC/CMD_Input', srv, CTRLCmdSrv)
 
-        if result:
-            print(f"Service call succeeded: srv_success={result.srv_success}")
-        else:
-            print("Service call failed")
-        print("sendCmd in SAR_Base_Interface.py is completed")
+        # if result:
+        #     print(f"Service call succeeded: srv_success={result.srv_success}")
+        # else:
+        #     print("Service call failed")
+        # print("sendCmd in SAR_Base_Interface.py is completed")
 
         # """Sends commands to SAR_DC->Controller via rosservice call
 

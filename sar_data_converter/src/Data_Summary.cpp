@@ -166,11 +166,16 @@ void SAR_DataConverter::Publish_ImpactData()
 
     // STICKY PAD CONTACTS
     ImpactData_msg.pad_connections = Pad_Connections;
+    // std::cout << "Pad_Connections: " << Pad_Connections << std::endl; 
 
     ImpactData_msg.pad1_contact = Pad1_Contact;
     ImpactData_msg.pad2_contact = Pad2_Contact;
     ImpactData_msg.pad3_contact = Pad3_Contact;
     ImpactData_msg.pad4_contact = Pad4_Contact;
+    // std::cout << "Pad1_Contact: " << Pad1_Contact << std::endl; 
+    // std::cout << "Pad2_Contact: " << Pad2_Contact << std::endl; 
+    // std::cout << "Pad3_Contact: " << Pad3_Contact << std::endl; 
+    // std::cout << "Pad4_Contact: " << Pad4_Contact << std::endl; 
 
 
     ImpactData_Pub->publish(ImpactData_msg);

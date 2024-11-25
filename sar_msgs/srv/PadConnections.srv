@@ -1,0 +1,5 @@
+# Request
+bool pad_connections
+---
+# Response
+bool cmd_success

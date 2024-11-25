@@ -188,10 +188,10 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         # print the result of execution
-        if result.returncode == 0:
-            print("Pose set successfully:", result.stdout)
-        else:
-            print("Error setting pose:", result.stderr)
+        # if result.returncode == 0:
+        #     print("Pose set successfully:", result.stdout)
+        # else:
+        #     print("Error setting pose:", result.stderr)
 
         # Run the command
         self.sendCmd('Pos',cmd_vals=pos,cmd_flag=1.0)
@@ -215,10 +215,10 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         # print the result of execution
-        if result.returncode == 0:
-            print("Pose set successfully:", result.stdout)
-        else:
-            print("Error setting pose:", result.stderr)
+        # if result.returncode == 0:
+        #     print("Pose set successfully:", result.stdout)
+        # else:
+        #     print("Error setting pose:", result.stderr)
 
         ## PUBLISH MODEL STATE SERVICE REQUEST
         self.pausePhysics(pause_flag=True)
@@ -252,10 +252,11 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         #print("!!!!!!!!!!!!!!!!!!!!! vel :", vel)
 
     def resetPose(self,z_0=0.4): 
+        print("resetPose is started")
         #!!! Need to Change
 
         self.sendCmd('GZ_StickyPads',cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
-        self._iterStep(10)
+        #self._iterStep(10)
         self.sendCmd('Tumble_Detect',cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
         self.sendCmd("Ctrl_Reset", cmd_vals=[1.0,1.0,1.0])
         self.sendCmd("DH_Reset", cmd_vals=[1.0,1.0,1.0])
@@ -273,13 +274,15 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         # print the result of execution
-        if result.returncode == 0:
-            print("Pose set successfully:", result.stdout)
-        else:
-            print("Error setting pose:", result.stderr)
+        # if result.returncode == 0:
+        #     print("Pose set successfully:", result.stdout)
+        # else:
+        #     print("Error setting pose:", result.stderr)
 
         #self._setModelState(pos=[0,0,z_0])
-        self._iterStep(50)
+        #self._iterStep(50)
+        self._iterStep(1000)
+        time.sleep(1)
 
         self.sendCmd('GZ_StickyPads',cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
         self._iterStep(10)
@@ -288,6 +291,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         self.sendCmd('Tumble_Detect',cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
         self.sendCmd("Ctrl_Reset", cmd_vals=[1.0,1.0,1.0])
         self.sendCmd("DH_Reset", cmd_vals=[1.0,1.0,1.0])
+
 # https://github.com/gazebosim/gz-sim/pull/2440
 # https://github.com/gazebosim/gz-sim/issues/2318
 
@@ -304,10 +308,10 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         # print the result of execution
-        if result.returncode == 0:
-            print("Pose set successfully:", result.stdout)
-        else:
-            print("Error setting pose:", result.stderr)
+        # if result.returncode == 0:
+        #     print("Pose set successfully:", result.stdout)
+        # else:
+        #     print("Error setting pose:", result.stderr)
 
         #self._setModelState(pos=[0,0,z_0])
         self._iterStep(500) # Give time for drone to settle
@@ -317,6 +321,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         self.sendCmd('GZ_StickyPads',cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
         
         #self.sendCmd('GZ_StickyPads',cmd_flag=1.0)
+        print("resetPose is completed")
 
     def _setModelState(self,pos=[0,0,0.5],quat=[0,0,0,1],vel=[0,0,0],ang_vel=[0,0,0]):
         print()

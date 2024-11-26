@@ -102,10 +102,50 @@ class RL_Training_Manager():
         #print("RL_Manager create_model function is done")
 
     def load_model(self,t_step_load: int, GroupName=None, LogName=None, Params_only=False, load_replay_buffer=False):
-      print()
+        
+        if GroupName is None:
+            GroupName = self.Group_Name
+        
+        if LogName is None:
+            LogName = self.Log_Name
+
+        ## SEARCH FOR BOTH MODEL AND REPLAY BUFFER WITH WILDCARD FOR OPTIONAL SUFFIX
+        model_pattern = f"model_{int(t_step_load)}_steps*.zip" 
+        replay_buffer_pattern = f"replay_buffer_{int(t_step_load)}_steps*.pkl" 
+
+        ## FIND MODEL AND REPLAY BUFFER FILES
+        model_files_path = os.path.join(LOG_DIR,GroupName,LogName,"Models", model_pattern)
+        print(f"Loading Model params from model: {model_files_path}")
+        model_files = glob.glob(os.path.join(LOG_DIR,GroupName,LogName,"Models", model_pattern))
+        replay_buffer_files = glob.glob(os.path.join(LOG_DIR,GroupName,LogName, "Models", replay_buffer_pattern))
+
+        ## LOAD MODEL AND REPLAY BUFFER
+        if Params_only:
+            model_path = model_files[0]  # Taking the first match
+            self.model.set_parameters(model_path,exact_match=False,device='cpu')
+            # loaded_model = SAC.load(
+            #     model_path,
+            #     device='cpu',
+            # )
+            # self.model.policy.load_state_dict(loaded_model.policy.state_dict())
+        
+        else:
+            print(f"Loading Model...")
+            model_path = model_files[0]  # Taking the first match
+            self.model = SAC.load(
+                model_path,
+                env=self.vec_env,
+                device='cpu',
+            )
+
+        if load_replay_buffer:
+
+            print(f"Loading Replay Buffer...")
+            replay_buffer_path = replay_buffer_files[0]  # Similarly, taking the first match
+            self.model.load_replay_buffer(replay_buffer_path)
 
     # model_save_freq=2e3
-    def train_model(self,model_save_freq=200,reward_check_freq=500,S3_upload_freq=1000,reset_timesteps=False,t_step_max=500e3):
+    def train_model(self,model_save_freq=100,reward_check_freq=500,S3_upload_freq=1000,reset_timesteps=False,t_step_max=500e3):
         if reset_timesteps == True:
 
             self.model.tensorboard_log = self.TB_Log_Dir
@@ -228,7 +268,7 @@ class RewardCallback(BaseCallback):
     def __init__(self, RLM, 
                  reward_check_freq: int = 500, 
                  S3_upload_freq: int = 500,
-                 model_save_freq: int = 200, 
+                 model_save_freq: int = 100, 
                  keep_last_n_models: int = 5,
                  verbose=0):
         super(RewardCallback, self).__init__(verbose)
@@ -360,11 +400,11 @@ class RewardCallback(BaseCallback):
 
         ## UPLOAD TB LOG TO SB3
         if self.num_timesteps % self.S3_upload_freq == 0:
-            
+            print()
             # print("self.num_timesteps", self.num_timesteps)
             # print("self.S3_upload_freq",self.S3_upload_freq)
 
-            self.RLM.upload_file_to_S3(local_file_path=self.TB_Log_file_path,S3_file_path=os.path.join("S3_TB_Logs",self.RLM.Group_Name,self.RLM.Log_Name,"TB_Logs/TB_Log_0",self.TB_Log))
+            # self.RLM.upload_file_to_S3(local_file_path=self.TB_Log_file_path,S3_file_path=os.path.join("S3_TB_Logs",self.RLM.Group_Name,self.RLM.Log_Name,"TB_Logs/TB_Log_0",self.TB_Log))
 
         #print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
         print("RL_Manager RewardCallback class's _on_step function is done")

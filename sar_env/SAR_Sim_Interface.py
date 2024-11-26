@@ -40,6 +40,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         self.SAR_DC_process = None
         self.SAR_Ctrl_process = None
         self.pause_simulation_process = None # For pausing simulation
+        self.adjust_simulation_speed_process = None
 
         self.GZ_ping_ok = False
         self.SAR_DC_ping_ok = False
@@ -155,8 +156,6 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
         ## OBSERVATION VECTOR
         obs = np.array(scaled_obs_list,dtype=np.float32)
-
-        #print("obs : ", obs)
 
         return obs
 
@@ -594,6 +593,11 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         else:
             cmd = f"gz service -s /world/empty/control --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --timeout 3000 --req 'pause: false'"
             self.pause_simulation_process = subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    def adjustSimSpeed(self,Real_time_factor=1.0):
+
+        cmd = f"gz service -s /world/empty/set_physics --reqtype gz.msgs.Physics --reptype gz.msgs.Boolean --timeout 3000 --req 'real_time_factor: {Real_time_factor}'"
+        self.adjust_simulation_speed_process = subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     def spin(self):
         rclpy.spin(self.node)

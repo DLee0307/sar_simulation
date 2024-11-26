@@ -198,9 +198,100 @@ class RL_Training_Manager():
 
     def plot_landing_performance(self,PlaneAngle=0,fileName=None,saveFig=False,showFig=True):
         print()
-
+        
     def save_NN_to_C_header(self):
-        print()
+
+        fileName = f"NN_Params_DeepRL.h"
+        filePath = os.path.join(self.Log_Dir,fileName)
+        f = open(filePath,'a')
+        f.truncate(0) ## Clears contents of file
+
+        f.write(f"// Model: {self.Log_Name} \t SAR_Type: {self.env.SAR_Type} \t SAR_Config: {self.env.SAR_Config}\n")
+        f.write("static char NN_Params_DeepRL[] = {\n")
+
+        num_hidden_layers = np.array([3]).reshape(-1,1)
+
+        ## SAVE SCALER ARRAY VALUES
+        np.savetxt(f,num_hidden_layers,
+                    fmt='"%.0f,"',
+                    delimiter='\t',
+                    comments='',
+                    header=f'"{num_hidden_layers.shape[0]},"\t"{num_hidden_layers.shape[1]},"',
+                    footer='"*"\n')
+        
+        ## SCALER ARRAY DIMENSIONS
+        obs_len = self.model.observation_space.shape[0]
+        scaling_means = np.zeros(obs_len).reshape(-1,1)
+        scaling_std = np.ones(obs_len).reshape(-1,1)
+
+        ## SAVE SCALER ARRAY VALUES
+        np.savetxt(f,scaling_means,
+                    fmt='"%.5f,"',
+                    delimiter='\t',
+                    comments='',
+                    header=f'"{scaling_means.shape[0]},"\t"{scaling_means.shape[1]},"',
+                    footer='"*"\n')
+
+        np.savetxt(f,scaling_std,
+                    fmt='"%.5f,"',
+                    delimiter='\t',
+                    comments='',
+                    header=f'"{scaling_std.shape[0]},"\t"{scaling_std.shape[1]},"',
+                    footer='"*"\n')
+        
+        ## SAVE PARAMETERS OF LATENT_PI LAYERS
+        for module in self.model.actor.latent_pi.modules():
+            if isinstance(module, th.nn.modules.linear.Linear):
+                W = module.weight.detach().numpy()
+                np.savetxt(f,W,
+                    fmt='"%.5f,"',
+                    delimiter='\t',
+                    comments='',
+                    header=f'"{W.shape[0]},"\t"{W.shape[1]},"',
+                    footer='"*"\n')
+
+
+                b = module.bias.detach().numpy().reshape(-1,1)
+                np.savetxt(f,b,
+                    fmt='"%.5f,"',
+                    delimiter='\t',
+                    comments='',
+                    header=f'"{b.shape[0]},"\t"{b.shape[1]},"',
+                    footer='"*"\n')
+                
+        ## SAVE PARAMETERS FOR MU/LOG_STD LAYER
+        for module in self.model.actor.mu.modules():
+            W_mu = module.weight.detach().numpy()
+            b_mu = module.bias.detach().numpy().reshape(-1,1)
+
+        for module in self.model.actor.log_std.modules():
+            W_log_std = module.weight.detach().numpy()
+            b_log_std = module.bias.detach().numpy().reshape(-1,1)
+
+        ## STACK WEIGHTS AND BIASES TO MAKE ONE COHESIVE LAYER INSTEAD OF SB3 DEFAULT SPLIT
+        W = np.vstack((W_mu,W_log_std))
+        b = np.vstack((b_mu,b_log_std))
+
+        np.savetxt(f,W,
+            fmt='"%.5f,"',
+            delimiter='\t',
+            comments='',
+            header=f'"{W.shape[0]},"\t"{W.shape[1]},"',
+            footer='"*"\n')
+
+        np.savetxt(f,b,
+            fmt='"%.5f,"',
+            delimiter='\t',
+            comments='',
+            header=f'"{b.shape[0]},"\t"{b.shape[1]},"',
+            footer='"*"\n')
+
+
+        f.write("};")
+        f.close()
+
+        # ## UPLOAD FILE TO S3
+        # self.upload_file_to_S3(local_file_path=filePath,S3_file_path=os.path.join("S3_TB_Logs",self.Group_Name,self.Log_Name,fileName))
 
     def write_config_file(self):
         config_path = os.path.join(self.Log_Dir,"Config.yaml")

@@ -98,6 +98,8 @@ if __name__ == '__main__':
     except Exception as e:
         print("No model loaded")
         print(e)
+
+    # RL_Manager.save_NN_to_C_header()
     RL_Manager.train_model(reset_timesteps=False,t_step_max=TrainConfig['t_step_limit'])
 
     rclpy.shutdown()

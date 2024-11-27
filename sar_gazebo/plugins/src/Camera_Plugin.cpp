@@ -168,7 +168,7 @@ void Camera_Plugin::OF_Calc_Opt_Sep()
     Eigen::Vector3d b = pinv_X * y;
 
     //std::cout << "Solution vector b: " << b.transpose() << std::endl;
-    std::cout << "Solution vector b: " << 1/b[2] << std::endl;
+    //std::cout << "Solution vector b: " << 1/b[2] << std::endl;
 
     sar_msgs::msg::OpticalFlowData msg;
 

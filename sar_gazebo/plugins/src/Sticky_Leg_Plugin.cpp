@@ -532,12 +532,12 @@ bool Sticky_Leg_Plugin::Service_Callback(const sar_msgs::srv::ActivateStickyPads
     if (request->sticky_flag == false)
     {
         this->Sticky_Flag = false;
-        std::cout << "[Leg_" << this->dataPtr->Leg_Number << "]: Sticky Disabled" << std::endl;
+        //std::cout << "[Leg_" << this->dataPtr->Leg_Number << "]: Sticky Disabled" << std::endl;
     }
     else if (request->sticky_flag == true)
     {
         this->Sticky_Flag = true;
-        std::cout << "[Leg_" << this->dataPtr->Leg_Number << "]: Sticky Enabled" << std::endl;
+        //std::cout << "[Leg_" << this->dataPtr->Leg_Number << "]: Sticky Enabled" << std::endl;
     }
 
   response->cmd_success = true;

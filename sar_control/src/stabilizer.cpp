@@ -88,6 +88,7 @@ void Controller::Get_Obs_Resp(const sar_msgs::srv::CTRLGetObs::Request::SharedPt
     response->tick = tick;
     response->tau = Tau;
     response->tau_cr = Tau_CR;
+    response->tau_dh = Tau_DH;
     response->theta_x = Theta_x;
     response->d_perp = D_perp;
     response->d_perp_cr = D_perp_CR;
@@ -159,6 +160,8 @@ void Controller::IMU_Update_Callback(const sar_msgs::msg::IMUData::SharedPtr msg
 void Controller::OpticalFlow_Update_Callback(const sar_msgs::msg::OpticalFlowData::SharedPtr msg) {
     OpticalFlow_Data = msg;
     Tau_DH = msg->tau;
+    //std::cout << "Tau_DH : " << Tau_DH << std::endl;
+
     Tau_DIFF = Tau - Tau_DH;
     double Tau_difference2 = Tau_CR - Tau_DH;
     //!!!std::cout << "Tau - Tau_DH : " << Tau_DIFF << std::endl;

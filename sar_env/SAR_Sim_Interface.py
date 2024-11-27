@@ -143,16 +143,19 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         resp = self.callService('/CTRL/Get_Obs',CTRLGetObs.Request(),CTRLGetObs)
 
         Tau_CR = resp.tau_cr
+        Tau_DH = resp.tau_dh
         Theta_x = resp.theta_x
         D_perp_CR = resp.d_perp_cr
+        print("Tau_DH", Tau_DH)
 
         obs_list = [Tau_CR,Theta_x,D_perp_CR]
 
         Tau_CR_scaled = self.scaleValue(Tau_CR,original_range=[-5,5],target_range=[-1,1])
+        Tau_DH_scaled = self.scaleValue(Tau_DH,original_range=[-1,1],target_range=[-1,1])
         Theta_x_scaled = self.scaleValue(Theta_x,original_range=[-20,20],target_range=[-1,1])
         D_perp_CR_scaled = self.scaleValue(D_perp_CR,original_range=[-0.5,2.0],target_range=[-1,1])
 
-        scaled_obs_list = [Tau_CR_scaled,Theta_x_scaled,D_perp_CR_scaled]
+        scaled_obs_list = [Tau_DH_scaled,Theta_x_scaled,D_perp_CR_scaled]
 
         ## OBSERVATION VECTOR
         obs = np.array(scaled_obs_list,dtype=np.float32)

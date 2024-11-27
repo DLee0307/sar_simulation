@@ -129,6 +129,7 @@ ament_target_dependencies(Camera_Plugin
   gz-sensors8
   rclcpp
   sar_msgs
+  std_msgs
 )
 
 target_link_libraries(Camera_Plugin

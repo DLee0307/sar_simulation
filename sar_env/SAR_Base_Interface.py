@@ -532,6 +532,10 @@ class SAR_Base_Interface(Node):
         print("Reset DH controller to default values\n")
         self.sendCmd("DH_Reset", cmd_vals=[1.0,1.0,1.0])
 
+    def handle_Optical_Flow_Flag(self):
+        cmd_flag = self.userInput("Turn optical flow flag On/Off (1,0): ",float)
+        self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=cmd_flag)
+
     def handle_Ang_Accel(self):
         cmd_vals = self.userInput("Set desired angular acceleration values (x,y,z): ",float)
         cmd_flag = self.userInput("Ang_Accel control On/Off (1,0): ",float)
@@ -769,6 +773,7 @@ class SAR_Base_Interface(Node):
             'GZ_Pose_Reset':90,
             'GZ_StickyPads':91,
             'GZ_Const_Vel_Traj':92,
+            'Optical_Flow_Flag':94
         }
         self.inv_cmd_dict = {value: key for key, value in self.cmd_dict.items()}
 

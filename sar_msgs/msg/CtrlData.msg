@@ -36,6 +36,7 @@ float64[4] nn_output
 float64 a_trg
 float64 a_rot
 
+bool optical_flow_flag
 
 # ==========================
 #  STATES AT POLICY TRIGGER

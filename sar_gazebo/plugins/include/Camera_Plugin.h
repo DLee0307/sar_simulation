@@ -16,6 +16,7 @@
 #include <iostream>
 
 #include "sar_msgs/msg/optical_flow_data.hpp"
+#include "sar_msgs/msg/ctrl_data.hpp"
 
 namespace gz
 {
@@ -51,6 +52,8 @@ namespace systems
                            const gz::sim::EntityComponentManager &_ecm) override;
 
     public: void OF_Calc_Opt_Sep();
+
+    public: void Optical_Flow_Flag_Callback(const sar_msgs::msg::CtrlData::SharedPtr msg);
 
     private: void CameraMsg(const gz::msgs::Image &_msg);
 

@@ -247,6 +247,9 @@ extern float thrust_override[4];    // Motor thrusts [g]
 //        OPTICAL FLOW STATES
 // =================================
 
+// OPTICAL FLOW Flag
+extern bool Optical_Flow_Flag;
+
 // OPTICAL FLOW STATES (GROUND TRUTH)
 extern float Tau;           // [s]
 extern float Tau_CR;        // [s]

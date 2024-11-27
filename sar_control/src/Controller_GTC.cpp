@@ -111,6 +111,8 @@ void controllerOutOfTreeReset() {
     D_perp_trg = 0.0f;
     D_perp_CR_trg = 0.0f;
 
+    Optical_Flow_Flag = false;
+
     Theta_x_trg = 0.0f;
     Theta_y_trg = 0.0f;
     Tau_trg = 0.0f;

@@ -656,6 +656,8 @@ void Controller::publishCtrlData()
     CtrlData_msg.optical_flow.z = Tau;
     CtrlData_msg.tau_cr = Tau_CR;
     
+    //
+    CtrlData_msg.optical_flow_flag = Optical_Flow_Flag;
 
     // ESTIMATED OPTICAL FLOW DATA
     CtrlData_msg.optical_flow_cam.x = Theta_x_Cam;

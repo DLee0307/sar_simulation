@@ -226,6 +226,9 @@ static struct vec Gyro_dyn;
 //        OPTICAL FLOW STATES
 // =================================
 
+// OPTICAL FLOW Flag
+bool Optical_Flow_Flag = false;
+
 // OPTICAL FLOW STATES (GROUND TRUTH)
 float Tau = 0.0f;       // [s]
 float Tau_CR = 0.0f;    // [s]
@@ -315,7 +318,6 @@ float Vel_mag_B_P_trg = 0.0f;                      // Velocity magnitude relativ
 float Vel_angle_B_P_trg = 0.0f;                    // Velocity angle relative [deg]
 float D_perp_trg = 0.0f;                           // Distance perp to plane [m]
 float D_perp_CR_trg = 0.0f;                        // Distance from CR to plane [m]
-
 
 
 // OPTICAL FLOW STATES
@@ -539,6 +541,10 @@ void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd)
                     
             }
 
+            break;
+
+        case 94: // Optical_Flow_Flag
+            Optical_Flow_Flag = CTRL_Cmd->cmd_flag;
             break;
 
     }

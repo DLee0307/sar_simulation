@@ -453,12 +453,12 @@
         name="gz::sim::systems::Set_Velocity_Plugin">
     </plugin>
 -->
-<!--
+<!---->
     <plugin
         filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libCamera_Plugin.so"
         name="gz::sim::systems::Camera_Plugin">
     </plugin>
--->
+
 
     <plugin
         filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libMotor_Plugin.so"

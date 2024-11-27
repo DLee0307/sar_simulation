@@ -305,6 +305,8 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         # print("self.SAR_Config", self.SAR_Config)
         # print("self.Policy_Type", self.Policy_Type)
 
+        self.calOF_activation()
+
         print("_initialStep is completed")
 
     def step(self, action):
@@ -463,6 +465,8 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
         ## SEND TRIGGER ACTION TO CONTROLLER
         self.sendCmd("Policy",[0.0,a_Rot,self.Ang_Acc_range[0]],cmd_flag=self.Ang_Acc_range[1])
+        self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)        
+        self.adjustSimSpeed(1.0)
         #print("Policy is sent", self.Ang_Acc_range[1])
 
         ## RUN REMAINING STEPS AT FULL SPEED

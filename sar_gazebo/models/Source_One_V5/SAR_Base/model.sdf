@@ -314,7 +314,7 @@
           </image>
           <clip>
             <near>0.02</near>
-            <far>500</far>
+            <far>10</far>
           </clip>
 <!--          <noise>
             <type>gaussian</type>
@@ -329,6 +329,7 @@
 -->          
           <lens>
             <type>sterographic</type>
+            <!-- <type>pinhole</type> -->
           </lens>
         </camera>
         <always_on>1</always_on>

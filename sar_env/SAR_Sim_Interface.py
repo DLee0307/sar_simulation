@@ -272,6 +272,18 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         self._iterStep(round(t_total * 1000))
         #print("!!!!!!!!!!!!!!!!!!!!! vel :", vel)
 
+    def calOF_activation(self):
+
+        #self.pausePhysics(pause_flag=True)
+        self.adjustSimSpeed(0.2)
+        self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
+        rclpy.spin_once(self)
+        #self.pausePhysics(pause_flag=False)
+
+    def calOF_unactivation(self):
+
+        print()
+
     def resetPose(self,z_0=0.4): 
         print("resetPose is started")
         #!!! Need to Change
@@ -594,6 +606,8 @@ class SAR_Sim_Interface(SAR_Base_Interface):
             cmd = f"gz service -s /world/empty/control --reqtype gz.msgs.WorldControl --reptype gz.msgs.Boolean --timeout 3000 --req 'pause: false'"
             self.pause_simulation_process = subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
+
+    # gz service -s /world/empty/set_physics --reqtype gz.msgs.Physics --reptype gz.msgs.Boolean --timeout 3000 --req 'real_time_factor: 0.2'
     def adjustSimSpeed(self,Real_time_factor=1.0):
 
         cmd = f"gz service -s /world/empty/set_physics --reqtype gz.msgs.Physics --reptype gz.msgs.Boolean --timeout 3000 --req 'real_time_factor: {Real_time_factor}'"

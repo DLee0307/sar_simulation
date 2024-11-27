@@ -75,52 +75,6 @@ install(TARGETS Practice
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin)
 
-# Set_Velocity_Plugin
-add_library(Set_Velocity_Plugin SHARED plugins/src/Set_Velocity_Plugin.cpp)
-
-ament_target_dependencies(Set_Velocity_Plugin
-  gz-sim8
-  gz-sensors8
-  rclcpp
-  sar_msgs
-)
-
-target_link_libraries(Set_Velocity_Plugin
-  gz-sim8::gz-sim8
-  gz-sensors8::gz-sensors8
-  gz-msgs10::gz-msgs10
-  ${rclcpp_LIBRARIES}
-
-)
-
-install(TARGETS Set_Velocity_Plugin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin)
-
-# Step_World_Plugin
-add_library(Step_World_Plugin SHARED plugins/src/Step_World_Plugin.cpp)
-
-ament_target_dependencies(Step_World_Plugin
-  gz-sim8
-  gz-sensors8
-  rclcpp
-  sar_msgs
-)
-
-target_link_libraries(Step_World_Plugin
-  gz-sim8::gz-sim8
-  gz-sensors8::gz-sensors8
-  gz-msgs10::gz-msgs10
-  ${rclcpp_LIBRARIES}
-
-)
-
-install(TARGETS Step_World_Plugin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin)
-
 # Camera_Plugin
 add_library(Camera_Plugin SHARED plugins/src/Camera_Plugin.cpp)
 

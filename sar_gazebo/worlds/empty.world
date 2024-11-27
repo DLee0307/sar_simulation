@@ -92,7 +92,7 @@ gz service -s /world/empty/create \
     <scene>
       <ambient>1.0 1.0 1.0</ambient>
       <background>0.8 0.8 0.8</background>
-      <grid>true</grid>
+      <grid>false</grid>
     </scene>
     
     <gui fullscreen="0">
@@ -250,10 +250,6 @@ gz service -s /world/empty/create \
       <direction>-0.5 0.1 -0.9</direction>
     </light>
 
-    <!--<plugin
-        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libStep_World_Plugin.so"
-        name="gz::sim::systems::Step_World_Plugin">
-    </plugin>-->
 
   </world>
 </sdf>

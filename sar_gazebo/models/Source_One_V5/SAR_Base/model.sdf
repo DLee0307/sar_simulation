@@ -282,8 +282,9 @@
     </link>
 
     <link name='Camera'>
+      <pose>0 0 86.9e-3 0 0 0</pose>
       <inertial>
-        <mass>1e-6</mass>
+        <mass>17.9E-3</mass>
         <inertia>
         <ixx>1e-9</ixx>
         <ixy>0</ixy>
@@ -294,9 +295,34 @@
         </inertia>
         <pose>0 0 0 0 0 0</pose>
       </inertial>
+      <visual name='Camera_Visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://SAR_Base/meshes/JeVois_A33.STL</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+          <material>
+              <!--DarkGrey-->
+              <ambient>0.175 0.175 0.175 1</ambient>
+              <diffuse>0.175 0.175 0.175 1</diffuse>
+              <specular>0.175 0.175 0.175 1.00</specular>
+          <lighting>1</lighting>
+          </material>
+      </visual>
+      <collision name="Camera_Collision">
+        <pose>6.78e-3 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>22.1e-3 17.5e-3 37.9e-3 </size>
+          </box>
+        </geometry>
+      </collision>
 <!--http://classic.gazebosim.org/tutorials?tut=ros_gzplugins-->
       <sensor name="camera" type="camera">
-        <pose>0 0 0.3e-1 0 -1.57 0</pose>
+        <!-- <pose>0 0 0.3e-1 0 -1.57 0</pose> -->
+        <pose>0 0 20e-3 0 -1.57 0</pose>
         <update_rate>100</update_rate>
         <visualize>false</visualize>
         <camera name="head">

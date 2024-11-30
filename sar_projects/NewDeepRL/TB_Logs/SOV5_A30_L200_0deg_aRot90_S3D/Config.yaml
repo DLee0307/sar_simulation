@@ -30,7 +30,7 @@ MODEL_SETTINGS:
   Forward_Reach: 0.15
 LEARNING_MODEL:
   Policy: SACPolicy
-  Observation_Layer: 3
+  Observation_Layer: 2
   Network_Layers:
     pi:
     - 10

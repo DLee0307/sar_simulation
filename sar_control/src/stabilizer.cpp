@@ -160,16 +160,19 @@ void Controller::IMU_Update_Callback(const sar_msgs::msg::IMUData::SharedPtr msg
 void Controller::OpticalFlow_Update_Callback(const sar_msgs::msg::OpticalFlowData::SharedPtr msg) {
     OpticalFlow_Data = msg;
     Tau_DH = msg->tau;
-    //std::cout << "Tau_DH : " << Tau_DH << std::endl;
+    double Tau_difference2 = Tau_CR - Tau_DH;
+    
+    //std::cout << "$$$$$$Tau_DH : " << Tau_DH << std::endl;
+    //std::cout << "$$$$$$Tau_CR : " << Tau_CR << std::endl;
+    std::cout << "$$$$$Tau_CR - Tau_DH : " << Tau_difference2 << std::endl;
 
     Tau_DIFF = Tau - Tau_DH;
-    double Tau_difference2 = Tau_CR - Tau_DH;
-    //!!!std::cout << "Tau - Tau_DH : " << Tau_DIFF << std::endl;
-    //std::cout << "Tau_CR - Tau_DH : " << Tau_difference2 << std::endl;
 
+    //!!!std::cout << "Tau - Tau_DH : " << Tau_DIFF << std::endl;
+    
     //!!!std::cout << "Tau_DH : " << Tau_DH << std::endl;
     //!!!std::cout << "Tau : " << Tau << std::endl;
-    //std::cout << "Tau_CR : " << Tau_CR << std::endl;
+    
 
 }
 

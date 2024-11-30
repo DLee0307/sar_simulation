@@ -145,7 +145,7 @@ class RL_Training_Manager():
             self.model.load_replay_buffer(replay_buffer_path)
 
     # model_save_freq=2e3
-    def train_model(self,model_save_freq=10,reward_check_freq=500,S3_upload_freq=1000,reset_timesteps=False,t_step_max=500e3):
+    def train_model(self,model_save_freq=50,reward_check_freq=500,S3_upload_freq=1000,reset_timesteps=False,t_step_max=500e3):
         if reset_timesteps == True:
 
             self.model.tensorboard_log = self.TB_Log_Dir
@@ -359,7 +359,7 @@ class RewardCallback(BaseCallback):
     def __init__(self, RLM, 
                  reward_check_freq: int = 500, 
                  S3_upload_freq: int = 500,
-                 model_save_freq: int = 10, 
+                 model_save_freq: int = 50, 
                  keep_last_n_models: int = 5,
                  verbose=0):
         super(RewardCallback, self).__init__(verbose)

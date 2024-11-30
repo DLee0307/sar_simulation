@@ -56,6 +56,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         self._start_monitoring_subprocesses()
         # self.Sim_Status = "Running"
         self._wait_for_sim_running()
+        time.sleep(3)
         
         #self._getTick()
         #print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
@@ -106,6 +107,8 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         srv = CTRLGetObs.Request() 
         #print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         result = self.callService('/CTRL/Get_Obs',srv, CTRLGetObs)
+        rclpy.spin_once(self)
+        time.sleep(1)
         #print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
         # if result:
@@ -142,20 +145,26 @@ class SAR_Sim_Interface(SAR_Base_Interface):
     def _getObs_DH(self):        
         resp = self.callService('/CTRL/Get_Obs',CTRLGetObs.Request(),CTRLGetObs)
 
-        Tau_CR = resp.tau_cr
+        #Tau_CR = resp.tau_cr
         Tau_DH = resp.tau_dh
-        Theta_x = resp.theta_x
+        #Theta_x = resp.theta_x
         D_perp_CR = resp.d_perp_cr
         print("Tau_DH", Tau_DH)
+        
+        if np.isnan(Tau_DH):
+            Tau_DH = 1
 
-        obs_list = [Tau_CR,Theta_x,D_perp_CR]
+        else:
+            Tau_DH = np.clip(Tau_DH, -1, 1)
 
-        Tau_CR_scaled = self.scaleValue(Tau_CR,original_range=[-5,5],target_range=[-1,1])
+        #obs_list = [Tau_CR,Theta_x,D_perp_CR]
+
+        #Tau_CR_scaled = self.scaleValue(Tau_CR,original_range=[-5,5],target_range=[-1,1])
         Tau_DH_scaled = self.scaleValue(Tau_DH,original_range=[-1,1],target_range=[-1,1])
-        Theta_x_scaled = self.scaleValue(Theta_x,original_range=[-20,20],target_range=[-1,1])
+        #Theta_x_scaled = self.scaleValue(Theta_x,original_range=[-20,20],target_range=[-1,1])
         D_perp_CR_scaled = self.scaleValue(D_perp_CR,original_range=[-0.5,2.0],target_range=[-1,1])
 
-        scaled_obs_list = [Tau_DH_scaled,Theta_x_scaled,D_perp_CR_scaled]
+        scaled_obs_list = [Tau_DH_scaled,D_perp_CR_scaled]
 
         ## OBSERVATION VECTOR
         obs = np.array(scaled_obs_list,dtype=np.float32)
@@ -469,7 +478,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
     def _wait_for_sim_running(self,timeout=600):
         #!!! Need to change
-        time.sleep(3)
+        time.sleep(1)
 
     def _ping_service(self, service_name, timeout=5, silence_errors=False):
         cmd = f"ros2 service call {service_name} sar_msgs/srv/CTRLCmdSrv '{{}}'"
@@ -497,16 +506,8 @@ class SAR_Sim_Interface(SAR_Base_Interface):
             print(f"Failed to kill processes or nodes: {e}")
             
         try:
-            # Terminate ROS2 nodes
-            nodes_to_kill = [
-                '/SAR_Controller_Node', 
-                '/SAR_DataConverter_Node'
-            ]
-
-            for node in nodes_to_kill:
-                subprocess.run(['ros2', 'node', 'kill', node], check=True)
-                time.sleep(1.0)
-
+            # Terminate all processes containing the string 'SAR_DataConverter'
+            subprocess.run(['pkill', '-f', 'SAR_DataConverter'], check=True)
         except subprocess.CalledProcessError as e:
             print(f"Failed to kill processes or nodes: {e}")
 

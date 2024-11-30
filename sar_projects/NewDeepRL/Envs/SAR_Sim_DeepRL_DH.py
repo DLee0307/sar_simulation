@@ -109,7 +109,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         ## DEFINE OBSERVATION SPACE
         ## need change : observation space 4 Tau, theta_x, D_Perp, Plane angle
         ## $$$$$$$$$$$
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(3,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
         self.obs_trg = np.zeros(self.observation_space.shape,dtype=np.float32) # Obs values at triggering
 
         ## DEFINE ACTION SPACE
@@ -141,6 +141,14 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
     #!!! Need to change
     def reset(self,seed=None,options=None):
+
+        # ## START SIMULATION
+        # self._kill_Sim()
+        # self._restart_Sim()
+        # self._start_monitoring_subprocesses()
+        # # self.Sim_Status = "Running"
+        # self._wait_for_sim_running()
+        # time.sleep(3)
 
         self._wait_for_sim_running()
 
@@ -289,6 +297,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         # Add code from DH : Beacause of lock step?
         time.sleep(5)
 
+        #rclpy.spin_once(self)
         ## ROUND OUT STEPS TO BE IN SYNC WITH CONTROLLER
         if self._getTick()%10 != 0:
             n_steps = 10 - (self._getTick()%10)
@@ -322,6 +331,8 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         self._wait_for_sim_running()
 
         ## ROUND OUT STEPS TO BE IN SYNC WITH CONTROLLER
+
+        #rclpy.spin_once(self)
         if self._getTick()%10 != 0:
             n_steps = 10 - (self._getTick()%10)
             self._iterStep(n_steps=n_steps)
@@ -344,8 +355,8 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
             self.render()
 
             # GRAB NEXT OBS
+            rclpy.spin_once(self)
             next_obs = self._getObs_DH()
-            #rclpy.spin_once(self)
 
             # 3) CALCULATE REWARD
             reward = 0.0
@@ -468,6 +479,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         self.sendCmd("Policy",[0.0,a_Rot,self.Ang_Acc_range[0]],cmd_flag=self.Ang_Acc_range[1])
         self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)        
         self.adjustSimSpeed(1.0)
+        time.sleep(0.1)
         #print("Policy is sent", self.Ang_Acc_range[1])
 
         ## RUN REMAINING STEPS AT FULL SPEED
@@ -686,6 +698,9 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
         ## REWARD: TAU_CR TRIGGER
         R_tau_cr = self.Reward_Exp_Decay(self.Tau_CR_trg,0.15,k=2.5)
+
+        if self.r_B_O[2] < -15:
+            R_tau_cr = 0
 
         ## Need to check if it works well especially 2 leg
         ## REWARD: PAD CONNECTIONS

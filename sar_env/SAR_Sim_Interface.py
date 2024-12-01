@@ -287,9 +287,9 @@ class SAR_Sim_Interface(SAR_Base_Interface):
     def calOF_activation(self):
 
         #self.pausePhysics(pause_flag=True)
+        rclpy.spin_once(self)
         self.adjustSimSpeed(0.2)
         self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
-        rclpy.spin_once(self)
         #self.pausePhysics(pause_flag=False)
 
     def calOF_unactivation(self):
@@ -298,6 +298,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
     def resetPose(self,z_0=0.4): 
         print("resetPose is started")
+        rclpy.spin_once(self)
         #!!! Need to Change
 
         self.sendCmd('GZ_StickyPads',cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
@@ -585,9 +586,6 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
             self.get_logger().warn(f"Retrying service call ({retry + 1}/{num_retries}).")
 
-        # In case all attempts fail
-        self.Done = True
-        self.get_logger().error(f"Service '{srv_addr}' call failed after {num_retries} attempts.")
         return None
 
 

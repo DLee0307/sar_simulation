@@ -22,12 +22,18 @@ void SAR_DataConverter::Pad_Connections_Callback_1(const sar_msgs::msg::StickyPa
     if (msg->pad1_contact == 1)
         Pad1_Contact = 1;
     Pad_Connections = Pad1_Contact + Pad2_Contact + Pad3_Contact + Pad4_Contact;
+
+    // if (ForelegContact_Flag == true)
+    //     Pad_Connections = Pad1_Contact + Pad2_Contact + Pad3_Contact + Pad4_Contact;
 }
 
 void SAR_DataConverter::Pad_Connections_Callback_2(const sar_msgs::msg::StickyPadConnect::SharedPtr msg) {
     if (msg->pad2_contact == 1)
         Pad2_Contact = 1;
     Pad_Connections = Pad1_Contact + Pad2_Contact + Pad3_Contact + Pad4_Contact;
+    
+    // if(HindlegContact_Flag = true)
+    //     Pad_Connections = Pad1_Contact + Pad2_Contact + Pad3_Contact + Pad4_Contact;
 }
 
 void SAR_DataConverter::Pad_Connections_Callback_3(const sar_msgs::msg::StickyPadConnect::SharedPtr msg) {
@@ -47,7 +53,12 @@ void SAR_DataConverter::Surface_Contact_Callback(const gz::msgs::Contacts &msg)
         std::string collision_name = contact.collision2().name();
         if (collision_name.find("Body_Collision") != std::string::npos) {
             BodyContact_Flag = true;
-            std::cout << "Body Contact Detected" << std::endl;
+            //std::cout << "Body Contact Detected" << std::endl;
+        }
+
+        if (collision_name.find("Camera_Collision") != std::string::npos) {
+            BodyContact_Flag = true;
+            //std::cout << "Body Contact Detected" << std::endl;
         }
 
         //!!! Need to Change if ForelegContact_Flag is true, cant HindlegContact_Flag be true? > need to check with rewardfunction in SAR_Sim_DeepRL.py
@@ -58,11 +69,11 @@ void SAR_DataConverter::Surface_Contact_Callback(const gz::msgs::Contacts &msg)
                 //std::cout << "Foot Collision Detected: " << collision_name << std::endl;
                 if (collision_name.back() == '1' || collision_name.back() == '4') {
                     ForelegContact_Flag = true;
-                    std::cout << "Foreleg Contact Detected" << std::endl;
+                    //std::cout << "Foreleg Contact Detected" << std::endl;
                 }
                 else if (collision_name.back() == '2' || collision_name.back() == '3') {
                     HindlegContact_Flag = true;
-                    std::cout << "Hindleg Contact Detected" << std::endl;
+                    //std::cout << "Hindleg Contact Detected" << std::endl;
                 }
             }
 
@@ -81,7 +92,7 @@ void SAR_DataConverter::Surface_Contact_Callback(const gz::msgs::Contacts &msg)
             Eul_P_B_impact_Ext = Eul_P_B_impact_buff.front();
             Rot_Sum_impact_Ext = Rot_Sum;
 
-            std::cout << "Impact_Flag_Ext = "<< Impact_Flag_Ext << std::endl;
+            //std::cout << "Impact_Flag_Ext = "<< Impact_Flag_Ext << std::endl;
 
         }
 

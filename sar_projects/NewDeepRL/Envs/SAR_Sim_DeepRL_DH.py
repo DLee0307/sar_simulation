@@ -30,7 +30,7 @@ RESET = '\033[0m'  # Reset to default color
 
 class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
-    def __init__(self,Ang_Acc_range=[-90,0],V_mag_range=[4,4],V_angle_range=[90,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=True,GZ_Timeout=False):
+    def __init__(self,Ang_Acc_range=[-90,0],V_mag_range=[2,4],V_angle_range=[90,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=True,GZ_Timeout=False):
         SAR_Sim_Interface.__init__(self, GZ_Timeout=GZ_Timeout)
         gym.Env.__init__(self)
 
@@ -136,19 +136,26 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
                 print(YELLOW + f"Sim Likely Frozen: Restarting Simulation Env" + RESET)
 
                 self._kill_Sim()
-                
+                self._restart_Sim()
+                self._start_monitoring_subprocesses()
+                # self.Sim_Status = "Running"
+                self._wait_for_sim_running()
+                time.sleep(5)                
             time.sleep(1)
 
     #!!! Need to change
     def reset(self,seed=None,options=None):
 
-        # ## START SIMULATION
-        # self._kill_Sim()
-        # self._restart_Sim()
-        # self._start_monitoring_subprocesses()
-        # # self.Sim_Status = "Running"
-        # self._wait_for_sim_running()
-        # time.sleep(3)
+        if self.K_ep%5 == 0:
+            ## START SIMULATION
+            self._kill_Sim()
+            self._restart_Sim()
+            self._start_monitoring_subprocesses()
+            # self.Sim_Status = "Running"
+            self._wait_for_sim_running()
+            time.sleep(5)
+            rclpy.spin_once(self)
+
 
         self._wait_for_sim_running()
 
@@ -295,7 +302,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         self._iterStep(n_steps=100)
         
         # Add code from DH : Beacause of lock step?
-        time.sleep(5)
+        time.sleep(3)
 
         #rclpy.spin_once(self)
         ## ROUND OUT STEPS TO BE IN SYNC WITH CONTROLLER
@@ -328,7 +335,8 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         # 4. CHECK TERMINATION
         # 5. RETURN VALUES
 
-        self._wait_for_sim_running()
+        #self._wait_for_sim_running()
+        time.sleep(0.1)
 
         ## ROUND OUT STEPS TO BE IN SYNC WITH CONTROLLER
 
@@ -376,6 +384,12 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
             ## IMPACT TERMINATION
             elif self.Impact_Flag_Ext == True:
                 self.error_str = "Episode Completed: Impact [Terminated]"
+                terminated = True
+                truncated = False
+                print(YELLOW,self.error_str,RESET)
+
+            elif self.r_B_O[2] < -15:
+                self.error_str = "Episode Completed: Out of bounds [Terminated]"
                 terminated = True
                 truncated = False
                 print(YELLOW,self.error_str,RESET)
@@ -476,6 +490,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         truncated = False
 
         ## SEND TRIGGER ACTION TO CONTROLLER
+        rclpy.spin_once(self)
         self.sendCmd("Policy",[0.0,a_Rot,self.Ang_Acc_range[0]],cmd_flag=self.Ang_Acc_range[1])
         self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)        
         self.adjustSimSpeed(1.0)
@@ -501,8 +516,9 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
                 OnceFlag_Impact = True
 
 
-            self._get_Tcondition_Obs()
+            #self._get_Tcondition_Obs()
             # 4) CHECK TERMINATION/TRUNCATED
+            rclpy.spin_once(self)
             r_B_O =  self.r_B_O
             V_B_O = self.V_B_O
             r_P_B = self.R_WP(self.r_P_O - r_B_O,self.Plane_Angle_rad) # {t_x,n_p}
@@ -815,7 +831,7 @@ if __name__ == "__main__":
 
     rclpy.init()
 
-    env = SAR_Sim_DeepRL(Ang_Acc_range=[-90,0],V_mag_range=[4,4],V_angle_range=[90,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=False)
+    env = SAR_Sim_DeepRL(Ang_Acc_range=[-90,0],V_mag_range=[2,4],V_angle_range=[90,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=False)
 
     time.sleep(3)
     env._setTestingConditions()

@@ -166,7 +166,7 @@ class SAR_Base_Interface(Node):
         self.Thrust_max = self.get_parameter(f"SAR_Type.{self.SAR_Type}.System_Params.Thrust_max").get_parameter_value().double_value
         self.C_tf = self.get_parameter(f"SAR_Type.{self.SAR_Type}.System_Params.C_tf").get_parameter_value().double_value
         self.Ang_Acc_max = (9.81*self.Thrust_max*1e-3*self.Prop_Front[0])*2/self.Ref_Iyy
-        self.setAngAcc_range([-self.Ang_Acc_max, self.Ang_Acc_max])
+        #self.setAngAcc_range([-self.Ang_Acc_max, self.Ang_Acc_max])
         
         self.Beta_Min_deg = -(self.Gamma_eff + np.degrees(np.arctan2(self.Forward_Reach-self.Lx_eff,self.Lz_eff)))
         self.Phi_P_B_impact_Min_deg = -self.Beta_Min_deg - self.Gamma_eff + 90
@@ -1162,7 +1162,7 @@ class SAR_Base_Interface(Node):
         self.Tau_down = ROSParams_msg.tau_down
         self.Thrust_max = ROSParams_msg.thrust_max
         self.Ang_Acc_max = (9.81*self.Thrust_max*1e-3*self.Prop_Front[0])*2/self.Ref_Iyy
-        self.setAngAcc_range([-self.Ang_Acc_max, self.Ang_Acc_max])
+        #self.setAngAcc_range([-self.Ang_Acc_max, self.Ang_Acc_max])
 
         self.Beta_Min_deg = -(self.Gamma_eff + np.degrees(np.arctan2(self.Forward_Reach-self.Lx_eff,self.Lz_eff)))
         self.Phi_P_B_impact_Min_deg = -self.Beta_Min_deg - self.Gamma_eff + 90

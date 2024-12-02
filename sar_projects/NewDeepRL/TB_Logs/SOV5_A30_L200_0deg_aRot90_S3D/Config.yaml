@@ -16,8 +16,8 @@ ENV_SETTINGS:
   - 0
   - 0
   Ang_Acc_Limits:
-  - -90
-  - 0
+  - -90.0
+  - 0.0
 MODEL_SETTINGS:
   Mass_Std: 0.0
   Iyy_Std: 0.0

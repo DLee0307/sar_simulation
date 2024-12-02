@@ -30,7 +30,7 @@ RESET = '\033[0m'  # Reset to default color
 
 class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
-    def __init__(self,Ang_Acc_range=[-90,0],V_mag_range=[2,4],V_angle_range=[90,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=True,GZ_Timeout=False):
+    def __init__(self,Ang_Acc_range=[-90.0,0.0],V_mag_range=[2,4],V_angle_range=[90,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=True,GZ_Timeout=False):
         SAR_Sim_Interface.__init__(self, GZ_Timeout=GZ_Timeout)
         gym.Env.__init__(self)
 
@@ -831,7 +831,7 @@ if __name__ == "__main__":
 
     rclpy.init()
 
-    env = SAR_Sim_DeepRL(Ang_Acc_range=[-90,0],V_mag_range=[2,4],V_angle_range=[90,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=False)
+    env = SAR_Sim_DeepRL(Ang_Acc_range=[-90.0,0.0],V_mag_range=[2,4],V_angle_range=[90,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=False)
 
     time.sleep(3)
     env._setTestingConditions()

@@ -13,6 +13,7 @@ public:
   std::chrono::time_point<std::chrono::high_resolution_clock> last_time;
   
   bool Optical_Flow_Flag = false;
+  float Tau_DH = 0.0f;
 
   ////!! ROS2 Publisher
   public: std::shared_ptr<rclcpp::Node> ros_node;
@@ -170,9 +171,20 @@ void Camera_Plugin::OF_Calc_Opt_Sep()
     //std::cout << "Solution vector b: " << b.transpose() << std::endl;
     //std::cout << "Solution vector b: " << 1/b[2] << std::endl;
 
+    this->dataPtr->Tau_DH = 1/b[2];
+
+    if (std::isnan(this->dataPtr->Tau_DH)) {
+        this->dataPtr->Tau_DH = 1;
+    } else {
+        this->dataPtr->Tau_DH = std::clamp(this->dataPtr->Tau_DH, -1.0f, 1.0f);
+    }
+
     sar_msgs::msg::OpticalFlowData msg;
 
-    msg.tau = 1/b[2];
+    msg.tau = this->dataPtr->Tau_DH;
+    msg.theta_x = b[0];
+    msg.theta_y = b[1];
+    
 
     this->dataPtr->opticalflow_publisher->publish(msg);
 

@@ -114,9 +114,11 @@ void controllerOutOfTreeReset() {
     Optical_Flow_Flag = false;
 
     Theta_x_trg = 0.0f;
+    Theta_x_DH_trg = 0.0f;
     Theta_y_trg = 0.0f;
     Tau_trg = 0.0f;
     Tau_CR_trg = 0.0f;
+    Tau_DH_trg = 0.0f;
 
     Y_output_trg[0] = 0.0f;
     Y_output_trg[1] = 0.0f;
@@ -153,13 +155,34 @@ void controllerOutOfTreeInit() {
 
     controllerOutOfTreeReset();
     controllerOutOfTreeTest();
+    
+    if(Policy == DEEP_RL_ONBOARD_DH){
+        // INIT DEEP RL NN POLICY
+        X_input = nml_mat_new(2,1);
+        Y_output = nml_mat_new(4,1);
 
-    // INIT DEEP RL NN POLICY
-    X_input = nml_mat_new(4,1);
-    Y_output = nml_mat_new(4,1);
+        // INIT DEEP RL NN POLICY
+        NN_init(&NN_DeepRL,NN_Params_DeepRL_DH);
 
-    // INIT DEEP RL NN POLICY
-    NN_init(&NN_DeepRL,NN_Params_DeepRL);
+    }
+
+    else{
+        // INIT DEEP RL NN POLICY
+        X_input = nml_mat_new(4,1);
+        Y_output = nml_mat_new(4,1);
+
+        // INIT DEEP RL NN POLICY
+        NN_init(&NN_DeepRL,NN_Params_DeepRL);
+
+    }
+
+
+    // // INIT DEEP RL NN POLICY
+    // X_input = nml_mat_new(4,1);
+    // Y_output = nml_mat_new(4,1);
+
+    // // INIT DEEP RL NN POLICY
+    // NN_init(&NN_DeepRL,NN_Params_DeepRL);
 
     RCLCPP_INFO(rclcpp::get_logger("GTC_Controller"), "GTC Controller Initiated");
 }
@@ -215,7 +238,9 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
                         Tau_trg = Tau;
                         Tau_CR_trg = Tau_CR;
+                        Tau_DH_trg = Tau_DH;
                         Theta_x_trg = Theta_x;
+                        Theta_x_DH_trg = Theta_x_DH;
                         Theta_y_trg = Theta_y;
                         D_perp_trg = D_perp;
                         D_perp_CR_trg = D_perp_CR;
@@ -270,6 +295,68 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                         Tau_trg = Tau;
                         Tau_CR_trg = Tau_CR;
                         Theta_x_trg = Theta_x;
+                        Theta_y_trg = Theta_y;
+                        D_perp_trg = D_perp;
+                        D_perp_CR_trg = D_perp_CR;
+
+                        Y_output_trg[0] = Y_output->data[0][0];
+                        Y_output_trg[1] = Y_output->data[1][0];
+                        Y_output_trg[2] = Y_output->data[2][0];
+                        Y_output_trg[3] = Y_output->data[3][0];
+
+                        a_Trg_trg = a_Trg;
+                        a_Rot_trg = a_Rot;
+
+                        M_d.x = 0.0f;
+                        M_d.y = a_Rot*Iyy;
+                        M_d.z = 0.0f;
+                    }
+                        
+                    break;
+
+
+                case DEEP_RL_ONBOARD_DH:
+
+                    //std::cout << "Policy_Armed_Flag: " << Policy_Armed_Flag << std::endl;
+                    // PASS OBSERVATION THROUGH POLICY NN
+                    NN_forward(X_input,Y_output,&NN_DeepRL);
+
+                    // printf("X_input: %.5f %.5f %.5f %.5f\n",X_input->data[0][0],X_input->data[1][0],X_input->data[2][0],X_input->data[3][0]);
+                    // printf("Y_output: %.5f %.5f %.5f %.5f\n\n",Y_output->data[0][0],Y_output->data[1][0],Y_output->data[2][0],Y_output->data[3][0]);
+
+
+                    // SAMPLE POLICY TRIGGER ACTION
+                    a_Trg = GaussianSample(Y_output->data[0][0],Y_output->data[2][0]);
+                    a_Rot = GaussianSample(Y_output->data[1][0],Y_output->data[3][0]);
+
+                    // SCALE ACTIONS
+                    a_Trg = scaleValue(tanhf(a_Trg),-1.0f,1.0f,-1.0f,1.0f);
+                    //a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,a_Rot_bounds[0],a_Rot_bounds[1]);
+                    a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,-197.835f,197.835f);
+
+                    // EXECUTE POLICY IF TRIGGERED
+                    if(a_Trg >= 0.5f && onceFlag == false && abs(Tau_DH) <= 1.0f)
+                    {
+                        onceFlag = true;
+                        //std::cout << "Trigger is generated." << std::endl;
+
+                        // UPDATE AND RECORD TRIGGER VALUES
+                        Trg_Flag = true;  
+                        Pos_B_O_trg = Pos_B_O;
+                        Vel_B_O_trg = Vel_B_O;
+                        Quat_B_O_trg = Quat_B_O;
+                        Omega_B_O_trg = Omega_B_O;
+
+                        Pos_P_B_trg = Pos_P_B;
+                        Vel_B_P_trg = Vel_B_P;
+                        Quat_P_B_trg = Quat_P_B;
+                        Omega_B_P_trg = Omega_B_P;
+
+                        Tau_trg = Tau;
+                        Tau_CR_trg = Tau_CR; //
+                        Tau_DH_trg = Tau_DH;
+                        Theta_x_trg = Theta_x; //
+                        Theta_x_DH_trg = Theta_x_DH;
                         Theta_y_trg = Theta_y;
                         D_perp_trg = D_perp;
                         D_perp_CR_trg = D_perp_CR;
@@ -393,7 +480,20 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
             // X_input->data[2][0] = D_perp; 
             // X_input->data[3][0] = Plane_Angle_deg; 
         }
-      else
+        else if (Policy == DEEP_RL_ONBOARD_DH)
+            {
+                // UPDATE AT THE ABOVE FREQUENCY
+                isOFUpdated = true;
+
+                //std::cout << "Tau_DH: " << Tau_DH << std::endl;
+                //std::cout << "D_perp_CR: " << D_perp_CR << std::endl;
+
+
+                // UPDATE POLICY VECTOR
+                X_input->data[0][0] = scaleValue(Tau_DH,-1.0f,1.0f,-1.0f,1.0f);
+                X_input->data[1][0] = scaleValue(D_perp_CR,-0.5f,2.0f,-1.0f,1.0f); 
+            }
+        else
         {
             // UPDATE AT THE ABOVE FREQUENCY
             isOFUpdated = true;

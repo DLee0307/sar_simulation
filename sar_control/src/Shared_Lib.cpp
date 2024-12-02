@@ -235,6 +235,8 @@ float Tau_CR = 0.0f;    // [s]
 float Theta_x = 0.0f;   // [rad/s] 
 float Theta_y = 0.0f;   // [rad/s]
 float Tau_DH = 0.0f;    // [s]
+float Theta_x_DH = 0.0f;   // [rad/s] 
+float Theta_y_DH = 0.0f;   // [rad/s]
 float Tau_DIFF = 0.0f;  // [s]
 
 // OPTICAL FLOW STATES (CAMERA ESTIMATE)
@@ -323,7 +325,9 @@ float D_perp_CR_trg = 0.0f;                        // Distance from CR to plane 
 // OPTICAL FLOW STATES
 float Tau_trg = 0.0f;               // [s]
 float Tau_CR_trg = 0.0f;            // [s]
+float Tau_DH_trg = 0.0f;            // [s]
 float Theta_x_trg = 0.0f;           // [rad/s]
+float Theta_x_DH_trg = 0.0f;        // [rad/s]
 float Theta_y_trg = 0.0f;           // [rad/s]
 
 // OPTICAL FLOW CAMERA ESTIMATES

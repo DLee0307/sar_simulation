@@ -12,6 +12,9 @@ import rclpy
 # For run this code I need to command below in terminal.
 # python3 T1_Policy_Pre-Training_DH.py --TrainConfig /home/dlee/ros2_ws/src/sar_simulation/sar_projects/NewDeepRL/Config_Files/SOV5_3D_Sim/SOV5_A30_L200_0deg_aRot90_S3D.json
 
+# To see  reward per time step
+# tensorboard --logdir=/home/dlee/ros2_ws/src/sar_simulation/sar_projects/NewDeepRL/TB_Logs
+
 ## DEFINE BASE PATH
 workspace_path = os.path.expanduser('~/ros2_ws')
 BASE_PATH = os.path.join(workspace_path, 'src', 'sar_simulation')

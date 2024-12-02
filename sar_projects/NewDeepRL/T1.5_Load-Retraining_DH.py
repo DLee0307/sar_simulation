@@ -10,7 +10,7 @@ import json
 import rclpy
 
 # For run this code I need to command below in terminal.
-# python3 T1_Policy_Pre-Training_DH.py --TrainConfig /home/dlee/ros2_ws/src/sar_simulation/sar_projects/NewDeepRL/Config_Files/SOV5_3D_Sim/SOV5_A30_L200_0deg_aRot90_S3D.json
+# python3 T1.5_Load-Retraining_DH.py 
 
 ## DEFINE BASE PATH
 workspace_path = os.path.expanduser('~/ros2_ws')
@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
     # 저장된 모델 및 리플레이 버퍼 로드
     RL_Manager.load_model(
-        t_step_load=2000, 
+        t_step_load=6100, 
         GroupName='', 
         LogName='SOV5_A30_L200_0deg_aRot90_S3D', 
         Params_only=False, 

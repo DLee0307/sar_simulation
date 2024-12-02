@@ -14,6 +14,9 @@
 
 #include <Eigen/Dense>
 #include <iostream>
+#include <cmath>
+#include <algorithm>
+
 
 #include "sar_msgs/msg/optical_flow_data.hpp"
 #include "sar_msgs/msg/ctrl_data.hpp"

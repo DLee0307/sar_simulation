@@ -160,11 +160,24 @@ void Controller::IMU_Update_Callback(const sar_msgs::msg::IMUData::SharedPtr msg
 void Controller::OpticalFlow_Update_Callback(const sar_msgs::msg::OpticalFlowData::SharedPtr msg) {
     OpticalFlow_Data = msg;
     Tau_DH = msg->tau;
+    Theta_x_DH = msg->theta_x;
+
+    // std::cout << "$$$$$$Vel_B_P.x : " << Vel_B_P.x << std::endl;
+    // std::cout << "$$$$$$D_perp : " << D_perp << std::endl;
+    // std::cout << "$$$$$$Theta_x : " << Theta_x << std::endl;
+    // std::cout << "$$$$$$Theta_x_DH : " << Theta_x_DH << std::endl;
+    
+    // std::cout << "$$$$$$D_perp : " << D_perp << std::endl;
+    // std::cout << "$$$$$$Vel_B_P.z : " << Vel_B_P.z << std::endl;
+    // std::cout << "$$$$$$Tau : " << Tau << std::endl;
+    // std::cout << "$$$$$$Tau_DH : " << Tau_DH << std::endl;
+
+
     double Tau_difference2 = Tau_CR - Tau_DH;
     
     //std::cout << "$$$$$$Tau_DH : " << Tau_DH << std::endl;
     //std::cout << "$$$$$$Tau_CR : " << Tau_CR << std::endl;
-    std::cout << "$$$$$Tau_CR - Tau_DH : " << Tau_difference2 << std::endl;
+    //std::cout << "$$$$$Tau_CR - Tau_DH : " << Tau_difference2 << std::endl;
 
     Tau_DIFF = Tau - Tau_DH;
 
@@ -277,6 +290,10 @@ void Controller::loadInitParams()
     else if (strcmp(POLICY_TYPE_STR.c_str(),"DEEP_RL_SB3")==0)
     {
         Policy = DEEP_RL_SB3;
+    }    
+    else if (strcmp(POLICY_TYPE_STR.c_str(),"DEEP_RL_ONBOARD_DH")==0)
+    {
+        Policy = DEEP_RL_ONBOARD_DH;
     }    
 
 

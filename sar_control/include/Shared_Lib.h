@@ -22,6 +22,7 @@
 //#include "Compress_States.h"
 
 #include "ML_Params/NN_Params_DeepRL.h"
+#include "ML_Params/NN_Params_DeepRL_DH.h"
 
 #define PWM_MAX 60000
 #define g2Newton (9.81f/1000.0f)
@@ -256,6 +257,8 @@ extern float Tau_CR;        // [s]
 extern float Theta_x;       // [rad/s] 
 extern float Theta_y;       // [rad/s]
 extern float Tau_DH;        // [s]
+extern float Theta_x_DH;       // [rad/s] 
+extern float Theta_y_DH;       // [rad/s]
 extern float Tau_DIFF;      // [s]
 
 // OPTICAL FLOW STATES (CAMERA ESTIMATE)
@@ -301,6 +304,7 @@ typedef enum {
     PARAM_OPTIM = 0,
     DEEP_RL_SB3 = 1,
     DEEP_RL_ONBOARD = 2,
+	DEEP_RL_ONBOARD_DH =3,
 }PolicyType;
 extern PolicyType Policy;
 
@@ -351,7 +355,9 @@ extern float Vel_angle_B_P_trg;         // Velocity angle relative [deg]
 // OPTICAL FLOW STATES
 extern float Tau_trg;                   // [rad/s]
 extern float Tau_CR_trg;                // [rad/s]
+extern float Tau_DH_trg;                // [rad/s]
 extern float Theta_x_trg;               // [rad/s]
+extern float Theta_x_DH_trg;            // [rad/s]
 extern float Theta_y_trg;               // [rad/s]
 
 // OPTICAL FLOW CAMERA ESTIMATES

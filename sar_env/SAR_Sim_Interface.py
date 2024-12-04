@@ -301,6 +301,10 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         rclpy.spin_once(self)
         #!!! Need to Change
 
+        # If step is terminated due to impact or out of bound
+        self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
+        self.adjustSimSpeed(1.0)
+
         self.sendCmd('GZ_StickyPads',cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
         #self._iterStep(10)
         self.sendCmd('Tumble_Detect',cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
@@ -330,6 +334,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         self._iterStep(1000)
         time.sleep(1)
 
+        rclpy.spin_once(self)
         self.sendCmd('GZ_StickyPads',cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
         self._iterStep(10)
         self.sendCmd('GZ_StickyPads',cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)

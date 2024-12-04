@@ -387,6 +387,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
                 terminated = True
                 truncated = False
                 print(YELLOW,self.error_str,RESET)
+                print("self.reward", self.reward)
 
             elif self.r_B_O[2] < -15:
                 self.error_str = "Episode Completed: Out of bounds [Terminated]"
@@ -723,6 +724,12 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         if self.Pad_Connections >= 3: 
             R_Legs = 1.0
         elif self.Pad_Connections == 2:
+            R_Legs = 0.5
+        elif self.Pad_Connections == 1:
+            print("self.Pad1_Contact", self.Pad1_Contact)
+            print("self.Pad2_Contact", self.Pad2_Contact)
+            print("self.Pad3_Contact", self.Pad3_Contact)
+            print("self.Pad4_Contact", self.Pad4_Contact)
             R_Legs = 0.5
         else:
             R_Legs = 0.0

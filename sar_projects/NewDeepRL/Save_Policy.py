@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     # 환경 설정
     env_kwargs = {
-        "Ang_Acc_range": [-90, 0],
+        "Ang_Acc_range": [-90.0, 0.0],
         "Plane_Angle_range": [0, 0],
         "V_mag_range": [2.0, 4.0],
         "V_angle_range": [90, 90],

@@ -162,6 +162,9 @@ void Controller::OpticalFlow_Update_Callback(const sar_msgs::msg::OpticalFlowDat
     Tau_DH = msg->tau;
     Theta_x_DH = msg->theta_x;
 
+    Tau_DIFF = Tau - Tau_DH;
+    double Tau_difference2 = Tau_CR - Tau_DH;
+
     // std::cout << "$$$$$$Vel_B_P.x : " << Vel_B_P.x << std::endl;
     // std::cout << "$$$$$$D_perp : " << D_perp << std::endl;
     // std::cout << "$$$$$$Theta_x : " << Theta_x << std::endl;
@@ -171,15 +174,13 @@ void Controller::OpticalFlow_Update_Callback(const sar_msgs::msg::OpticalFlowDat
     // std::cout << "$$$$$$Vel_B_P.z : " << Vel_B_P.z << std::endl;
     // std::cout << "$$$$$$Tau : " << Tau << std::endl;
     // std::cout << "$$$$$$Tau_DH : " << Tau_DH << std::endl;
-
-
-    double Tau_difference2 = Tau_CR - Tau_DH;
+    // std::cout << "$$$$$$Tau_DIFF : " << Tau_DIFF << std::endl;
     
+
     //std::cout << "$$$$$$Tau_DH : " << Tau_DH << std::endl;
     //std::cout << "$$$$$$Tau_CR : " << Tau_CR << std::endl;
     //std::cout << "$$$$$Tau_CR - Tau_DH : " << Tau_difference2 << std::endl;
 
-    Tau_DIFF = Tau - Tau_DH;
 
     //!!!std::cout << "Tau - Tau_DH : " << Tau_DIFF << std::endl;
     

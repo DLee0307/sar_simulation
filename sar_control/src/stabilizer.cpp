@@ -172,9 +172,13 @@ void Controller::OpticalFlow_Update_Callback(const sar_msgs::msg::OpticalFlowDat
     
     // std::cout << "$$$$$$D_perp : " << D_perp << std::endl;
     // std::cout << "$$$$$$Vel_B_P.z : " << Vel_B_P.z << std::endl;
+    double Tau_groundtruth = Tau - 0.11/state.velocity.z;
+    double Tau_difference3 = Tau_groundtruth - Tau_DH;
+    
     // std::cout << "$$$$$$Tau : " << Tau << std::endl;
+    // std::cout << "$$$$$$Tau_groundtruth : " << Tau_groundtruth << std::endl;
     // std::cout << "$$$$$$Tau_DH : " << Tau_DH << std::endl;
-    // std::cout << "$$$$$$Tau_DIFF : " << Tau_DIFF << std::endl;
+    // std::cout << "$$$$$$Tau_DIFF : " << Tau_difference3 << std::endl;
     
 
     //std::cout << "$$$$$$Tau_DH : " << Tau_DH << std::endl;

@@ -332,10 +332,11 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                     // SCALE ACTIONS
                     a_Trg = scaleValue(tanhf(a_Trg),-1.0f,1.0f,-1.0f,1.0f);
                     //a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,a_Rot_bounds[0],a_Rot_bounds[1]);
-                    a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,-197.835f,197.835f);
+                    //a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,-197.835f,197.835f);
+                    a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,-90.0f,0.0f);
 
                     // EXECUTE POLICY IF TRIGGERED
-                    if(a_Trg >= 0.5f && onceFlag == false && abs(Tau_DH) <= 1.0f)
+                    if(a_Trg >= 0.5f && onceFlag == false && abs(Tau_CR) <= 1.0f)
                     {
                         onceFlag = true;
                         //std::cout << "Trigger is generated." << std::endl;

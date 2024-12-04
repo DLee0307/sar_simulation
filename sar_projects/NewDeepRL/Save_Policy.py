@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     # 저장된 모델 및 리플레이 버퍼 로드
     RL_Manager.load_model(
-        t_step_load=6100, 
+        t_step_load=2500, 
         GroupName='', 
         LogName='SOV5_A30_L200_0deg_aRot90_S3D', 
         Params_only=False, 

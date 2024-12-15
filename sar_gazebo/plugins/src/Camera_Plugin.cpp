@@ -14,6 +14,7 @@ public:
   
   bool Optical_Flow_Flag = false;
   float Tau_DH = 0.0f;
+  float Theta_x_DH = 0.0f;
 
   ////!! ROS2 Publisher
   public: std::shared_ptr<rclcpp::Node> ros_node;
@@ -69,7 +70,17 @@ void Camera_Plugin::CameraMsg(const gz::msgs::Image &_msg)
     this->OF_Calc_Opt_Sep();
     //std::cout << "OF_Calc_Opt_Sep is running" << std::endl;
   }
-  
+  else
+  {
+    this->dataPtr->Tau_DH = 5;
+    this->dataPtr->Theta_x_DH = 20;
+
+    sar_msgs::msg::OpticalFlowData msg;
+    msg.tau = this->dataPtr->Tau_DH;
+    msg.theta_x = this->dataPtr->Theta_x_DH;
+    
+    this->dataPtr->opticalflow_publisher->publish(msg);
+  }
 }
 
   //DH When w = 3.6e-6, FoV = 82.22, f = 0.33e-3 resolution 64*64 thexa_DH x is 0.5 of ground truth > Why? > IDK
@@ -174,17 +185,25 @@ void Camera_Plugin::OF_Calc_Opt_Sep()
     //std::cout << "Solution vector b: " << 1/b[2] << std::endl;
 
     this->dataPtr->Tau_DH = 1/b[2];
+    this->dataPtr->Theta_x_DH = b[0];
+    
 
     if (std::isnan(this->dataPtr->Tau_DH)) {
-        this->dataPtr->Tau_DH = 1;
+        this->dataPtr->Tau_DH = 5;
     } else {
-        this->dataPtr->Tau_DH = std::clamp(this->dataPtr->Tau_DH, -1.0f, 1.0f);
+        this->dataPtr->Tau_DH = std::clamp(this->dataPtr->Tau_DH, -5.0f, 5.0f);
+    }
+
+    if (std::isnan(this->dataPtr->Theta_x_DH)) {
+        this->dataPtr->Theta_x_DH = 20;
+    } else {
+        this->dataPtr->Theta_x_DH = std::clamp(this->dataPtr->Theta_x_DH, -20.0f, 20.0f);
     }
 
     sar_msgs::msg::OpticalFlowData msg;
 
     msg.tau = this->dataPtr->Tau_DH;
-    msg.theta_x = b[0];
+    msg.theta_x = this->dataPtr->Theta_x_DH;
     msg.theta_y = b[1];
     
 

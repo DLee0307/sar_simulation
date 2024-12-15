@@ -7,17 +7,17 @@ PLANE_SETTINGS:
 ENV_SETTINGS:
   Env_Name: SAR_Sim_DeepRL_Env
   V_mag_Limts:
-  - 2.0
+  - 1.0
   - 4.0
   V_angle_Limits:
-  - 90
+  - 15
   - 90
   Plane_Angle_Limits:
   - 0
   - 0
   Ang_Acc_Limits:
   - -90.0
-  - 0.0
+  - -80.0
 MODEL_SETTINGS:
   Mass_Std: 0.0
   Iyy_Std: 0.0

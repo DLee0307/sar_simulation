@@ -326,6 +326,7 @@ class SAR_Base_Interface(Node):
 
         for retry in range(num_retries):
             try:
+                #rclpy.spin_once(self) # need to check
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
                 print(f"Attempting to call service '{srv_addr}', attempt {retry + 1}")
@@ -773,7 +774,8 @@ class SAR_Base_Interface(Node):
             'GZ_Pose_Reset':90,
             'GZ_StickyPads':91,
             'GZ_Const_Vel_Traj':92,
-            'Optical_Flow_Flag':94
+            'Optical_Flow_Flag':94,
+            'test_policy':95
         }
         self.inv_cmd_dict = {value: key for key, value in self.cmd_dict.items()}
 

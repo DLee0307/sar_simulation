@@ -114,6 +114,7 @@ void SAR_DataConverter::Publish_TriggerData()
     // OPTICAL FLOW STATES
     TriggerData_msg.optical_flow_trg = Optical_Flow_trg;
     TriggerData_msg.tau_cr_trg = Tau_CR_trg;
+    //TriggerData_msg.tau_dh_trg = Tau_DH_trg;
 
     // POLICY ACTIONS
     //TriggerData_msg.nn_output_trg = NN_Output_trg;

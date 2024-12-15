@@ -77,6 +77,7 @@ void SAR_DataConverter::ConsoleLoop()
         mvprintw(24, 0,"Tau_CR_trg: % 6.3f",Tau_CR_trg);
 
         mvprintw(23, 20,"Theta_x_trg: % 6.3f",Theta_x_trg);
+        //mvprintw(23, 20,"Tau_DH_trg: % 6.3f",Tau_DH_trg);
         mvprintw(24, 20,"D_perp_trg:  % 6.3f",D_perp_trg);
 
         mvprintw(23, 42,"Trg_Act_trg: % 6.3f",a_Trg_trg);

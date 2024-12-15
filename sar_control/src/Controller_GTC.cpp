@@ -158,7 +158,9 @@ void controllerOutOfTreeInit() {
     
     if(Policy == DEEP_RL_ONBOARD_DH){
         // INIT DEEP RL NN POLICY
-        X_input = nml_mat_new(2,1);
+        //X_input = nml_mat_new(2,1);
+        X_input = nml_mat_new(1,1);
+
         Y_output = nml_mat_new(4,1);
 
         // INIT DEEP RL NN POLICY
@@ -333,10 +335,10 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                     a_Trg = scaleValue(tanhf(a_Trg),-1.0f,1.0f,-1.0f,1.0f);
                     //a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,a_Rot_bounds[0],a_Rot_bounds[1]);
                     //a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,-197.835f,197.835f);
-                    a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,-90.0f,0.0f);
+                    a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,-90.0f,-80.0f);
 
                     // EXECUTE POLICY IF TRIGGERED
-                    if(a_Trg >= 0.5f && onceFlag == false && abs(Tau_CR) <= 1.0f)
+                    if(a_Trg >= 0.5f && onceFlag == false && abs(Tau_CR) <= 0.5f)
                     {
                         onceFlag = true;
                         //std::cout << "Trigger is generated." << std::endl;
@@ -356,6 +358,8 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                         Tau_trg = Tau;
                         Tau_CR_trg = Tau_CR; //
                         Tau_DH_trg = Tau_DH;
+                        std::cout << "Tau_DH_trg: " << Tau_DH_trg << std::endl;
+                        
                         Theta_x_trg = Theta_x; //
                         Theta_x_DH_trg = Theta_x_DH;
                         Theta_y_trg = Theta_y;
@@ -492,7 +496,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
                 // UPDATE POLICY VECTOR
                 X_input->data[0][0] = scaleValue(Tau_DH,-1.0f,1.0f,-1.0f,1.0f);
-                X_input->data[1][0] = scaleValue(D_perp_CR,-0.5f,2.0f,-1.0f,1.0f); 
+                //X_input->data[1][0] = scaleValue(D_perp_CR,-0.5f,2.0f,-1.0f,1.0f); 
             }
         else
         {

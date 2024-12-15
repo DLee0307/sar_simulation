@@ -1,0 +1,26 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/dlee/ros2_ws/install/test_capi/lib/python3.10/site-packages",
+        "/home/dlee/ros2_ws/install/sar_msgs/local/lib/python3.10/dist-packages",
+        "/home/dlee/ros2_ws/install/my_robot_controller/lib/python3.10/site-packages",
+        "/home/dlee/ros2_ws/install/my-test-package/lib/python3.10/site-packages",
+        "/home/dlee/ros2_ws/install/crazyflie_sim/local/lib/python3.10/dist-packages",
+        "/home/dlee/ros2_ws/install/crazyflie_examples/local/lib/python3.10/dist-packages",
+        "/home/dlee/ros2_ws/install/crazyflie_py/lib/python3.10/site-packages",
+        "/home/dlee/ros2_ws/install/crazyflie_interfaces/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/dlee/ros2_ws/install/test_capi/lib/python3.10/site-packages",
+        "/home/dlee/ros2_ws/install/sar_msgs/local/lib/python3.10/dist-packages",
+        "/home/dlee/ros2_ws/install/my_robot_controller/lib/python3.10/site-packages",
+        "/home/dlee/ros2_ws/install/my-test-package/lib/python3.10/site-packages",
+        "/home/dlee/ros2_ws/install/crazyflie_sim/local/lib/python3.10/dist-packages",
+        "/home/dlee/ros2_ws/install/crazyflie_examples/local/lib/python3.10/dist-packages",
+        "/home/dlee/ros2_ws/install/crazyflie_py/lib/python3.10/site-packages",
+        "/home/dlee/ros2_ws/install/crazyflie_interfaces/local/lib/python3.10/dist-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
+}

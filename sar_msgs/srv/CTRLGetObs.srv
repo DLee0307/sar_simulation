@@ -7,6 +7,7 @@ float64 tau
 float64 tau_cr
 float64 tau_dh
 float64 theta_x
+float64 theta_x_dh
 float64 d_perp
 float64 d_perp_cr
 float64 plane_angle_deg

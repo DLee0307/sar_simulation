@@ -349,6 +349,7 @@ private:
     geometry_msgs::msg::Vector3 Optical_Flow_trg;
     double Tau_trg = NAN;
     double Tau_CR_trg = NAN;
+    //double Tau_DH_trg = NAN;
     double Theta_x_trg = NAN;
     double Theta_y_trg = NAN;
 
@@ -501,6 +502,7 @@ inline void SAR_DataConverter::resetTriggerData()
     // OPTICAL FLOW
     Optical_Flow_trg = geometry_msgs::msg::Vector3();
     Tau_CR_trg = NAN;
+    //Tau_DH_trg = NAN;
 
     // POLICY ACTIONS
     a_Trg_trg = NAN;

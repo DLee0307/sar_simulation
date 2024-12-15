@@ -21,10 +21,10 @@ if __name__ == '__main__':
 
     # 환경 설정
     env_kwargs = {
-        "Ang_Acc_range": [-90.0, 0.0],
+        "Ang_Acc_range": [-90.0, -80.0],
         "Plane_Angle_range": [0, 0],
-        "V_mag_range": [2.0, 4.0],
-        "V_angle_range": [90, 90],
+        "V_mag_range": [1.0, 4.0],
+        "V_angle_range": [15, 90],
         "Render": False,
         "GZ_Timeout": True
     }
@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
     # 저장된 모델 및 리플레이 버퍼 로드
     RL_Manager.load_model(
-        t_step_load=400, 
+        t_step_load=8000, 
         GroupName='', 
         LogName='SOV5_A30_L200_0deg_aRot90_S3D', 
         Params_only=False, 

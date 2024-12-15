@@ -30,7 +30,7 @@ RESET = '\033[0m'  # Reset to default color
 
 class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
-    def __init__(self,Ang_Acc_range=[-90.0,0.0],V_mag_range=[2,4],V_angle_range=[90,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=True,GZ_Timeout=False):
+    def __init__(self,Ang_Acc_range=[-90.0,-80.0],V_mag_range=[1,4],V_angle_range=[15,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=True,GZ_Timeout=False):
         SAR_Sim_Interface.__init__(self, GZ_Timeout=GZ_Timeout)
         gym.Env.__init__(self)
 
@@ -148,12 +148,13 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
         if self.K_ep%5 == 0:
             ## START SIMULATION
+            time.sleep(1)
             self._kill_Sim()
             self._restart_Sim()
             self._start_monitoring_subprocesses()
             # self.Sim_Status = "Running"
             self._wait_for_sim_running()
-            time.sleep(5)
+            time.sleep(4)
             rclpy.spin_once(self)
 
 
@@ -258,14 +259,25 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         V_B_P = np.array([V_tx,0,V_perp])               # {t_x,n_p}
         V_B_O = self.R_PW(V_B_P,self.Plane_Angle_rad)   # {X_W,Z_W}
 
-        ## CALCULATE STARTING TAU VALUE
-        # self.Tau_CR_start = self.t_rot_max*np.random.uniform(0.9,1.1) # Add noise to starting condition
-        self.Tau_CR_start = 0.5 + np.random.uniform(-0.05,0.05)
-        try:
-            self.Tau_Body_start = (self.Tau_CR_start + self.Collision_Radius/(V_perp+EPS)) # Tau read by body
-        except:
-            print("Exception")
-        self.Tau_Accel_start = 1.0 # Acceleration time to desired velocity conditions [s]
+        if V_perp <= 1.0:
+            ## CALCULATE STARTING TAU VALUE
+            # self.Tau_CR_start = self.t_rot_max*np.random.uniform(0.9,1.1) # Add noise to starting condition
+            self.Tau_CR_start = 0.5 + np.random.uniform(-0.05,0.05)
+            try:
+                self.Tau_Body_start = (self.Tau_CR_start + self.Collision_Radius/(V_perp+EPS)) # Tau read by body
+            except:
+                print("Exception")
+            self.Tau_Accel_start = 1.3 # Acceleration time to desired velocity conditions [s]
+
+        else:
+            ## CALCULATE STARTING TAU VALUE
+            # self.Tau_CR_start = self.t_rot_max*np.random.uniform(0.9,1.1) # Add noise to starting condition
+            self.Tau_CR_start = 0.5 + np.random.uniform(-0.05,0.05)
+            try:
+                self.Tau_Body_start = (self.Tau_CR_start + self.Collision_Radius/(V_perp+EPS)) # Tau read by body
+            except:
+                print("Exception")
+            self.Tau_Accel_start = 1 # Acceleration time to desired velocity conditions [s]
 
         ## CALC STARTING POSITION IN GLOBAL COORDS
         # (Derivation: Research_Notes_Book_3.pdf (9/17/23))
@@ -302,7 +314,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         self._iterStep(n_steps=100)
         
         # Add code from DH : Beacause of lock step?
-        time.sleep(3)
+        time.sleep(8)
 
         #rclpy.spin_once(self)
         ## ROUND OUT STEPS TO BE IN SYNC WITH CONTROLLER
@@ -323,6 +335,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         # print("self.Policy_Type", self.Policy_Type)
 
         self.calOF_activation()
+        self._iterStep(n_steps=20)
 
         print("_initialStep is completed")
 
@@ -384,6 +397,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
             ## IMPACT TERMINATION
             elif self.Impact_Flag_Ext == True:
                 self.error_str = "Episode Completed: Impact [Terminated]"
+                print("!!!!!!!!!!!!!!!!!!")
                 terminated = True
                 truncated = False
                 print(YELLOW,self.error_str,RESET)
@@ -555,13 +569,13 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
                 print(YELLOW,self.error_str,f"{(t_now - self.start_time_impact):.3f} s",RESET)
 
             elif r_B_O[2] < -15:
-                self.error_str = "Episode Completed: Out of bounds [Terminated]"
+                self.error_str = "Episode Completed: Out of bounds_1 [Terminated]"
                 terminated = True
                 truncated = False
                 print(YELLOW,self.error_str,RESET)
 
             elif np.abs(r_P_B[0]) > 1.4 and (self.D_perp < 1.5*self.L_eff) and (self.D_perp >= 0):
-                self.error_str = "Episode Completed: Out of Bounds [Terminated]"
+                self.error_str = "Episode Completed: Out of Bounds_2 [Terminated]"
                 terminated = True
                 truncated = False
                 print(YELLOW,self.error_str,RESET)
@@ -838,7 +852,7 @@ if __name__ == "__main__":
 
     rclpy.init()
 
-    env = SAR_Sim_DeepRL(Ang_Acc_range=[-90.0,0.0],V_mag_range=[2,4],V_angle_range=[90,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=False)
+    env = SAR_Sim_DeepRL(Ang_Acc_range=[-90.0,-80.0],V_mag_range=[1,4],V_angle_range=[15,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=False)
 
     time.sleep(3)
     env._setTestingConditions()

@@ -20,6 +20,7 @@ float64 d_perp_cr_trg
 ## OPTICAL FLOW STATES
 geometry_msgs/Vector3 optical_flow_trg
 float64 tau_cr_trg
+#float64 tau_dh_trg
 
 ## POLICY ACTIONS
 float64[4] nn_output_trg

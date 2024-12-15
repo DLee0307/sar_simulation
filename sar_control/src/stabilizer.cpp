@@ -90,6 +90,7 @@ void Controller::Get_Obs_Resp(const sar_msgs::srv::CTRLGetObs::Request::SharedPt
     response->tau_cr = Tau_CR;
     response->tau_dh = Tau_DH;
     response->theta_x = Theta_x;
+    response->theta_x_dh = Theta_x_DH;
     response->d_perp = D_perp;
     response->d_perp_cr = D_perp_CR;
     response->plane_angle_deg = Plane_Angle_deg;
@@ -175,7 +176,7 @@ void Controller::OpticalFlow_Update_Callback(const sar_msgs::msg::OpticalFlowDat
     double Tau_groundtruth = Tau - 0.11/state.velocity.z;
     double Tau_difference3 = Tau_groundtruth - Tau_DH;
     
-    // std::cout << "$$$$$$Tau : " << Tau << std::endl;
+    //std::cout << "$$$$$$Tau : " << Tau << std::endl;
     // std::cout << "$$$$$$Tau_groundtruth : " << Tau_groundtruth << std::endl;
     // std::cout << "$$$$$$Tau_DH : " << Tau_DH << std::endl;
     // std::cout << "$$$$$$Tau_DIFF : " << Tau_difference3 << std::endl;
@@ -769,6 +770,7 @@ void Controller::publishCtrlData()
     CtrlData_msg.optical_flow_trg.y = Theta_y_trg;
     CtrlData_msg.optical_flow_trg.z = Tau_trg;
     CtrlData_msg.tau_cr_trg = Tau_CR_trg;
+    //CtrlData_msg.tau_dh_trg = Tau_DH_trg;
 
     // POLICY ACTIONS (TRIGGER)
     CtrlData_msg.nn_output_trg = {tanhf(Y_output_trg[0]),tanhf(Y_output_trg[1]),Y_output_trg[2],Y_output_trg[3]};

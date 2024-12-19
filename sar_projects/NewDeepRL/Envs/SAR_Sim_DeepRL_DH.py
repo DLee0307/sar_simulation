@@ -76,8 +76,8 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         ## TIME CONSTRAINTS
         self.t_rot_max = np.sqrt(np.radians(360)/np.max(np.abs(self.Ang_Acc_range))) # Allow enough time for a full rotation [s]
         self.t_impact_max = 1.5     # [s]
-        self.t_ep_max = 5.0         # [s]
-        self.t_real_max = 5*60      # [s]
+        self.t_ep_max = 5.0*3         # [s]
+        self.t_real_max = 5*150      # [s]
 
         ## INITIAL LEARNING/REWARD CONFIGS
         self.Initial_Step = False
@@ -146,7 +146,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
     #!!! Need to change
     def reset(self,seed=None,options=None):
 
-        if self.K_ep%5 == 0:
+        if self.K_ep%3 == 0:
             ## START SIMULATION
             time.sleep(1)
             self._kill_Sim()

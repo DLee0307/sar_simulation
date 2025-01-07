@@ -428,7 +428,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         self.sendCmd("GZ_StickyPads",cmd_vals=[1.0,1.0,1.0],cmd_flag=cmd_flag)
 
     def handle_test_policy(self):
-        self.adjustSimSpeed(0.1)
+        self.adjustSimSpeed(0.05)
         self.sendCmd("GZ_StickyPads",cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
         self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
 

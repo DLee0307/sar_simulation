@@ -159,7 +159,7 @@ void controllerOutOfTreeInit() {
     if(Policy == DEEP_RL_ONBOARD_DH){
         // INIT DEEP RL NN POLICY
         //X_input = nml_mat_new(2,1);
-        X_input = nml_mat_new(1,1);
+        X_input = nml_mat_new(2,1);
 
         Y_output = nml_mat_new(4,1);
 
@@ -495,8 +495,8 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
 
                 // UPDATE POLICY VECTOR
-                X_input->data[0][0] = scaleValue(Tau_DH,-1.0f,1.0f,-1.0f,1.0f);
-                //X_input->data[1][0] = scaleValue(D_perp_CR,-0.5f,2.0f,-1.0f,1.0f); 
+                X_input->data[0][0] = scaleValue(Tau_DH,-5.0f,5.0f,-1.0f,1.0f);
+                X_input->data[1][0] = scaleValue(Theta_x_DH,-20.0f,20.0f,-1.0f,1.0f); 
             }
         else
         {

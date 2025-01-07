@@ -29,8 +29,8 @@ BLUE = '\033[34m'
 RESET = '\033[0m'  # Reset to default color
 
 class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
-
-    def __init__(self,Ang_Acc_range=[-90.0,-80.0],V_mag_range=[1,4],V_angle_range=[15,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=True,GZ_Timeout=False):
+    #def __init__(self,Ang_Acc_range=[-90.0,-80.0],V_mag_range=[1,4],V_angle_range=[15,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=True,GZ_Timeout=False):
+    def __init__(self,Ang_Acc_range=[-90.0,-80.0],V_mag_range=[1,4],V_angle_range=[15,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=False,GZ_Timeout=False):
         SAR_Sim_Interface.__init__(self, GZ_Timeout=GZ_Timeout)
         gym.Env.__init__(self)
 
@@ -140,7 +140,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
                 self._start_monitoring_subprocesses()
                 # self.Sim_Status = "Running"
                 self._wait_for_sim_running()
-                time.sleep(5)                
+                time.sleep(8)                
             time.sleep(1)
 
     #!!! Need to change
@@ -267,7 +267,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
                 self.Tau_Body_start = (self.Tau_CR_start + self.Collision_Radius/(V_perp+EPS)) # Tau read by body
             except:
                 print("Exception")
-            self.Tau_Accel_start = 1.3 # Acceleration time to desired velocity conditions [s]
+            self.Tau_Accel_start = 1 # Acceleration time to desired velocity conditions [s]
 
         else:
             ## CALCULATE STARTING TAU VALUE
@@ -366,7 +366,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
         ########## POLICY PRE-TRIGGER ##########
         if a_Trg <= self.Pol_Trg_Threshold:
-            print("r_B_O[2]", self.r_B_O[2])
+            #print("r_B_O[2]", self.r_B_O[2])
             
             ## 2) UPDATE STATE
             self._iterStep(n_steps=10)
@@ -397,11 +397,11 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
             ## IMPACT TERMINATION
             elif self.Impact_Flag_Ext == True:
                 self.error_str = "Episode Completed: Impact [Terminated]"
-                print("!!!!!!!!!!!!!!!!!!")
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 terminated = True
                 truncated = False
                 print(YELLOW,self.error_str,RESET)
-                print("self.reward", self.reward)
+                #print("self.reward", self.reward)
 
             elif self.r_B_O[2] < -15:
                 self.error_str = "Episode Completed: Out of bounds [Terminated]"
@@ -728,7 +728,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
             R_dist = 0
 
         ## REWARD: TAU_CR TRIGGER
-        R_tau_cr = self.Reward_Exp_Decay(self.Tau_CR_trg,0.15,k=2.5)
+        R_tau_cr = self.Reward_Exp_Decay(self.Tau_CR_trg,0.25,k=2.5)#0.15 Bryan
 
         if self.r_B_O[2] < -15:
             R_tau_cr = 0

@@ -12,7 +12,7 @@ Controller::Controller()
 
     // EXTERNAL SENSOR SUBSCRIBERS
     subscriber_Vicon = this->create_subscription<sar_msgs::msg::ViconData>("Vicon/data", 1, std::bind(&Controller::Vicon_Update_Callback, this, std::placeholders::_1));
-    
+
     // INTERNAL SENSOR SUBSCRIBERS
     subscriber_IMU = this->create_subscription<sar_msgs::msg::IMUData>("Imu/data", 1, std::bind(&Controller::IMU_Update_Callback, this, std::placeholders::_1));
 
@@ -59,7 +59,7 @@ bool Controller::Get_Obs_Resp(sar_msgs::CTRL_Get_Obs::Request &req, sar_msgs::CT
 void Controller::CMD_Service_Resp(const sar_msgs::srv::CTRLCmdSrv::Request::SharedPtr request,
                      sar_msgs::srv::CTRLCmdSrv::Response::SharedPtr response) {
     std::cout << "service is requested in controller : " <<  std::endl;
-    
+
     // RESPOND THE SRV WAS RECIEVED
     response->srv_success = true;
 
@@ -71,7 +71,7 @@ void Controller::CMD_Service_Resp(const sar_msgs::srv::CTRLCmdSrv::Request::Shar
     CTRL_Cmd.cmd_flag = request->cmd_flag;
     CTRL_Cmd.cmd_rx = request->cmd_rx;
 /**/
-    std::cout << request->cmd_type <<  std::endl;                    
+    std::cout << request->cmd_type <<  std::endl;
     std::cout << "cmd_type: " << request->cmd_type <<  std::endl;
     std::cout << "cmd_val1: " << request->cmd_vals.x <<  std::endl;
     std::cout << "cmd_val2: " << request->cmd_vals.y <<  std::endl;
@@ -165,22 +165,25 @@ void Controller::OpticalFlow_Update_Callback(const sar_msgs::msg::OpticalFlowDat
 
     Tau_DIFF = Tau - Tau_DH;
     double Tau_difference2 = Tau_CR - Tau_DH;
+    double Theta_x_groundtruth = Vel_B_P.x/(D_perp-0.07175);
 
     // std::cout << "$$$$$$Vel_B_P.x : " << Vel_B_P.x << std::endl;
     // std::cout << "$$$$$$D_perp : " << D_perp << std::endl;
     // std::cout << "$$$$$$Theta_x : " << Theta_x << std::endl;
+    // std::cout << "$$$$$$Theta_x_groundtruth : " << Theta_x_groundtruth << std::endl;
     // std::cout << "$$$$$$Theta_x_DH : " << Theta_x_DH << std::endl;
     
+
     // std::cout << "$$$$$$D_perp : " << D_perp << std::endl;
     // std::cout << "$$$$$$Vel_B_P.z : " << Vel_B_P.z << std::endl;
-    double Tau_groundtruth = Tau - 0.11/state.velocity.z;
-    double Tau_difference3 = Tau_groundtruth - Tau_DH;
-    
+    // double Tau_groundtruth = Tau - 0.07175/Vel_B_P.z;
+
+
     //std::cout << "$$$$$$Tau : " << Tau << std::endl;
     // std::cout << "$$$$$$Tau_groundtruth : " << Tau_groundtruth << std::endl;
     // std::cout << "$$$$$$Tau_DH : " << Tau_DH << std::endl;
     // std::cout << "$$$$$$Tau_DIFF : " << Tau_difference3 << std::endl;
-    
+
 
     //std::cout << "$$$$$$Tau_DH : " << Tau_DH << std::endl;
     //std::cout << "$$$$$$Tau_CR : " << Tau_CR << std::endl;
@@ -188,10 +191,10 @@ void Controller::OpticalFlow_Update_Callback(const sar_msgs::msg::OpticalFlowDat
 
 
     //!!!std::cout << "Tau - Tau_DH : " << Tau_DIFF << std::endl;
-    
+
     //!!!std::cout << "Tau_DH : " << Tau_DH << std::endl;
     //!!!std::cout << "Tau : " << Tau << std::endl;
-    
+
 
 }
 
@@ -199,16 +202,16 @@ void Controller::OpticalFlow_Update_Callback(const sar_msgs::msg::OpticalFlowDat
 void Controller::loadInitParams()
 {
     printf("Updating Parameters\n");
-    
+
     // Declare PARAMETERS from Sim_Settings.yaml
     this->declare_parameter("DATA_TYPE", "None");
     this->declare_parameter("SAR_SETTINGS.SAR_Type", "None");
     this->declare_parameter("SAR_SETTINGS.SAR_Config", "None");
     this->declare_parameter("SAR_SETTINGS.Policy_Type", "None");
-   
+
     this->declare_parameter("CAM_SETTINGS.Cam_Config", "None");
     this->declare_parameter("CAM_SETTINGS.Cam_Active", false);
-    
+
     this->declare_parameter("SIM_SETTINGS.Vicon_Delay", 0);
     //Ext_Position_msgBuffer.set_capacity(Vicon_Delay_ms);
 
@@ -228,7 +231,7 @@ void Controller::loadInitParams()
 
     // Load parameters from YAML file
     loadParametersFromSim_SettingsFile("/home/dlee/ros2_ws/src/sar_simulation/sar_config/Sim_Settings.yaml");
-    
+
 
     // Get SAR PARAMETERS from loaded parameters
     DATA_TYPE = this->get_parameter("DATA_TYPE").as_string();
@@ -296,11 +299,11 @@ void Controller::loadInitParams()
     else if (strcmp(POLICY_TYPE_STR.c_str(),"DEEP_RL_SB3")==0)
     {
         Policy = DEEP_RL_SB3;
-    }    
+    }
     else if (strcmp(POLICY_TYPE_STR.c_str(),"DEEP_RL_ONBOARD_DH")==0)
     {
         Policy = DEEP_RL_ONBOARD_DH;
-    }    
+    }
 
 
     /// Declare PARAMETERS from Model_Types.yaml
@@ -379,7 +382,7 @@ void Controller::loadInitParams()
     Izz = this->get_parameter("SAR_Type." + SAR_Type + ".Config." + SAR_Config + ".Ref_Izz").as_double();
 
     Base_Mass = this->get_parameter("SAR_Type." + SAR_Type + ".System_Params.Base_Mass").as_double();
-    Base_Ixx = this->get_parameter("SAR_Type." + SAR_Type + ".System_Params.Base_Ixx").as_double();    
+    Base_Ixx = this->get_parameter("SAR_Type." + SAR_Type + ".System_Params.Base_Ixx").as_double();
     Base_Iyy = this->get_parameter("SAR_Type." + SAR_Type + ".System_Params.Base_Iyy").as_double();
     Base_Izz = this->get_parameter("SAR_Type." + SAR_Type + ".System_Params.Base_Izz").as_double();
 
@@ -410,7 +413,7 @@ void Controller::loadInitParams()
     Prop_14_x = Prop_Front_Vec[0];
     Prop_14_y = Prop_Front_Vec[1];
     Prop_23_x = Prop_Rear_Vec[0];
-    Prop_23_y = Prop_Rear_Vec[1];    
+    Prop_23_y = Prop_Rear_Vec[1];
 
     // UPDATE CTRL GAINS
     P_kp_xy = this->get_parameter("SAR_Type."+ SAR_Type +".CtrlGains.P_kp_xy").as_double();
@@ -609,7 +612,7 @@ void Controller::loadParametersFromModel_TypesFile(const std::string &file_path)
         this->set_parameter(rclcpp::Parameter("SAR_Type."+ SAR_Type +".CtrlGains.R_kd_z", params["SAR_Type"][SAR_Type]["CtrlGains"]["R_kd_z"].as<double>()));
         this->set_parameter(rclcpp::Parameter("SAR_Type."+ SAR_Type +".CtrlGains.R_ki_z", params["SAR_Type"][SAR_Type]["CtrlGains"]["R_ki_z"].as<double>()));
         this->set_parameter(rclcpp::Parameter("SAR_Type."+ SAR_Type +".CtrlGains.i_range_R_z", params["SAR_Type"][SAR_Type]["CtrlGains"]["i_range_R_z"].as<double>()));
-        
+
     }
 }
 
@@ -678,13 +681,13 @@ void Controller::publishCtrlData()
     CtrlData_msg.plane_pos.y = r_P_O.y;
     CtrlData_msg.plane_pos.z = r_P_O.z;
     CtrlData_msg.plane_angle_deg = Plane_Angle_deg;
- 
+
     // OPTICAL FLOW DATA
     CtrlData_msg.optical_flow.x = Theta_x;
     CtrlData_msg.optical_flow.y = Theta_y;
     CtrlData_msg.optical_flow.z = Tau;
     CtrlData_msg.tau_cr = Tau_CR;
-    
+
     //
     CtrlData_msg.optical_flow_flag = Optical_Flow_Flag;
 
@@ -751,7 +754,7 @@ void Controller::publishCtrlData()
     CtrlData_msg.pose_p_b_trg.orientation.w = Quat_P_B_trg.w;
 
     CtrlData_msg.twist_b_p_trg.linear.x = Vel_B_P_trg.x;
-    CtrlData_msg.twist_b_p_trg.linear.y = Vel_B_P_trg.y;    
+    CtrlData_msg.twist_b_p_trg.linear.y = Vel_B_P_trg.y;
     CtrlData_msg.twist_b_p_trg.linear.z = Vel_B_P_trg.z;
 
     CtrlData_msg.twist_b_p_trg.angular.x = Omega_B_P_trg.x;
@@ -797,7 +800,7 @@ void Controller::publishCtrlData()
     CtrlData_msg.twist_b_p_impact_ob.angular.z = Omega_B_O_impact_OB.z;
 
     CtrlData_msg.domega_b_o_y_impact_ob = dOmega_B_O_impact_OB.y;
-    
+
     CTRL_Data_Publisher->publish(CtrlData_msg);
 }
 
@@ -807,14 +810,14 @@ void Controller::publishCtrlDebug()
     CtrlDebug_msg.tumbled_flag = Tumbled_Flag;
     CtrlDebug_msg.tumbledetect_flag = TumbleDetect_Flag;
     CtrlDebug_msg.motorstop_flag = MotorStop_Flag;
-    CtrlDebug_msg.angaccel_flag = AngAccel_Flag; 
+    CtrlDebug_msg.angaccel_flag = AngAccel_Flag;
     CtrlDebug_msg.armed_flag = Armed_Flag;
     CtrlDebug_msg.customthrust_flag = CustomThrust_Flag;
     CtrlDebug_msg.custommotorcmd_flag = CustomMotorCMD_Flag;
 
     CtrlDebug_msg.pos_ctrl_flag = (bool)kp_xf;
     CtrlDebug_msg.vel_ctrl_flag = (bool)kd_xf;
-    CtrlDebug_msg.policy_armed_flag = Policy_Armed_Flag; 
+    CtrlDebug_msg.policy_armed_flag = Policy_Armed_Flag;
     CtrlDebug_msg.camactive_flag = CamActive_Flag;
 
     CTRL_Debug_Publisher->publish(CtrlDebug_msg);
@@ -857,7 +860,7 @@ void Controller::publishROSParamData(){
     ROSParams_msg.base_mass = Base_Mass;
     ROSParams_msg.base_ixx = Base_Ixx;
     ROSParams_msg.base_iyy = Base_Iyy;
-    ROSParams_msg.base_izz = Base_Izz;    
+    ROSParams_msg.base_izz = Base_Izz;
 
     ROSParams_msg.thrust_max = Thrust_max;
     ROSParams_msg.c_tf = C_tf;
@@ -922,7 +925,7 @@ void Controller::appLoop()
     while (rclcpp::ok())
     {
         appMain();
-        
+
         rate.sleep();
     }
 }
@@ -955,7 +958,7 @@ void Controller::stabilizerLoop() // MAIN CONTROLLER LOOP
 //https://github.com/ros-navigation/navigation2/issues/3586
 //https://gazebosim.org/api/sim/8/distributedsimulation.html
 /**/
-void Controller::stabilizerLoop() 
+void Controller::stabilizerLoop()
 {
     bool sim_time_enabled = this->get_parameter("use_sim_time").as_bool();
     if (sim_time_enabled) {
@@ -965,7 +968,7 @@ void Controller::stabilizerLoop()
     }
 
     // Time for staring simulation
-    rclcpp::Time last_time = this->get_clock()->now(); 
+    rclcpp::Time last_time = this->get_clock()->now();
 
     loadInitParams();
     controllerOutOfTreeInit();
@@ -975,7 +978,7 @@ void Controller::stabilizerLoop()
     {
         // Current simulation time
         rclcpp::Time current_time = this->get_clock()->now();
-        
+
         //
         rclcpp::Duration time_diff = current_time - last_time;
 
@@ -983,7 +986,7 @@ void Controller::stabilizerLoop()
         if (time_diff.seconds() >= 0.001) {
             controllerOutOfTree(&control, &setpoint, &sensorData, &state, tick);
 
-            
+
             Controller::publishCtrlData();
             Controller::publishCtrlDebug();
             Controller::publishROSParamData();
@@ -997,7 +1000,7 @@ void Controller::stabilizerLoop()
 int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
-    
+
     auto node = std::make_shared<Controller>();
     rclcpp::spin(node);
     rclcpp::shutdown();

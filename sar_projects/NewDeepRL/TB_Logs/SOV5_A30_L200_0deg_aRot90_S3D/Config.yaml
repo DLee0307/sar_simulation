@@ -10,7 +10,7 @@ ENV_SETTINGS:
   - 1.0
   - 4.0
   V_angle_Limits:
-  - 15
+  - 75
   - 90
   Plane_Angle_Limits:
   - 0

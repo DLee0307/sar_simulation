@@ -194,7 +194,87 @@ class RL_Training_Manager():
         print()
 
     def collect_landing_performance(self,fileName=None,Plane_Angle_Step=45,V_mag_Step=0.5,V_angle_Step=10,n=1):
-        print()
+        if fileName is None:
+            fileName = "PolicyPerformance_Data.csv"
+        filePath = os.path.join(self.Log_Dir,fileName)
+
+        ## GENERATE SWEEP ARRAYS
+        Plane_Angle_num = np.ceil((self.env.Plane_Angle_range[1] - self.env.Plane_Angle_range[0]) / Plane_Angle_Step).astype(int) + 1
+        Plane_Angle_arr = np.linspace(self.env.Plane_Angle_range[0], self.env.Plane_Angle_range[1], Plane_Angle_num, endpoint=True)
+        
+        V_mag_num = np.ceil((self.env.V_mag_range[1] - self.env.V_mag_range[0]) / V_mag_Step).astype(int) + 1
+        V_mag_arr = np.linspace(self.env.V_mag_range[0], self.env.V_mag_range[1], V_mag_num, endpoint=True)
+
+        V_angle_num = np.ceil((self.env.V_angle_range[1] - self.env.V_angle_range[0]) / V_angle_Step).astype(int) + 1
+        V_angle_arr = np.linspace(self.env.V_angle_range[0], self.env.V_angle_range[1], V_angle_num, endpoint=True)
+
+        def EMA(cur_val,prev_val,alpha = 0.15):            
+            return alpha*cur_val + (1-alpha)*(prev_val)
+
+        def round_list_elements(lst, precision=3):
+            """Round all numerical elements in a list to a specified precision."""
+            rounded_list = []
+            for item in lst:
+                if isinstance(item, np.floating):  # Check if the item is a float
+                    rounded_list.append(round(item, precision))
+                else:
+                    rounded_list.append(item)  # Leave non-float items unchanged
+            return rounded_list
+
+        ## TIME ESTIMATION FILTER INITIALIZATION
+        num_trials = len(V_mag_arr)*len(V_angle_arr)*len(Plane_Angle_arr)*n
+        idx = 0
+        t_delta = 0
+        t_delta_prev = 0
+        t_init = time.time()
+
+
+        with open(filePath,'w') as file:
+            writer = csv.writer(file,delimiter=',')
+            writer.writerow([
+                "V_mag", "V_angle", "Plane_Angle", "Trial_num",
+
+                "--",
+
+                "Pad_Connections",
+                "BodyContact","ForelegContact","HindlegContact",
+
+                "--",
+                
+                "a_Trg_trg",
+                "a_Rot_trg",
+                "Vel_mag_B_O_trg","Vel_angle_B_O_trg",
+                "Vel_mag_B_P_trg","Vel_angle_B_P_trg",
+
+                "Tau_CR_trg",
+                "Tau_trg",
+                "Theta_x_trg",
+                "D_perp_CR_trg",
+                "D_perp_trg",
+
+                "--",
+
+                "Phi_B_O_impact",
+                "Phi_B_P_impact",
+                "Omega_B_O_impact",
+
+                "Vel_B_P_impact_x","Vel_B_P_impact_z",
+                
+                "Impact_Magnitude",
+                "Force_Impact_x","Force_Impact_y","Force_Impact_z",
+
+                "--",
+
+                "reward","reward_vals",
+                "NN_Output_trg","a_Rot_scale",
+
+                "--",
+
+                "4_Leg_NBC","4_Leg_BC",
+                "2_Leg_NBC","2_Leg_BC",
+                "0_Leg_NBC","0_Leg_BC",
+            ])
+
 
     def plot_landing_performance(self,PlaneAngle=0,fileName=None,saveFig=False,showFig=True):
         print()
@@ -437,7 +517,7 @@ class RewardCallback(BaseCallback):
             self._save_model_and_replay_buffer()
 
         ## CHECK FOR MODEL PERFORMANCE AND SAVE IF IMPROVED
-        if self.num_timesteps % self.reward_check_freq == 0 and self.env.K_ep > 2.5*len(self.env.TestingConditions):
+        if self.num_timesteps % self.reward_check_freq == 0 and self.env.K_ep > 0.5*len(self.env.TestingConditions):
 
             ## COMPUTE THE MEAN REWARD FOR THE LAST 'CHECK_FREQ' EPISODES
             if ep_rew_mean > self.best_mean_reward:

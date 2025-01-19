@@ -432,6 +432,10 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         self.sendCmd("GZ_StickyPads",cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
         self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
 
+    def handle_test_policy_(self):
+        self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
+        self.adjustSimSpeed(1)
+
     # def handle_GZ_Pose_Reset(self):
     #     print("Reset Pos/Vel -- Sticky off -- Controller Reset\n")
     #     self.resetPose()

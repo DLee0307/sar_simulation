@@ -23,6 +23,13 @@ install(
   DESTINATION lib/${PROJECT_NAME}
 )
 
+# Install Python scripts
+install(
+  PROGRAMS
+    scripts/Test_Performance.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights

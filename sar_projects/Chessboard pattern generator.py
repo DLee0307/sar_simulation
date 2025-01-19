@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 # 파라미터 설정
 I0 = 1.0  # Intensity 최대값
-L_values = [0.33]  # L 값 리스트
+L_values = [0.16]  # L 값 리스트
 x = np.linspace(-10, 10, 500)  # x 좌표
 y = np.linspace(-10, 10, 500)  # y 좌표
 X, Y = np.meshgrid(x, y)

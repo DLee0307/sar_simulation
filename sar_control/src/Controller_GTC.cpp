@@ -321,24 +321,27 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
                     //std::cout << "Policy_Armed_Flag: " << Policy_Armed_Flag << std::endl;
                     // PASS OBSERVATION THROUGH POLICY NN
-                    NN_forward(X_input,Y_output,&NN_DeepRL);
+                    ///// NN_forward(X_input,Y_output,&NN_DeepRL);
 
                     // printf("X_input: %.5f %.5f %.5f %.5f\n",X_input->data[0][0],X_input->data[1][0],X_input->data[2][0],X_input->data[3][0]);
                     // printf("Y_output: %.5f %.5f %.5f %.5f\n\n",Y_output->data[0][0],Y_output->data[1][0],Y_output->data[2][0],Y_output->data[3][0]);
 
 
                     // SAMPLE POLICY TRIGGER ACTION
-                    a_Trg = GaussianSample(Y_output->data[0][0],Y_output->data[2][0]);
-                    a_Rot = GaussianSample(Y_output->data[1][0],Y_output->data[3][0]);
+                    ///// a_Trg = GaussianSample(Y_output->data[0][0],Y_output->data[2][0]);
+                    ///// a_Rot = GaussianSample(Y_output->data[1][0],Y_output->data[3][0]);
 
                     // SCALE ACTIONS
-                    a_Trg = scaleValue(tanhf(a_Trg),-1.0f,1.0f,-1.0f,1.0f);
+                    ///// a_Trg = scaleValue(tanhf(a_Trg),-1.0f,1.0f,-1.0f,1.0f);
                     //a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,a_Rot_bounds[0],a_Rot_bounds[1]);
                     //a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,-197.835f,197.835f);
-                    a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,-90.0f,-80.0f);
+                    ////// a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,-90.0f,-80.0f);
+                    a_Rot = -88.5f;
 
                     // EXECUTE POLICY IF TRIGGERED
-                    if(a_Trg >= 0.5f && onceFlag == false && abs(Tau_CR) <= 0.5f)
+                    ///// if(a_Trg >= 0.5f && onceFlag == false && abs(Tau_CR) <= 0.5f)
+                    ///// if(Tau_DH <= 0.27f && onceFlag == false && abs(Tau_CR) <= 0.5f)
+                    if(Tau_CR <= 0.255f && onceFlag == false && abs(Tau_CR) <= 0.5f)
                     {
                         onceFlag = true;
                         //std::cout << "Trigger is generated." << std::endl;
@@ -357,8 +360,8 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
                         Tau_trg = Tau;
                         Tau_CR_trg = Tau_CR; //
-                        Tau_DH_trg = Tau_DH;
-                        std::cout << "Tau_DH_trg: " << Tau_DH_trg << std::endl;
+                        ///// Tau_DH_trg = Tau_DH;
+                        ///// std::cout << "Tau_DH_trg: " << Tau_DH_trg << std::endl;
                         
                         Theta_x_trg = Theta_x; //
                         Theta_x_DH_trg = Theta_x_DH;
@@ -366,13 +369,13 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                         D_perp_trg = D_perp;
                         D_perp_CR_trg = D_perp_CR;
 
-                        Y_output_trg[0] = Y_output->data[0][0];
-                        Y_output_trg[1] = Y_output->data[1][0];
-                        Y_output_trg[2] = Y_output->data[2][0];
-                        Y_output_trg[3] = Y_output->data[3][0];
+                        ///// Y_output_trg[0] = Y_output->data[0][0];
+                        ///// Y_output_trg[1] = Y_output->data[1][0];
+                        ///// Y_output_trg[2] = Y_output->data[2][0];
+                        ///// Y_output_trg[3] = Y_output->data[3][0];
 
-                        a_Trg_trg = a_Trg;
-                        a_Rot_trg = a_Rot;
+                        ///// a_Trg_trg = a_Trg;
+                        ///// a_Rot_trg = a_Rot;
 
                         M_d.x = 0.0f;
                         M_d.y = a_Rot*Iyy;

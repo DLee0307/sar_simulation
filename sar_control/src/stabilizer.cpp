@@ -163,9 +163,9 @@ void Controller::OpticalFlow_Update_Callback(const sar_msgs::msg::OpticalFlowDat
     Tau_DH = msg->tau;
     Theta_x_DH = msg->theta_x;
 
-    Tau_DIFF = Tau - Tau_DH;
-    double Tau_difference2 = Tau_CR - Tau_DH;
-    double Theta_x_groundtruth = Vel_B_P.x/(D_perp-0.07175);
+    // Tau_DIFF = Tau - Tau_DH;
+    // double Tau_difference2 = Tau_CR - Tau_DH;
+    // double Theta_x_groundtruth = Vel_B_P.x/(D_perp-0.07175);
 
     // std::cout << "$$$$$$Vel_B_P.x : " << Vel_B_P.x << std::endl;
     // std::cout << "$$$$$$D_perp : " << D_perp << std::endl;
@@ -176,7 +176,8 @@ void Controller::OpticalFlow_Update_Callback(const sar_msgs::msg::OpticalFlowDat
 
     // std::cout << "$$$$$$D_perp : " << D_perp << std::endl;
     // std::cout << "$$$$$$Vel_B_P.z : " << Vel_B_P.z << std::endl;
-    // double Tau_groundtruth = Tau - 0.07175/Vel_B_P.z;
+    // double Tau_groundtruth = Tau - 0.07175/Vel_B_P.z; //camera general
+    // double Tau_groundtruth = Tau - 0.20475/Vel_B_P.z; //camera up
 
 
     //std::cout << "$$$$$$Tau : " << Tau << std::endl;

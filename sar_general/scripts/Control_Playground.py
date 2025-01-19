@@ -50,6 +50,7 @@ def cmd_send(env):
             #93: env.handle_GZ_Rel_Vel_traj,
             94: env.handle_Optical_Flow_Flag,
             95: env.handle_test_policy,
+            96: env.handle_test_policy_,
 
         }
         

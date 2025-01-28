@@ -10,12 +10,12 @@
     "ENV_KWARGS": {
         "Ang_Acc_range": [ -90.0, -80.0 ],
         "Plane_Angle_range": [0, 0],
-        "V_mag_range": [ 2.0, 4.0 ],
-        "V_angle_range": [ 90,   90   ],
+        "V_mag_range": [ 4.0, 4.0 ],
+        "V_angle_range": [ 30,   30   ],
         "Render": false,
         "GZ_Timeout":true
     },
 
     "t_step_limit": 96000, 
-    "t_step_optim": 0
+    "t_step_optim": 27700
 }

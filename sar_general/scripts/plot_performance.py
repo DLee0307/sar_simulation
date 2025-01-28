@@ -33,7 +33,7 @@ def main(args=None):
     BASE_PATH = os.path.join(workspace_path, 'src', 'sar_simulation')
     LOG_DIR = f"{BASE_PATH}/sar_general" 
 
-    fileName = "Reliable.csv"
+    fileName = "PolicyPerformance_Data_Tau_CR_0.255.csv"
     filePath = os.path.join(LOG_DIR,fileName)
 
     df = pd.read_csv(filePath, sep=',', comment="#")
@@ -77,7 +77,7 @@ def main(args=None):
     ax.set_rmax(R.max())
 
     ## SAVE FIGURE WITH TEXT
-    config_str = f"Trg_Tau: 0.27 \
+    config_str = f"Trg_Tau_CR: 0.0.255 \
         \nTrg_Acc: 88.5" 
     fig.text(0,1,config_str,transform=plt.gcf().transFigure,ha='left',va='top',fontsize=6)
 

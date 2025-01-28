@@ -93,7 +93,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
             "W_LT":1.0,
             "W_GM":1.0,
             "W_Phi_rel":2.0,
-            "W_Legs":2.0
+            "W_Legs":4.0
         }
         self.W_max = sum(self.reward_weights.values())
 
@@ -334,8 +334,8 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         # print("self.SAR_Config", self.SAR_Config)
         # print("self.Policy_Type", self.Policy_Type)
 
-        self.calOF_activation()
-        self._iterStep(n_steps=20)
+        #//// self.calOF_activation()
+        #//// self._iterStep(n_steps=20)
 
         print("_initialStep is completed")
 

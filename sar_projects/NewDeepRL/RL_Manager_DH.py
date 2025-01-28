@@ -194,6 +194,7 @@ class RL_Training_Manager():
         print()
 
     def collect_landing_performance(self,fileName=None,Plane_Angle_Step=45,V_mag_Step=0.5,V_angle_Step=10,n=1):
+
         if fileName is None:
             fileName = "PolicyPerformance_Data.csv"
         filePath = os.path.join(self.Log_Dir,fileName)
@@ -227,6 +228,7 @@ class RL_Training_Manager():
         t_delta = 0
         t_delta_prev = 0
         t_init = time.time()
+        #print("Time : ", t_init)
 
 
         with open(filePath,'w') as file:
@@ -275,6 +277,107 @@ class RL_Training_Manager():
                 "0_Leg_NBC","0_Leg_BC",
             ])
 
+        for Plane_Angle in Plane_Angle_arr:
+            for V_mag in V_mag_arr:
+                for V_angle in V_angle_arr:
+                    for trial in range(n):
+
+                        ## CONVERT RELATIVE ANGLES TO GLOBAL ANGLE
+                        A1 = V_angle - Plane_Angle
+                        # print("Plane_Angle : ", Plane_Angle)
+                        # print("V_mag : ", V_mag)
+                        # print("V_angle : ", V_angle)
+
+                        ## ANGLE CAPS TO ENSURE +X DIRECTION
+                        B1 = -90
+                        B2 = 90
+
+                        if A1 < B1 or A1 > B2:
+                            continue
+
+                        t_trial_start = time.time()
+
+                        ## TEST POLICY FOR GIVEN FLIGHT CONDITIONS
+                        self.test_policy(V_mag,V_angle,Plane_Angle)
+
+                        if self.env.Policy_Type == "DEEP_RL_SB3":
+                            NN_Output_trg = self.policy_output(self.env.obs_trg)
+                            a_Trg_trg = self.env.action_trg[0]
+
+                        else:
+                            NN_Output_trg = self.env.NN_Output_trg
+                            a_Trg_trg = self.env.a_Trg_trg
+
+                        PC = self.env.Pad_Connections
+                        BC = self.env.BodyContact_Flag
+
+                        if PC >= 3 and BC == False:         # 4_Leg_NBC
+                            LS = [1,0,0,0,0,0]
+                        elif PC >= 3 and BC == True:        # 4_Leg_BC
+                            LS = [0,1,0,0,0,0]
+                        elif PC == 2 and BC == False:       # 2_Leg_NBC
+                            LS = [0,0,1,0,0,0]
+                        elif PC == 2 and BC == True:        # 2_Leg_BC
+                            LS = [0,0,0,1,0,0]
+                        elif PC <= 1 and BC == False:       # 0_Leg_NBC
+                            LS = [0,0,0,0,1,0]
+                        elif PC <= 1 and BC == True:        # 0_Leg_BC
+                            LS = [0,0,0,0,0,1]                 
+
+                        ## APPEND RECORDED VALUES TO CSV FILE
+                        with open(filePath,'a') as file:
+                            writer = csv.writer(file,delimiter=',',quoting=csv.QUOTE_NONE,escapechar='\\')
+
+                            row_data = [
+                            
+                                V_mag,V_angle,Plane_Angle,trial,
+                                "--",
+                                self.env.Pad_Connections,
+                                self.env.BodyContact_Flag,self.env.ForelegContact_Flag,self.env.HindlegContact_Flag,
+                                "--",
+                                np.round(a_Trg_trg,3),self.env.a_Rot_trg,
+                                self.env.Vel_mag_B_O_trg,self.env.Vel_angle_B_O_trg,
+                                self.env.Vel_mag_B_P_trg,self.env.Vel_angle_B_P_trg,
+                                self.env.Tau_CR_trg,
+                                self.env.Tau_trg,
+                                self.env.Theta_x_trg,
+                                self.env.D_perp_CR_trg,
+                                self.env.D_perp_trg,
+                                "--",
+                                self.env.Eul_B_O_impact_Ext[1],
+                                self.env.Eul_P_B_impact_Ext[1],
+                                self.env.Omega_B_P_impact_Ext[1],
+                                self.env.V_B_P_impact_Ext[0],self.env.V_B_P_impact_Ext[2],
+                                self.env.Impact_Magnitude,
+                                self.env.Force_impact_x,self.env.Force_impact_y,self.env.Force_impact_z,
+                                "--",
+                                np.round(self.env.reward,3),np.round(self.env.reward_vals,3),
+                                np.round(NN_Output_trg,3),np.round(self.env.Ang_Acc_range,0),
+                                "--",
+                                LS[0],LS[1],
+                                LS[2],LS[3],
+                                LS[4],LS[5],
+
+                            ]
+
+                            rounded_row_data = round_list_elements(row_data)
+                            writer.writerow(rounded_row_data)
+
+
+                            ## CALCULATE AVERAGE TIME PER EPISODE
+                            t_now = time.time() - t_init
+                            t_delta = time.time() - t_trial_start
+                            t_delta_avg = EMA(t_delta,t_delta_prev,alpha=0.05)
+                            t_delta_prev = t_delta_avg
+                            idx += 1
+
+                            TTC = np.round(t_delta_avg*(num_trials-idx)) # Time to completion
+                            t_now = np.round(t_now)
+                            print(f"Flight Conditions: ({V_mag:.02f} m/s, {V_angle:.02f} deg, {Plane_Angle:.02f} deg) Reward: {self.env.reward_vals[-1]:.2f} Index: {idx}/{num_trials}  Percent: {100*idx/num_trials:.2f}% TTC: {str(timedelta(seconds=TTC))} \tElapsed: {str(timedelta(seconds=t_now))}")
+                    
+
+
+        print("collect_landing_performance function is done")
 
     def plot_landing_performance(self,PlaneAngle=0,fileName=None,saveFig=False,showFig=True):
         print()
@@ -434,6 +537,35 @@ class RL_Training_Manager():
 
         self.env.setAngAcc_range(config_dict['ENV_SETTINGS']['Ang_Acc_Limits'])
 
+    def policy_output(self,obs):
+        
+        ## CONVERT OBS TO TENSOR
+        obs = th.FloatTensor([obs])
+
+        ## PASS OBS THROUGH NN
+        actor = self.model.policy.actor
+        latent_pi = actor.latent_pi(obs)
+        mean_actions = actor.mu(latent_pi)
+        log_std = actor.log_std(latent_pi)
+
+        # CLAMP THE LOG STANDARD DEVIATION OF THE ACTOR (FOR STABILITY)
+        LOG_STD_MAX = 2
+        LOG_STD_MIN = -20
+        log_std = th.clamp(log_std, LOG_STD_MIN, LOG_STD_MAX)
+
+        ## CONVERT LOG_STD TO STD
+        action_log_std = log_std
+        action_log_std = action_log_std.detach().numpy()[0]
+        action_std = np.exp(action_log_std)
+        # squished_action_std = np.tanh(action_std) ## THIS OPERATION IS INVALID (TANH IS NON-LINEAR)
+
+        ## GRAB ACTION DISTRIBUTION MEAN
+        action_mean = mean_actions
+        action_mean = action_mean.detach().numpy()[0]
+        squished_action_mean = np.tanh(action_mean) ## MEAN POSITION SCALES APPROPRIATELY THOUGH
+
+        return np.hstack((squished_action_mean,action_std))
+    
 class RewardCallback(BaseCallback):
     # model_save_freq: int = 5_000
     def __init__(self, RLM, 

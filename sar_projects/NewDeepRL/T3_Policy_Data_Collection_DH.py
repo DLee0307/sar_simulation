@@ -85,7 +85,7 @@ if __name__ == '__main__':
         Plane_Angle_Step=45,
         V_mag_Step=0.5,
         V_angle_Step=5,
-        n=1,
+        n=5,
     )
     
     # for i in [0,45,90,135,180]:

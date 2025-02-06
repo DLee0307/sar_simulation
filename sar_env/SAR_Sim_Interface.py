@@ -106,6 +106,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
     def _getTick(self):
         srv = CTRLGetObs.Request() 
         #print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        rclpy.spin_once(self)
         result = self.callService('/CTRL/Get_Obs',srv, CTRLGetObs)
         rclpy.spin_once(self)
         time.sleep(1)
@@ -145,67 +146,74 @@ class SAR_Sim_Interface(SAR_Base_Interface):
     def _getObs_DH(self):        
         resp = self.callService('/CTRL/Get_Obs',CTRLGetObs.Request(),CTRLGetObs)
 
-        Tau_CR = resp.tau_cr
-        Theta_x = resp.theta_x
-        # D_perp_CR = resp.d_perp_cr
-
-        # print("Tau_CR", Tau_CR)
-        # print("Theta_x", Theta_x)        
-
 #/////
-        # Tau_DH = resp.tau_dh
-        # Theta_x_DH = resp.theta_x_dh
+        Tau_DH = resp.tau_dh
+        Theta_x_DH = resp.theta_x_dh
 
         # print("Tau_DH", Tau_DH)
         # print("Theta_x_DH", Theta_x_DH)
         
-        # if np.isnan(Tau_DH):
-        #     Tau_DH = 5
+        if np.isnan(Tau_DH):
+            Tau_DH = 5
 
-        # else:
-        #     Tau_DH = np.clip(Tau_DH, -5, 5)
+        else:
+            Tau_DH = np.clip(Tau_DH, -5, 5)
 
-        # if np.isnan(Theta_x_DH):
-        #     Theta_x_DH = 20
+        if np.isnan(Theta_x_DH):
+            Theta_x_DH = 20
 
-        # else:
-        #     Theta_x_DH = np.clip(Theta_x_DH, -20, 20)
+        else:
+            Theta_x_DH = np.clip(Theta_x_DH, -20, 20)
         
-        # Tau_DH_scaled = self.scaleValue(Tau_DH,original_range=[-5,5],target_range=[-1,1])
-        # Theta_x_DH_scaled = self.scaleValue(Theta_x_DH,original_range=[-20,20],target_range=[-1,1])
+        Tau_DH_scaled = self.scaleValue(Tau_DH,original_range=[-5,5],target_range=[-1,1])
+        Theta_x_DH_scaled = self.scaleValue(Theta_x_DH,original_range=[-20,20],target_range=[-1,1])
 
-        # scaled_obs_list = [Tau_DH_scaled, Theta_x_DH_scaled]
+        scaled_obs_list = [Tau_DH_scaled, Theta_x_DH_scaled]
 
 #/////
 
-        #obs_list = [Tau_CR,Theta_x,D_perp_CR]
-        
-        if np.isnan(Tau_CR):
-            Tau_CR = 5
+#@@@@@
+        # Tau_CR = resp.tau_cr
+        # Theta_x = resp.theta_x
+        # # D_perp_CR = resp.d_perp_cr
 
-        else:
-            Tau_CR = np.clip(Tau_CR, -5, 5)
+        # # print("Tau_CR", Tau_CR)
+        # # print("Theta_x", Theta_x)        
 
-        if np.isnan(Theta_x):
-            Theta_x = 20
+        # if np.isnan(Tau_CR):
+        #     Tau_CR = 5
 
-        else:
-            Theta_x = np.clip(Theta_x, -20, 20)
+        # else:
+        #     Tau_CR = np.clip(Tau_CR, -5, 5)
 
-        Tau_CR_scaled = self.scaleValue(Tau_CR,original_range=[-5,5],target_range=[-1,1])
-        Theta_x_scaled = self.scaleValue(Theta_x,original_range=[-20,20],target_range=[-1,1])
-        # D_perp_CR_scaled = self.scaleValue(D_perp_CR,original_range=[-0.5,2.0],target_range=[-1,1])
+        # if np.isnan(Theta_x):
+        #     Theta_x = 20
 
-        scaled_obs_list = [Tau_CR_scaled, Theta_x_scaled]
+        # else:
+        #     Theta_x = np.clip(Theta_x, -20, 20)
+
+        # Tau_CR_scaled = self.scaleValue(Tau_CR,original_range=[-5,5],target_range=[-1,1])
+        # Theta_x_scaled = self.scaleValue(Theta_x,original_range=[-20,20],target_range=[-1,1])
+        # # D_perp_CR_scaled = self.scaleValue(D_perp_CR,original_range=[-0.5,2.0],target_range=[-1,1])
+
+        # scaled_obs_list = [Tau_CR_scaled, Theta_x_scaled]
+
+#@@@@@@  
         # scaled_obs_list = [Tau_CR_scaled, Theta_x_scaled, D_perp_CR_scaled]
 
 
         ## OBSERVATION VECTOR
         obs = np.array(scaled_obs_list,dtype=np.float32)
+#/////
+        print("Tau_DH", obs[0])
+        print("Theta_x_DH", obs[1])
+#/////
 
-        print("Tau_CR", obs[0])
-        print("Theta_x", obs[1]) 
-        #print("D_perp_CR", obs[2]) 
+#@@@@@
+        # print("Tau_CR", obs[0])
+        # print("Theta_x", obs[1]) 
+        # # print("D_perp_CR", obs[2]) 
+#@@@@@
 
         return obs
 
@@ -339,9 +347,13 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         rclpy.spin_once(self)
         #!!! Need to Change
 
+#/////
+
         # If step is terminated due to impact or out of bound
-        #//// self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
-        #//// self.adjustSimSpeed(1.0)
+        self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
+        self.adjustSimSpeed(1.0)
+
+#/////
 
         self.sendCmd('GZ_StickyPads',cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
         #self._iterStep(10)

@@ -14,6 +14,7 @@ bool impact_flag_ext
 builtin_interfaces/Time time_impact_ext
 
 bool bodycontact_flag
+bool cameracontact_flag
 bool forelegcontact_flag
 bool hindlegcontact_flag
 

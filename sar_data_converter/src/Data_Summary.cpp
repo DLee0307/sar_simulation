@@ -148,6 +148,7 @@ void SAR_DataConverter::Publish_ImpactData()
 
     ImpactData_msg.impact_flag_ext = Impact_Flag_Ext;
     ImpactData_msg.bodycontact_flag = BodyContact_Flag;
+    ImpactData_msg.cameracontact_flag = CameraContact_Flag;
     ImpactData_msg.forelegcontact_flag = ForelegContact_Flag;
     ImpactData_msg.hindlegcontact_flag = HindlegContact_Flag;
 

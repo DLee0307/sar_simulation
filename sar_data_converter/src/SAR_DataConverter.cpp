@@ -1,6 +1,7 @@
 #include "SAR_DataConverter.h"
 SAR_DataConverter::SAR_DataConverter()
     : Node("SAR_DataConverter_Node") {
+        //std::cout << "!!!!!!!!!!!!!" << std::endl;
 
         cmd_input_service_ = this->create_service<sar_msgs::srv::CTRLCmdSrv>("/SAR_DC/CMD_Input", std::bind(&SAR_DataConverter::CMD_SAR_DC_Callback, this, std::placeholders::_1, std::placeholders::_2));
         CMD_Output_Service_Sim = this->create_client<sar_msgs::srv::CTRLCmdSrv>("/CTRL/Cmd_ctrl"); //To Stabilizer

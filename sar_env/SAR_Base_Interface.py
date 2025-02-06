@@ -91,6 +91,8 @@ class SAR_Base_Interface(Node):
         # self.RL_Data_Pub = rospy.Publisher("/RL/Data",RL_Data,queue_size=10)
         # self.RL_History_Pub = rospy.Publisher("/RL/History",RL_History,queue_size=10)
 
+        print("SAR_Base_Interface running is done")
+
 
     def loadBaseParams(self):
         # LOAD BASE PARAMETERS
@@ -869,6 +871,7 @@ class SAR_Base_Interface(Node):
 
         self.Impact_Flag_Ext = False
         self.BodyContact_Flag = False
+        self.CameraContact_Flag = False #DH
         self.ForelegContact_Flag = False
         self.HindlegContact_Flag = False
         self.t_impact_Ext = np.nan
@@ -1064,6 +1067,7 @@ class SAR_Base_Interface(Node):
         ## EXTERNAL IMPACT DETECTION
         self.Impact_Flag_Ext = ImpactData_msg.impact_flag_ext
         self.BodyContact_Flag = ImpactData_msg.bodycontact_flag
+        self.CameraContact_Flag = ImpactData_msg.cameracontact_flag
         self.ForelegContact_Flag = ImpactData_msg.forelegcontact_flag
         self.HindlegContact_Flag = ImpactData_msg.hindlegcontact_flag
         

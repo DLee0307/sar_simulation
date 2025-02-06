@@ -136,6 +136,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
                 print(YELLOW + f"Sim Likely Frozen: Restarting Simulation Env" + RESET)
 
                 self._kill_Sim()
+                time.sleep(3)
                 self._restart_Sim()
                 self._start_monitoring_subprocesses()
                 # self.Sim_Status = "Running"
@@ -150,6 +151,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
             ## START SIMULATION
             time.sleep(1)
             self._kill_Sim()
+            time.sleep(4)
             self._restart_Sim()
             self._start_monitoring_subprocesses()
             # self.Sim_Status = "Running"
@@ -334,8 +336,11 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         # print("self.SAR_Config", self.SAR_Config)
         # print("self.Policy_Type", self.Policy_Type)
 
-        #//// self.calOF_activation()
-        #//// self._iterStep(n_steps=20)
+#/////
+        self.calOF_activation()
+#/////
+
+        self._iterStep(n_steps=20)
 
         print("_initialStep is completed")
 
@@ -467,6 +472,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
             try:
                 rclpy.spin_once(self)
                 reward = self._CalcReward()  
+                print("reward : ", reward)
 
             except (UnboundLocalError,ValueError) as e:
                 reward = np.nan
@@ -507,8 +513,12 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         ## SEND TRIGGER ACTION TO CONTROLLER
         rclpy.spin_once(self)
         self.sendCmd("Policy",[0.0,a_Rot,self.Ang_Acc_range[0]],cmd_flag=self.Ang_Acc_range[1])
+#/////
+
         self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)        
         self.adjustSimSpeed(1.0)
+
+#/////
         time.sleep(0.1)
         #print("Policy is sent", self.Ang_Acc_range[1])
 
@@ -719,6 +729,8 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
             R_GM = 0
             R_Phi = self.Reward_ImpactAngle(Phi_P_B_impact_deg,self.Phi_P_B_impact_Min_deg,Phi_B_P_Impact_Condition)
         
+
+
         print("self.Eul_B_O_impact_Ext[1]", self.Eul_B_O_impact_Ext[1])
 
         ## REWARD: MINIMUM DISTANCE AFTER TRIGGER
@@ -740,16 +752,26 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         elif self.Pad_Connections == 2:
             R_Legs = 0.5
         elif self.Pad_Connections == 1:
-            print("self.Pad1_Contact", self.Pad1_Contact)
-            print("self.Pad2_Contact", self.Pad2_Contact)
-            print("self.Pad3_Contact", self.Pad3_Contact)
-            print("self.Pad4_Contact", self.Pad4_Contact)
+            # print("self.Pad1_Contact", self.Pad1_Contact)
+            # print("self.Pad2_Contact", self.Pad2_Contact)
+            # print("self.Pad3_Contact", self.Pad3_Contact)
+            # print("self.Pad4_Contact", self.Pad4_Contact)
             R_Legs = 0.5
         else:
             R_Legs = 0.0
 
         if self.BodyContact_Flag:
             R_Legs = max(R_Legs-0.25,0)
+
+        if self.CameraContact_Flag:
+
+            ## CALC REWARD VALUES
+            print("Camera is contacted")
+            R_tx = 0
+            R_LT = 0
+            R_GM = 0
+            R_Phi = 0
+            R_Legs = 0
 
         self.reward_vals = [R_dist,R_tau_cr,R_tx,R_LT,R_GM,R_Phi,R_Legs]
         R_t = np.dot(self.reward_vals,list(self.reward_weights.values()))

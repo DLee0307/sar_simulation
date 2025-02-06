@@ -388,6 +388,7 @@ private:
     float Rot_Sum_impact_Ext = NAN;
 
     bool BodyContact_Flag = false;
+    bool CameraContact_Flag = false;
     bool ForelegContact_Flag = false;
     bool HindlegContact_Flag = false;
     bool OnceFlag_Impact = false;
@@ -530,6 +531,7 @@ inline void SAR_DataConverter::resetImpactData()
     Time_impact_Ext = rclcpp::Time(0);
 
     BodyContact_Flag = false;
+    CameraContact_Flag = false;
     ForelegContact_Flag = false;
     HindlegContact_Flag = false;
 

@@ -58,6 +58,7 @@ void SAR_DataConverter::Surface_Contact_Callback(const gz::msgs::Contacts &msg)
 
         if (collision_name.find("Camera_Collision") != std::string::npos) {
             BodyContact_Flag = true;
+            CameraContact_Flag = true;
             //std::cout << "Body Contact Detected" << std::endl;
         }
 

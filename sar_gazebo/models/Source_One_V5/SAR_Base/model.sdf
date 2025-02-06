@@ -285,8 +285,8 @@
       <!-- <pose>0 0 69.3e-3 0 0 0</pose> --> <!-- on the battery -->
       <!-- <pose>-63.5e-3 0 52e-3 0 0 0</pose> --> <!-- backside -->
       <!-- <pose>-63.5e-3 0 185e-3 0 0 0</pose>  --> <!-- backside --> 
-      <pose>63.5e-3 0 52e-3 0 0 0</pose> <!-- frontside --> 
-      <!-- <pose>0 0 180.25e-3 0 0 0</pose> --> <!-- center high --> 
+      <!-- <pose>63.5e-3 0 52e-3 0 0 0</pose> --> <!-- frontside --> 
+      <pose>0 0 180.25e-3 0 0 0</pose> <!-- center high --> 
       
       <inertial>
         <mass>17.9E-3</mass>

@@ -118,6 +118,8 @@ void controllerOutOfTreeReset() {
     Theta_y_trg = 0.0f;
     Tau_trg = 0.0f;
     Tau_CR_trg = 0.0f;
+    Tau_CM_trg = 0.0f;
+    Theta_x_CM_trg = 0.0f;
     Tau_DH_trg = 0.0f;
 
     Y_output_trg[0] = 0.0f;
@@ -240,6 +242,8 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
                         Tau_trg = Tau;
                         Tau_CR_trg = Tau_CR;
+                        Tau_CM_trg = Tau_CM;
+                        Theta_x_CM_trg = Theta_x_CM;
                         Tau_DH_trg = Tau_DH;
                         Theta_x_trg = Theta_x;
                         Theta_x_DH_trg = Theta_x_DH;
@@ -296,6 +300,7 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
 
                         Tau_trg = Tau;
                         Tau_CR_trg = Tau_CR;
+                        Tau_DH_trg = Tau_DH;
                         Theta_x_trg = Theta_x;
                         Theta_y_trg = Theta_y;
                         D_perp_trg = D_perp;
@@ -336,7 +341,6 @@ void controllerOutOfTree(control_t *control,const setpoint_t *setpoint,
                     //a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,a_Rot_bounds[0],a_Rot_bounds[1]);
                     //a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,-197.835f,197.835f);
                     a_Rot = scaleValue(tanhf(a_Rot),-1.0f,1.0f,-90.0f,-80.0f);
-                    a_Rot = -88.5f;
 
                     // EXECUTE POLICY IF TRIGGERED
                     if(a_Trg >= 0.5f && onceFlag == false && abs(Tau_CR) <= 0.5f)

@@ -254,7 +254,9 @@ extern bool Optical_Flow_Flag;
 // OPTICAL FLOW STATES (GROUND TRUTH)
 extern float Tau;           // [s]
 extern float Tau_CR;        // [s]
+extern float Tau_CM;        // [s]
 extern float Theta_x;       // [rad/s] 
+extern float Theta_x_CM;       // [rad/s] 
 extern float Theta_y;       // [rad/s]
 extern float Tau_DH;        // [s]
 extern float Theta_x_DH;       // [rad/s] 
@@ -355,6 +357,8 @@ extern float Vel_angle_B_P_trg;         // Velocity angle relative [deg]
 // OPTICAL FLOW STATES
 extern float Tau_trg;                   // [rad/s]
 extern float Tau_CR_trg;                // [rad/s]
+extern float Tau_CM_trg;                // [rad/s]
+extern float Theta_x_CM_trg;                // [rad/s]
 extern float Tau_DH_trg;                // [rad/s]
 extern float Theta_x_trg;               // [rad/s]
 extern float Theta_x_DH_trg;            // [rad/s]

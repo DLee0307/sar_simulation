@@ -1,0 +1,544 @@
+<?xml version='1.0'?>
+<sdf version='1.7'>
+  <model name='SAR_Base' canonical_link='SAR_Body'>
+    <pose>0 0 0 0 0 0</pose>   <!--the pose is relative to the world by default-->
+
+    <link name='SAR_Body'>
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <mass>693.0e-3</mass>
+        <inertia>
+          <ixx>3.17e-3</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.71e-3</iyy>
+          <iyz>0</iyz>
+          <izz>5.27e-3</izz>
+        </inertia>
+        <pose>0 0 26.5e-3 0 0 0</pose>
+      </inertial>
+      <gravity>1</gravity>
+      <self_collide>0</self_collide>
+      <kinematic>0</kinematic>
+      <enable_wind>0</enable_wind>
+
+      <sensor name="imu" type="imu">
+      <always_on>1</always_on>
+      <update_rate>100</update_rate>
+      <visualize>true</visualize>
+      <topic>imu</topic>
+      <enable_metrics>true</enable_metrics>
+      </sensor>
+<!--
+      <visual name='Collision_Radius'>
+        <pose>0 0 0 1.57 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>250.0e-3</length>
+            <radius>216.0e-3</radius>
+          </cylinder>
+        </geometry>
+        <material>
+        <ambient>1 1 1 0.2</ambient>
+        <diffuse>1 1 1 0.2</diffuse>-->
+        <!--<script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+        </script>-->
+<!--        <lighting>1</lighting>
+      </material>
+      </visual>
+-->
+      <visual name='SO_V5_Base_Assembly'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://SAR_Base/meshes/SO_V5_Base_Assembly.STL</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+        <material>
+            <!--DarkGrey-->
+            <ambient>0.175 0.175 0.175 1</ambient>
+            <diffuse>0.175 0.175 0.175 1</diffuse>
+            <specular>0.175 0.175 0.175 1.00</specular>
+        <lighting>1</lighting>
+        </material>
+      </visual>
+
+      <visual name='SO_V5_Prop_Guards'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://SAR_Base/meshes/SO_V5_Prop_Guards.STL</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+        <material>
+            <!--White-->                    
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+            <specular>0.1 0.1 0.1 0.128</specular>
+        <lighting>1</lighting>
+        </material>
+      </visual>
+
+      <visual name='SO_V5_Prop_Guard_Standoffs'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://SAR_Base/meshes/SO_V5_Prop_Guard_Standoffs.STL</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+        <material>
+            <!--DarkGrey-->
+            <ambient>0.175 0.175 0.175 1</ambient>
+            <diffuse>0.175 0.175 0.175 1</diffuse>
+            <specular>0.175 0.175 0.175 1.00</specular>
+        <lighting>1</lighting>
+        </material>
+      </visual>
+
+      <collision name='Body_Collision_Prop_1'>
+        <pose>72.6e-3 -86.6e-3 20.5e-3 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>41.0e-3</length>
+            <radius>77.0e-3</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <collision name='Body_Collision_Prop_2'>
+        <pose>-72.6e-3 -86.6e-3 20.5e-3 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>41.0e-3</length>
+            <radius>77.0e-3</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <collision name='Body_Collision_Prop_3'>
+        <pose>-72.6e-3 86.6e-3 20.5e-3 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>41.0e-3</length>
+            <radius>77.0e-3</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <collision name='Body_Collision_Prop_4'>
+        <pose>72.6e-3 86.6e-3 20.5e-3 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>41.0e-3</length>
+            <radius>77.0e-3</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+
+      <collision name='Body_Collision_Battery'>
+        <pose>2.88e-3 0 35.0e-3 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>80.0e-3 45.0e-3 70.0e-3 </size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+
+    <link name='Prop_1'>
+      <inertial>
+        <mass>1e-6</mass>
+        <inertia>
+          <ixx>1e-9</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-9</iyy>
+          <iyz>0</iyz>
+          <izz>1e-9</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <pose>72.6e-3 -86.6e-3 28.0e-3 0 0 0</pose>
+      <gravity>1</gravity>
+      <self_collide>0</self_collide>
+      <visual name='SO_V5_Prop_1'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://SAR_Base/meshes/SO_V5_Propeller.STL</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <!-- Blue Transparent -->
+          <ambient>0.0 0.0 1.0 0.5</ambient>
+          <diffuse>0.0 0.0 1.0 0.5</diffuse>
+          <lighting>1</lighting>
+        </material>
+      </visual>
+    </link>
+
+    <link name='Prop_2'>
+      <inertial>
+        <mass>1e-6</mass>
+        <inertia>
+          <ixx>1e-9</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-9</iyy>
+          <iyz>0</iyz>
+          <izz>1e-9</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <pose>-72.6e-3 -86.6e-3 28.0e-3 0 0 0</pose>
+      <gravity>1</gravity>
+      <self_collide>0</self_collide>
+      <visual name='SO_V5_Prop_2'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://SAR_Base/meshes/SO_V5_Propeller.STL</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <!-- Blue Transparent -->
+          <ambient>0.0 0.0 1.0 0.5</ambient>
+          <diffuse>0.0 0.0 1.0 0.5</diffuse>
+          <lighting>1</lighting>
+        </material>
+      </visual>
+    </link>
+
+    <link name='Prop_3'>
+      <inertial>
+        <mass>1e-6</mass>
+        <inertia>
+          <ixx>1e-9</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-9</iyy>
+          <iyz>0</iyz>
+          <izz>1e-9</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <pose>-72.6e-3 86.6e-3 28.0e-3 0 0 0</pose>
+      <gravity>1</gravity>
+      <self_collide>0</self_collide>
+      <visual name='SO_V5_Prop_2'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://SAR_Base/meshes/SO_V5_Propeller.STL</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <!-- Blue Transparent -->
+          <ambient>0.0 0.0 1.0 0.5</ambient>
+          <diffuse>0.0 0.0 1.0 0.5</diffuse>
+          <lighting>1</lighting>
+        </material>
+      </visual>
+    </link>
+
+    <link name='Prop_4'>
+      <inertial>
+        <mass>1e-6</mass>
+        <inertia>
+          <ixx>1e-9</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-9</iyy>
+          <iyz>0</iyz>
+          <izz>1e-9</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <pose>72.6e-3 86.6e-3 28.0e-3 0 0 0</pose>
+      <gravity>1</gravity>
+      <self_collide>0</self_collide>
+      <visual name='SO_V5_Prop_3'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://SAR_Base/meshes/SO_V5_Propeller.STL</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <!-- Blue Transparent -->
+          <ambient>0.0 0.0 1.0 0.5</ambient>
+          <diffuse>0.0 0.0 1.0 0.5</diffuse>
+          <lighting>1</lighting>
+        </material>
+      </visual>
+    </link>
+
+    <link name='Camera'>
+      <!-- <pose>0 0 69.3e-3 0 0 0</pose> --> <!-- on the battery -->
+      <!-- <pose>-63.5e-3 0 52e-3 0 0 0</pose> --> <!-- backside -->
+      <!-- <pose>-63.5e-3 0 185e-3 0 0 0</pose>  --> <!-- backside --> 
+      <pose>0 0 180.25e-3 0 0 0</pose> <!-- center high --> 
+      <!-- <pose>63.5e-3 0 52e-3 0 0 0</pose> --> <!-- frontside --> 
+      <!-- <pose>65.5e-3 0 50e-3 0 -0.523 3.14</pose>--> <!-- frontside 60deg --> 
+      <!-- <pose>65.5e-3 0 50e-3 0 -0.785 3.14</pose> --> <!-- frontside 45deg --> 
+
+      <inertial>
+        <mass>17.9E-3</mass>
+        <inertia>
+        <ixx>1e-9</ixx>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyy>1e-9</iyy>
+        <iyz>0</iyz>
+        <izz>1e-9</izz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <visual name='Camera_Visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://SAR_Base/meshes/JeVois_A33.STL</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+          <material>
+              <!--DarkGrey-->
+              <ambient>0.175 0.175 0.175 1</ambient>
+              <diffuse>0.175 0.175 0.175 1</diffuse>
+              <specular>0.175 0.175 0.175 1.00</specular>
+          <lighting>1</lighting>
+          </material>
+      </visual>
+      <collision name="Camera_Collision">
+        <pose>6.78e-3 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>22.1e-3 17.5e-3 37.9e-3 </size>
+          </box>
+        </geometry>
+      </collision>
+<!--http://classic.gazebosim.org/tutorials?tut=ros_gzplugins-->
+      <sensor name="camera" type="camera">
+        <!-- <pose>0 0 0.3e-1 0 -1.57 0</pose> -->
+        <pose>0 0 20e-3 0 -1.57 0</pose>
+        <update_rate>100</update_rate>
+        <visualize>false</visualize>
+        <camera name="head">
+          <save enabled="false">
+            <path>/home/dlee/Pictures/Gazebo</path>
+          </save>
+          <horizontal_fov>1.435</horizontal_fov>
+          <image>
+            <!-- <width>16</width>
+            <height>16</height> -->
+            <width>64</width>
+            <height>64</height>
+            <!--64<format>R8G8B8</format>-->
+            <format>L8</format>
+          </image>
+          <clip>
+            <near>0.02</near>
+            <far>10</far>
+          </clip>
+<!--          <noise>
+            <type>gaussian</type>
+-->
+            <!-- Noise is sampled independently per pixel on each frame.
+                That pixel's noise value is added to each of its color
+                channels, which at that point lie in the range [0,1]. -->
+<!--
+            <mean>0.0</mean>
+            <stddev>0.000</stddev>
+          </noise>
+-->          
+          <lens>
+            <type>sterographic</type>
+            <!-- <type>pinhole</type> -->
+          </lens>
+        </camera>
+        <always_on>1</always_on>
+        <topic>camera</topic>
+      </sensor>
+
+      <visual name='camera_center'>
+        <cast_shadows>0</cast_shadows>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.002</radius>
+          </sphere>
+        </geometry>
+        <material>
+          <!-- Blue -->
+          <ambient>0.0 0.0 1.0 1.0</ambient>
+          <diffuse>0.0 0.0 1.0 1.0</diffuse>
+          <specular>0.5 0.5 0.5 1.0</specular>
+          <emissive>0.0 0.0 0.0 1.0</emissive> 
+          <lighting>1</lighting> 
+        </material>
+      </visual>
+    </link>
+
+    <joint name='Prop_1_Joint' type='revolute'>
+      <parent>SAR_Body</parent>
+      <child>Prop_1</child>
+      <pose>0 0 0 0 0 0</pose>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1.79769e+308</lower>
+          <upper>1.79769e+308</upper>
+          <effort>-1</effort>
+          <velocity>-1</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+
+    <joint name='Prop_2_Joint' type='revolute'>
+      <parent>SAR_Body</parent>
+      <child>Prop_2</child>
+      <pose>0 0 0 0 0 0</pose>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1.79769e+308</lower>
+          <upper>1.79769e+308</upper>
+          <effort>-1</effort>
+          <velocity>-1</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+
+    <joint name='Prop_3_Joint' type='revolute'>
+      <parent>SAR_Body</parent>
+      <child>Prop_3</child>
+      <pose>0 0 0 0 0 0</pose>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1.79769e+308</lower>
+          <upper>1.79769e+308</upper>
+          <effort>-1</effort>
+          <velocity>-1</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+
+    <joint name='Prop_4_Joint' type='revolute'>
+      <parent>SAR_Body</parent>
+      <child>Prop_4</child>
+      <pose>0 0 0 0 0 0</pose>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1.79769e+308</lower>
+          <upper>1.79769e+308</upper>
+          <effort>-1</effort>
+          <velocity>-1</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    
+    <joint name='Camera_Joint' type='fixed'>
+      <parent>SAR_Body</parent>
+      <child>Camera</child>
+    </joint>
+
+<!--  -->            
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libImu_Plugin.so"
+        name="gz::sim::systems::Imu_Plugin">
+    </plugin>
+  
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libVicon_Plugin.so"
+        name="gz::sim::systems::Vicon_Plugin">
+        <!--<link_name>Prop_1</link_name>-->
+        <link_name>SAR_Body</link_name>
+    </plugin>
+<!--
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libSet_Velocity_Plugin.so"
+        name="gz::sim::systems::Set_Velocity_Plugin">
+    </plugin>
+-->
+<!---->
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libCamera_Plugin.so"
+        name="gz::sim::systems::Camera_Plugin">
+    </plugin>
+
+
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libMotor_Plugin.so"
+        name="gz::sim::systems::Motor_Plugin">
+        <Motor_Number>1</Motor_Number>
+        <joint_name>Prop_1_Joint</joint_name>
+        <link_name>Prop_1</link_name>
+        <canonicallink_name>SAR_Body</canonicallink_name>
+        <Turning_Direction>ccw</Turning_Direction>
+        <Visual_Slowdown>200</Visual_Slowdown>                
+    </plugin>
+
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libMotor_Plugin.so"
+        name="gz::sim::systems::Motor_Plugin">
+        <Motor_Number>2</Motor_Number>
+        <joint_name>Prop_2_Joint</joint_name>
+        <link_name>Prop_2</link_name>
+        <canonicallink_name>SAR_Body</canonicallink_name>
+        <Turning_Direction>cw</Turning_Direction>
+        <Visual_Slowdown>200</Visual_Slowdown>                  
+    </plugin>
+    
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libMotor_Plugin.so"
+        name="gz::sim::systems::Motor_Plugin">
+        <Motor_Number>3</Motor_Number>
+        <joint_name>Prop_3_Joint</joint_name>
+        <link_name>Prop_3</link_name>
+        <canonicallink_name>SAR_Body</canonicallink_name>
+        <Turning_Direction>ccw</Turning_Direction>
+        <Visual_Slowdown>200</Visual_Slowdown>                  
+    </plugin>
+
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libMotor_Plugin.so"
+        name="gz::sim::systems::Motor_Plugin">
+        <Motor_Number>4</Motor_Number>
+        <joint_name>Prop_4_Joint</joint_name>
+        <link_name>Prop_4</link_name>
+        <canonicallink_name>SAR_Body</canonicallink_name>
+        <Turning_Direction>cw</Turning_Direction>
+        <Visual_Slowdown>200</Visual_Slowdown>               
+    </plugin>
+
+    <static>0</static>
+    <allow_auto_disable>1</allow_auto_disable>
+  </model>
+</sdf>

@@ -13,6 +13,7 @@ import sys
 from sar_msgs.srv import CTRLGetObs
 from sar_msgs.srv import CTRLGetTcon
 
+import csv
 
 #SET PYTHONPATH 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
@@ -119,6 +120,58 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
         return result.tick
 
+    def _getObs_Tau(self):        
+        resp = self.callService('/CTRL/Get_Obs',CTRLGetObs.Request(),CTRLGetObs)
+        
+        Tau_DH = resp.tau_dh
+        Theta_x_DH = resp.theta_x_dh
+
+        Tau_CR = resp.tau_cr
+        Theta_x = resp.theta_x
+        D_perp_CR = resp.d_perp_cr
+
+        Tau_CM = resp.tau_cm
+
+        if np.isnan(Tau_DH):
+            Tau_DH = 5
+
+        else:
+            Tau_DH = np.clip(Tau_DH, -5, 5)
+
+        if np.isnan(Theta_x_DH):
+            Theta_x_DH = 20
+
+        else:
+            Theta_x_DH = np.clip(Theta_x_DH, -20, 20)
+
+        if np.isnan(Tau_CR):
+            Tau_CR = 5
+
+        else:
+            Tau_CR = np.clip(Tau_CR, -5, 5)
+
+        if np.isnan(Theta_x):
+            Theta_x = 20
+
+        else:
+            Theta_x = np.clip(Theta_x, -20, 20)
+
+        if np.isnan(Tau_CM):
+            Tau_CM = 5
+
+        else:
+            Tau_CM = np.clip(Tau_CM, -5, 5)
+
+        if np.isnan(D_perp_CR):
+            D_perp_CR = 2.0
+
+        else:
+            D_perp_CR = np.clip(D_perp_CR, -0.5, 2.0)
+
+
+        return Tau_DH, Theta_x_DH, Tau_CR, Theta_x, D_perp_CR, Tau_CM
+
+
     def _getObs(self):        
         resp = self.callService('/CTRL/Get_Obs',CTRLGetObs.Request(),CTRLGetObs)
 
@@ -147,11 +200,17 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         resp = self.callService('/CTRL/Get_Obs',CTRLGetObs.Request(),CTRLGetObs)
 
 #/////
+
         Tau_DH = resp.tau_dh
         Theta_x_DH = resp.theta_x_dh
+        # Theta_y_DH = resp.theta_y_dh
+
+        # Tau = resp.tau
+        # print("Tau", Tau)
 
         # print("Tau_DH", Tau_DH)
         # print("Theta_x_DH", Theta_x_DH)
+        # # print("Theta_y_DH", Theta_y_DH)
         
         if np.isnan(Tau_DH):
             Tau_DH = 5
@@ -164,21 +223,30 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
         else:
             Theta_x_DH = np.clip(Theta_x_DH, -20, 20)
-        
+
+        # if np.isnan(Theta_y_DH):
+        #     Theta_y_DH = 20
+
+        # else:
+        #     Theta_y_DH = np.clip(Theta_y_DH, -20, 20)
+
         Tau_DH_scaled = self.scaleValue(Tau_DH,original_range=[-5,5],target_range=[-1,1])
         Theta_x_DH_scaled = self.scaleValue(Theta_x_DH,original_range=[-20,20],target_range=[-1,1])
+        # Theta_y_DH_scaled = self.scaleValue(Theta_y_DH,original_range=[-20,20],target_range=[-1,1])
 
         scaled_obs_list = [Tau_DH_scaled, Theta_x_DH_scaled]
 
 #/////
 
 #@@@@@
+        
         # Tau_CR = resp.tau_cr
         # Theta_x = resp.theta_x
-        # # D_perp_CR = resp.d_perp_cr
+        # D_perp_CR = resp.d_perp_cr
 
         # # print("Tau_CR", Tau_CR)
         # # print("Theta_x", Theta_x)        
+
 
         # if np.isnan(Tau_CR):
         #     Tau_CR = 5
@@ -192,14 +260,44 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         # else:
         #     Theta_x = np.clip(Theta_x, -20, 20)
 
+        # if np.isnan(D_perp_CR):
+        #     D_perp_CR = 2.0
+
+        # else:
+        #     D_perp_CR = np.clip(D_perp_CR, -0.5, 2.0)
+
         # Tau_CR_scaled = self.scaleValue(Tau_CR,original_range=[-5,5],target_range=[-1,1])
         # Theta_x_scaled = self.scaleValue(Theta_x,original_range=[-20,20],target_range=[-1,1])
-        # # D_perp_CR_scaled = self.scaleValue(D_perp_CR,original_range=[-0.5,2.0],target_range=[-1,1])
+        # D_perp_CR_scaled = self.scaleValue(D_perp_CR,original_range=[-0.5,2.0],target_range=[-1,1])
 
-        # scaled_obs_list = [Tau_CR_scaled, Theta_x_scaled]
+        # # scaled_obs_list = [Tau_CR_scaled, Theta_x_scaled]
+        # scaled_obs_list = [Tau_CR_scaled, Theta_x_scaled, D_perp_CR_scaled]
 
 #@@@@@@  
-        # scaled_obs_list = [Tau_CR_scaled, Theta_x_scaled, D_perp_CR_scaled]
+        
+#######
+
+        # Tau_CM = resp.tau_cm
+        # Theta_x_CM = resp.theta_x_cm
+
+        # if np.isnan(Tau_CM):
+        #     Tau_CM = 5
+
+        # else:
+        #     Tau_CM = np.clip(Tau_CM, -5, 5)
+
+        # if np.isnan(Theta_x_CM):
+        #     Theta_x_CM = 20
+
+        # else:
+        #     Theta_x_CM = np.clip(Theta_x_CM, -20, 20)
+
+        # Tau_CM_scaled = self.scaleValue(Tau_CM,original_range=[-5,5],target_range=[-1,1])
+        # Theta_x_CM_scaled = self.scaleValue(Theta_x_CM,original_range=[-20,20],target_range=[-1,1])
+        
+        # scaled_obs_list = [Tau_CM_scaled, Theta_x_CM_scaled]
+
+#######
 
 
         ## OBSERVATION VECTOR
@@ -212,8 +310,14 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 #@@@@@
         # print("Tau_CR", obs[0])
         # print("Theta_x", obs[1]) 
-        # # print("D_perp_CR", obs[2]) 
+        # print("D_perp_CR", obs[2]) 
 #@@@@@
+
+
+######
+        # print("Tau_CM", obs[0])
+        # print("Theta_x_CM", obs[1])
+######
 
         return obs
 
@@ -424,6 +528,70 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         #self.sendCmd('GZ_StickyPads',cmd_flag=1.0)
         print("resetPose is completed")
 
+    def resetPose_Opticalflow(self,z_0=0.4): 
+        print("resetPose_Opticalflow is started")
+
+
+        self.sendCmd('Tumble_Detect',cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
+        self.sendCmd("Ctrl_Reset", cmd_vals=[1.0,1.0,1.0])
+        self.sendCmd("DH_Reset", cmd_vals=[1.0,1.0,1.0])
+
+        # Use subprocess to call the GZ service for setting pose
+        # Need to chane "SAR_Config"
+        cmd = [
+            'gz', 'service', '-s', '/world/empty/set_pose',
+            '--reqtype', 'gz.msgs.Pose',
+            '--reptype', 'gz.msgs.Boolean',
+            '--timeout', '3000',
+            '--req', f'name: "A30_L200", position: {{x: 0, y: 0, z: {z_0}}}, orientation: {{x: 0, y: 0, z: 0, w: 1}}'
+        ]
+
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        # print the result of execution
+        # if result.returncode == 0:
+        #     print("Pose set successfully:", result.stdout)
+        # else:
+        #     print("Error setting pose:", result.stderr)
+
+        #self._setModelState(pos=[0,0,z_0])
+        #self._iterStep(50)
+        self._iterStep(1000)
+        time.sleep(1)
+
+        self.sendCmd('Tumble_Detect',cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
+        self.sendCmd("Ctrl_Reset", cmd_vals=[1.0,1.0,1.0])
+        self.sendCmd("DH_Reset", cmd_vals=[1.0,1.0,1.0])
+
+# https://github.com/gazebosim/gz-sim/pull/2440
+# https://github.com/gazebosim/gz-sim/issues/2318
+
+        # Use subprocess to call the GZ service for setting pose
+        # Need to chane "SAR_Config"
+        cmd = [
+            'gz', 'service', '-s', '/world/empty/set_pose',
+            '--reqtype', 'gz.msgs.Pose',
+            '--reptype', 'gz.msgs.Boolean',
+            '--timeout', '3000',
+            '--req', f'name: "A30_L200", position: {{x: 0, y: 0, z: {z_0}}}, orientation: {{x: 0, y: 0, z: 0, w: 1}}'
+        ]
+
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        # print the result of execution
+        # if result.returncode == 0:
+        #     print("Pose set successfully:", result.stdout)
+        # else:
+        #     print("Error setting pose:", result.stderr)
+
+        #self._setModelState(pos=[0,0,z_0])
+        self._iterStep(500) # Give time for drone to settle
+        #rclpy.spin_once(self)
+        time.sleep(1)
+        
+        #self.sendCmd('GZ_StickyPads',cmd_flag=1.0)
+        print("resetPose is completed")
+
     def _setModelState(self,pos=[0,0,0.5],quat=[0,0,0,1],vel=[0,0,0],ang_vel=[0,0,0]):
         print()
 
@@ -475,6 +643,257 @@ class SAR_Sim_Interface(SAR_Base_Interface):
     def handle_test_policy_(self):
         self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
         self.adjustSimSpeed(1)
+
+    def handle_OpticalFlow_Accuracy(self):
+
+        for V_mag in np.arange(3.5, 4.5, 0.5):  # V_mag: 2.0 ~ 4.0 (Increment by 0.5)
+            for V_angle in np.arange(90, 95, 5):  # V_angle: 15 ~ 90 (Increment by 5)
+                self.V_mag = V_mag
+                self.V_angle = V_angle
+
+                # Add code from DH
+                if np.isnan(getattr(self, 'Plane_Angle_rad', np.nan)):
+                    self.Plane_Angle_rad = 0
+                # Add code from DH
+                if np.isnan(getattr(self, 'r_P_O', [np.nan])[0]):
+                    self.r_P_O = [3.0, 0.0, 2.5]
+
+                ## CALC STARTING VELOCITY IN GLOBAL COORDS
+                V_tx = self.V_mag * np.cos(np.deg2rad(self.V_angle))
+                V_perp = self.V_mag * np.sin(np.deg2rad(self.V_angle))
+                V_B_P = np.array([V_tx, 0, V_perp])  # {t_x,n_p}
+                V_B_O = self.R_PW(V_B_P, self.Plane_Angle_rad)  # {X_W,Z_W}
+
+                EPS = 1e-6  # Epsilon (Prevent division by zero)
+
+                ## CALCULATE STARTING TAU VALUE
+                self.Tau_CR_start = 0.75 + np.random.uniform(-0.05, 0.05)
+
+                try:
+                    self.Tau_Body_start = (self.Tau_CR_start + self.Collision_Radius / (V_perp + EPS))  # Tau read by body
+                except:
+                    print("Exception")
+                self.Tau_Accel_start = 1  # Acceleration time to desired velocity conditions [s]
+
+                ## CALC STARTING POSITION IN GLOBAL COORDS
+                r_P_O = np.array(self.r_P_O)  # Plane Position wrt to Origin - {X_W,Z_W}
+                r_P_B = np.array([
+                    (self.Tau_CR_start + self.Tau_Accel_start) * V_tx,
+                    0,
+                    (self.Tau_Body_start + self.Tau_Accel_start) * V_perp
+                ])  # Body Position wrt to Plane - {t_x,n_p}
+                r_B_O = r_P_O - self.R_PW(r_P_B, self.Plane_Angle_rad)
+
+                ## DESIRED ACCELERATION VALUES Added by DH
+                Acc = self.TrajAcc_Max
+
+                a_x = Acc[0]
+                a_z = Acc[2]
+
+                ## CALC OFFSET POSITIONS
+                t_x = V_B_O[0] / a_x  # Time required to reach Vx
+                t_z = V_B_O[2] / a_z  # Time required to reach Vz
+                t_total = t_x + t_z + 1
+
+                x_0 = r_B_O[0] - V_B_O[0] ** 2 / (2 * a_x) - V_B_O[0] * t_z  # X-position Vel reached
+                y_0 = r_B_O[1]  # Y-position Vel reached
+                z_0 = r_B_O[2] - V_B_O[2] ** 2 / (2 * a_z)  # Z-position Vel reached  
+
+                r_B_O = np.array([x_0, y_0, z_0])
+
+                ## LAUNCH QUAD W/ DESIRED VELOCITY
+                self.initial_state = (r_B_O, V_B_O)
+                self.Sim_VelTraj(pos=r_B_O, vel=V_B_O, t_total=t_total)
+                self._iterStep(n_steps=100)
+
+                # Add code from DH : Because of lock step?
+                time.sleep(t_total + 8)
+
+                print(f"Initial step is done for V_mag={V_mag}, V_angle={V_angle}\n")
+                
+                #self._getObs_Tau()
+                Tau_DH, Theta_x_DH, Tau_CR, Theta_x, D_perp_CR, Tau_CM = self._getObs_Tau()
+
+#(((((
+
+                # while Tau_CR >= 0.33:
+                #     #self._getObs_Tau()
+                #     Tau_DH, Theta_x_DH, Tau_CR, Theta_x, D_perp_CR, Tau_CM = self._getObs_Tau()
+                #     time.sleep(0.2)
+                #     self._iterStep(10)
+                #     time.sleep(0.2)
+
+                # print("Start calculating Tau\n")
+                # self.adjustSimSpeed(0.05)
+                # self.sendCmd("Optical_Flow_Flag", cmd_vals=[1.0, 1.0, 1.0], cmd_flag=1.0)
+
+                # Tau_values = []
+
+                # while Tau_CR >= 0.20:
+                #     #self._getObs_Tau()
+                #     Tau_DH, Theta_x_DH, Tau_CR, Theta_x, D_perp_CR, Tau_CM = self._getObs_Tau()
+                #     time.sleep(0.2)
+                #     Tau_values.append([Tau_CR, Tau_DH])
+                #     self._iterStep(10)
+                #     time.sleep(0.2)
+#(((((
+
+#)))))
+
+                while Tau_CM >= 0.50:
+                    #self._getObs_Tau()
+                    Tau_DH, Theta_x_DH, Tau_CR, Theta_x, D_perp_CR, Tau_CM = self._getObs_Tau()
+                    time.sleep(0.1)
+                    self._iterStep(10)
+                    time.sleep(0.1)
+
+
+                print("Start calculating Tau\n")
+                self.adjustSimSpeed(0.05)
+                self.sendCmd("Optical_Flow_Flag", cmd_vals=[1.0, 1.0, 1.0], cmd_flag=1.0)
+
+                Tau_values = []
+
+                while Tau_CM >= 0.20:
+                    #self._getObs_Tau()
+                    Tau_DH, Theta_x_DH, Tau_CR, Theta_x, D_perp_CR, Tau_CM = self._getObs_Tau()
+                    time.sleep(0.1)
+                    Tau_values.append([Tau_CM, Tau_DH])
+                    self._iterStep(10)
+                    time.sleep(0.1)
+#))))))
+
+                # 파일 이름을 V_mag과 V_angle을 포함하도록 설정
+                fileName = f"OFA[{V_mag:.2f},{V_angle:.2f}].csv"
+                filePath = os.path.join(self.Log_Dir, fileName)
+
+#(((((
+
+                # with open(filePath, 'w', newline='') as file:
+                #     writer = csv.writer(file, delimiter=',')
+                #     writer.writerow(["Tau_CR", "Tau_DH"])
+                #     writer.writerows(Tau_values)
+
+#(((((
+
+#)))))
+                with open(filePath, 'w', newline='') as file:
+                    writer = csv.writer(file, delimiter=',')
+                    writer.writerow(["Tau_CM", "Tau_DH"])
+                    writer.writerows(Tau_values)
+#)))))
+                self.sendCmd("Optical_Flow_Flag", cmd_vals=[1.0, 1.0, 1.0], cmd_flag=0.0)
+                self.adjustSimSpeed(1.0)
+
+
+                self.resetPose_Opticalflow()
+
+                print(f"handle_OpticalFlow_Accuracy is done for V_mag={V_mag}, V_angle={V_angle}\n")
+                
+    # def handle_OpticalFlow_Accuracy(self):
+
+    #     ## GET RELATIVE VEL CONDITIONS 
+    #     self.V_mag, self.V_angle = self.userInput("Flight Velocity (V_mag,V_angle):",float)
+
+    #     # Add code from DH
+    #     if np.isnan(getattr(self, 'Plane_Angle_rad', np.nan)):
+    #         self.Plane_Angle_rad = 0
+    #     # Add code from DH
+    #     if np.isnan(getattr(self, 'r_P_O', [np.nan])[0]):
+    #         self.r_P_O = [3.0, 0.0, 2.5]
+
+    #     ## CALC STARTING VELOCITY IN GLOBAL COORDS
+    #     V_tx = self.V_mag*np.cos(np.deg2rad(self.V_angle))
+    #     V_perp = self.V_mag*np.sin(np.deg2rad(self.V_angle))
+    #     V_B_P = np.array([V_tx,0,V_perp])               # {t_x,n_p}
+    #     V_B_O = self.R_PW(V_B_P,self.Plane_Angle_rad)   # {X_W,Z_W}
+
+    #     EPS = 1e-6 # Epsilon (Prevent division by zero)
+
+    #     ## CALCULATE STARTING TAU VALUE
+    #     # self.Tau_CR_start = self.t_rot_max*np.random.uniform(0.9,1.1) # Add noise to starting condition
+        
+    #     #self.Tau_CR_start = 0.5 + np.random.uniform(-0.05,0.05)
+    #     self.Tau_CR_start = 0.75 + np.random.uniform(-0.05,0.05)
+        
+    #     try:
+    #         self.Tau_Body_start = (self.Tau_CR_start + self.Collision_Radius/(V_perp+EPS)) # Tau read by body
+    #     except:
+    #         print("Exception")
+    #     self.Tau_Accel_start = 1 # Acceleration time to desired velocity conditions [s]
+
+    #     ## CALC STARTING POSITION IN GLOBAL COORDS
+    #     # (Derivation: Research_Notes_Book_3.pdf (9/17/23))
+
+    #     r_P_O = np.array(self.r_P_O)                                        # Plane Position wrt to Origin - {X_W,Z_W}
+    #     r_P_B = np.array([(self.Tau_CR_start + self.Tau_Accel_start)*V_tx,
+    #                       0,
+    #                       (self.Tau_Body_start + self.Tau_Accel_start)*V_perp])  # Body Position wrt to Plane - {t_x,n_p}
+    #     r_B_O = r_P_O - self.R_PW(r_P_B,self.Plane_Angle_rad)    
+    #     #print("r_P_B : ", r_P_B)
+
+    #     ## DESIRED ACCELERATION VALUES Added by DH
+    #     Acc = self.TrajAcc_Max
+    
+    #     a_x = Acc[0]
+    #     a_z = Acc[2]
+
+    #     ## CALC OFFSET POSITIONS
+    #     t_x = V_B_O[0]/a_x    # Time required to reach Vx
+    #     t_z = V_B_O[2]/a_z    # Time required to reach Vz
+    #     t_total = t_x + t_z + 1
+
+    #     x_0 = r_B_O[0] - V_B_O[0]**2/(2*a_x) - V_B_O[0]*t_z     # X-position Vel reached
+    #     y_0 = r_B_O[1]                                          # Y-position Vel reached
+    #     z_0 = r_B_O[2] - V_B_O[2]**2/(2*a_z)                    # Z-position Vel reached  
+
+    #     r_B_O = np.array([x_0,y_0,z_0])
+
+    #     ## LAUNCH QUAD W/ DESIRED VELOCITY
+    #     self.initial_state = (r_B_O,V_B_O)
+    #     #print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& r_B_O :",r_B_O)
+    #     #print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& V_B_O :",V_B_O)
+    #     self.Sim_VelTraj(pos=r_B_O,vel=V_B_O,t_total=t_total)
+    #     self._iterStep(n_steps=100)
+        
+    #     # Add code from DH : Beacause of lock step?
+    #     time.sleep(t_total+8)
+
+    #     print("Initial step is done\n")
+
+    #     self._getObs_Tau()
+    #     Tau_DH, Theta_x_DH, Tau_CR, Theta_x, D_perp_CR = self._getObs_Tau()
+
+    #     while(Tau_CR >= 0.35):
+    #         #rclpy.spin_once(self)
+    #         self._getObs_Tau()
+    #         Tau_DH, Theta_x_DH, Tau_CR, Theta_x, D_perp_CR = self._getObs_Tau()
+    #         self._iterStep(10)
+
+    #     print("start calculating Tau\n")
+    #     self.adjustSimSpeed(0.05)
+    #     self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
+
+    #     Tau_values = []
+
+    #     while(Tau_CR >= 0.15):
+    #         #rclpy.spin_once(self)
+    #         self._getObs_Tau()
+    #         Tau_DH, Theta_x_DH, Tau_CR, Theta_x, D_perp_CR = self._getObs_Tau()
+    #         Tau_values.append([Tau_CR, Tau_DH]) 
+    #         self._iterStep(10)
+
+    #     fileName = fileName if 'fileName' in locals() else "OpticalflowAccuracy.csv"
+    #     filePath = os.path.join(self.Log_Dir,fileName)
+
+    #     with open(filePath, 'w', newline='') as file:
+    #         writer = csv.writer(file, delimiter=',')
+    #         writer.writerow(["Tau_CR", "Tau_DH"])
+    #         writer.writerows(Tau_values)
+
+
+    #     print("handle_OpticalFlow_Accuracy is done\n")
+
 
     # def handle_GZ_Pose_Reset(self):
     #     print("Reset Pos/Vel -- Sticky off -- Controller Reset\n")

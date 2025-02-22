@@ -249,6 +249,9 @@ class RL_Training_Manager():
                 "Vel_mag_B_P_trg","Vel_angle_B_P_trg",
 
                 "Tau_CR_trg",
+                "Tau_CM_trg",
+                "Theta_x_CM_trg",
+                "Tau_DH_trg",
                 "Tau_trg",
                 "Theta_x_trg",
                 "D_perp_CR_trg",
@@ -339,6 +342,9 @@ class RL_Training_Manager():
                                 self.env.Vel_mag_B_O_trg,self.env.Vel_angle_B_O_trg,
                                 self.env.Vel_mag_B_P_trg,self.env.Vel_angle_B_P_trg,
                                 self.env.Tau_CR_trg,
+                                self.env.Tau_CM_trg,
+                                self.env.Theta_x_CM_trg,
+                                self.env.Tau_DH_trg,
                                 self.env.Tau_trg,
                                 self.env.Theta_x_trg,
                                 self.env.D_perp_CR_trg,
@@ -687,6 +693,9 @@ class RewardCallback(BaseCallback):
             self.logger.record('z_Custom/Plane_Angle',info_dict["Plane_Angle"])
             self.logger.record('z_Custom/a_Rot_trg',info_dict["a_Rot"])
             self.logger.record('z_Custom/Tau_CR_trg',info_dict["Tau_CR_trg"])
+            self.logger.record('z_Custom/Tau_CM_trg',info_dict["Tau_CM_trg"])
+            self.logger.record('z_Custom/Theta_x_CM_trg',info_dict["Theta_x_CM_trg"])
+            self.logger.record('z_Custom/Tau_DH_trg',info_dict["Tau_DH_trg"])
             self.logger.record('z_Custom/Trg_Flag',int(info_dict["Trg_Flag"]))
             self.logger.record('z_Custom/Impact_Flag_Ext',int(info_dict["Impact_Flag_Ext"]))
             self.logger.record('z_Custom/D_perp_pad_min',info_dict["D_perp_pad_min"])

@@ -773,11 +773,14 @@ class SAR_Base_Interface(Node):
             'Thrust_CMD':30,
             'Motor_CMD':31,
 
+
+
             'GZ_Pose_Reset':90,
             'GZ_StickyPads':91,
             'GZ_Const_Vel_Traj':92,
             'Optical_Flow_Flag':94,
-            'test_policy':95
+            'test_policy':95,
+            'OpticalFlow_Accuracy':98
         }
         self.inv_cmd_dict = {value: key for key, value in self.cmd_dict.items()}
 
@@ -844,9 +847,12 @@ class SAR_Base_Interface(Node):
         self.D_perp_CR_trg = np.nan
 
         self.Theta_x_trg = np.nan
+        self.Theta_x_CM_trg = np.nan
         self.Theta_y_trg = np.nan
         self.Tau_trg = np.nan
         self.Tau_CR_trg = np.nan
+        self.Tau_CM_trg = np.nan
+        self.Tau_DH_trg = np.nan
 
         self.Vel_mag_B_O_trg = np.nan
         self.Vel_angle_B_O_trg = np.nan
@@ -1021,7 +1027,10 @@ class SAR_Base_Interface(Node):
         self.Theta_y_trg = np.round(TriggerData_msg.optical_flow_trg.y,3)
         self.Tau_trg = np.round(TriggerData_msg.optical_flow_trg.z,3)
         self.Tau_CR_trg = np.round(TriggerData_msg.tau_cr_trg,3)
-
+        self.Tau_CM_trg = np.round(TriggerData_msg.tau_cm_trg,3)
+        self.Tau_DH_trg = np.round(TriggerData_msg.tau_dh_trg,3)
+        self.Theta_x_CM_trg = np.round(TriggerData_msg.theta_x_cm_trg,3)
+        
         self.Vel_mag_B_O_trg = np.round(TriggerData_msg.vel_mag_b_o_trg,3)
         self.Vel_angle_B_O_trg = np.round(TriggerData_msg.vel_angle_b_o_trg,3)
 

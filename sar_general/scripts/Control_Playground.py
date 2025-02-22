@@ -44,6 +44,7 @@ def cmd_send(env):
             24: env.handle_Arm_Quad,
             #30: env.handle_Thrust_CMD,
             #31: env.handle_Motor_CMD,
+
             #90: env.handle_GZ_Pose_Reset,
             91: env.handle_GZ_StickyPads,
             92: env.handle_GZ_Global_Vel_traj,
@@ -51,6 +52,7 @@ def cmd_send(env):
             94: env.handle_Optical_Flow_Flag,
             95: env.handle_test_policy,
             96: env.handle_test_policy_,
+            98: env.handle_OpticalFlow_Accuracy,
 
         }
         

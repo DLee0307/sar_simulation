@@ -55,7 +55,9 @@ float64 d_perp_cr_trg
 
 geometry_msgs/Vector3 optical_flow_trg
 float64 tau_cr_trg
-#float64 tau_dh_trg
+float64 tau_cm_trg
+float64 theta_x_cm_trg
+float64 tau_dh_trg
 
 float64[4] nn_output_trg
 float64 a_trg_trg

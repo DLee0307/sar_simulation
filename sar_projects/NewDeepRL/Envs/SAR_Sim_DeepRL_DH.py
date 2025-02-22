@@ -100,6 +100,10 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         self.D_perp_CR_min = np.inf
         self.D_perp_pad_min = np.inf
         self.Tau_CR_trg = np.inf
+        self.Tau_CM_trg = np.inf
+        self.Theta_x_CM_trg = np.inf
+        self.Tau_DH_trg = np.inf
+        self.Theta_x_CM_trg = np.inf
         self.Tau_trg = np.inf
 
         ## DOMAIN RANDOMIZATION
@@ -188,6 +192,9 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         self.D_perp_CR_min = np.inf
         self.D_perp_pad_min = np.inf
         self.Tau_CR_trg = np.inf
+        self.Tau_CM_trg = np.inf
+        self.Tau_DH_trg = np.inf
+        self.Theta_x_CM_trg = np.inf
         self.Tau_trg = np.inf
 
         self.obs_trg = np.full(self.obs_trg.shape[0],np.nan)
@@ -337,7 +344,9 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         # print("self.Policy_Type", self.Policy_Type)
 
 #/////
+
         self.calOF_activation()
+        
 #/////
 
         self._iterStep(n_steps=20)
@@ -440,6 +449,9 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
                 "Impact_Flag_Ext": self.Impact_Flag_Ext,
                 "D_perp_pad_min": self.D_perp_pad_min,
                 "Tau_CR_trg": self.Tau_CR_trg,
+                "Tau_CM_trg": self.Tau_CM_trg,
+                "Theta_x_CM_trg": self.Theta_x_CM_trg,
+                "Tau_DH_trg": self.Tau_DH_trg,
                 "Plane_Angle": self.Plane_Angle_deg,
                 "V_mag": self.V_mag,
                 "V_angle": self.V_angle,
@@ -486,6 +498,9 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
                 "Impact_Flag_Ext": self.Impact_Flag_Ext,
                 "D_perp_pad_min": self.D_perp_pad_min,
                 "Tau_CR_trg": self.Tau_CR_trg,
+                "Tau_CM_trg": self.Tau_CM_trg,
+                "Theta_x_CM_trg": self.Theta_x_CM_trg,
+                "Tau_DH_trg": self.Tau_DH_trg,
                 "Plane_Angle": self.Plane_Angle_deg,
                 "V_mag": self.V_mag,
                 "V_angle": self.V_angle,
@@ -763,16 +778,18 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         if self.BodyContact_Flag:
             R_Legs = max(R_Legs-0.25,0)
 
+#/////
         if self.CameraContact_Flag:
 
             ## CALC REWARD VALUES
             print("Camera is contacted")
-            R_tx = 0
-            R_LT = 0
-            R_GM = 0
-            R_Phi = 0
-            R_Legs = 0
-
+            self.CameraContact_Flag = False
+            # R_tx = 0
+            # R_LT = 0
+            # R_GM = 0
+            # R_Phi = 0
+            # R_Legs = 0
+#/////
         self.reward_vals = [R_dist,R_tau_cr,R_tx,R_LT,R_GM,R_Phi,R_Legs]
         R_t = np.dot(self.reward_vals,list(self.reward_weights.values()))
         self.reward = R_t/self.W_max

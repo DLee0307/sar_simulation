@@ -216,7 +216,9 @@ void SAR_DataConverter::CtrlData_Callback(const sar_msgs::msg::CtrlData::SharedP
     Theta_y_trg = Optical_Flow_trg.y;
     Tau_trg = Optical_Flow_trg.z;
     Tau_CR_trg = ctrl_msg->tau_cr_trg;
-    //Tau_DH_trg = ctrl_msg->tau_dh_trg;
+    Tau_CM_trg = ctrl_msg->tau_cm_trg;
+    Theta_x_CM_trg = ctrl_msg->theta_x_cm_trg;
+    Tau_DH_trg = ctrl_msg->tau_dh_trg;
     D_perp_trg = ctrl_msg->pose_p_b_trg.position.z;
     D_perp_CR_trg = ctrl_msg->d_perp_cr_trg;
 

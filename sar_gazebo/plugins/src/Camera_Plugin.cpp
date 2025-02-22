@@ -15,6 +15,7 @@ public:
   bool Optical_Flow_Flag = false;
   float Tau_DH = 0.0f;
   float Theta_x_DH = 0.0f;
+  float Theta_y_DH = 0.0f;
 
   ////!! ROS2 Publisher
   public: std::shared_ptr<rclcpp::Node> ros_node;
@@ -74,10 +75,12 @@ void Camera_Plugin::CameraMsg(const gz::msgs::Image &_msg)
   {
     this->dataPtr->Tau_DH = 5;
     this->dataPtr->Theta_x_DH = 20;
+    this->dataPtr->Theta_y_DH = 20;
 
     sar_msgs::msg::OpticalFlowData msg;
     msg.tau = this->dataPtr->Tau_DH;
     msg.theta_x = this->dataPtr->Theta_x_DH;
+    msg.theta_x = this->dataPtr->Theta_y_DH;
     
     this->dataPtr->opticalflow_publisher->publish(msg);
   }
@@ -186,6 +189,7 @@ void Camera_Plugin::OF_Calc_Opt_Sep()
 
     this->dataPtr->Tau_DH = 1/b[2];
     this->dataPtr->Theta_x_DH = b[0];
+    this->dataPtr->Theta_y_DH = b[1];
     
 
     if (std::isnan(this->dataPtr->Tau_DH)) {
@@ -200,11 +204,16 @@ void Camera_Plugin::OF_Calc_Opt_Sep()
         this->dataPtr->Theta_x_DH = std::clamp(this->dataPtr->Theta_x_DH, -20.0f, 20.0f);
     }
 
-    sar_msgs::msg::OpticalFlowData msg;
+    if (std::isnan(this->dataPtr->Theta_y_DH)) {
+      this->dataPtr->Theta_y_DH = 20;
+    } else {
+        this->dataPtr->Theta_y_DH = std::clamp(this->dataPtr->Theta_y_DH, -20.0f, 20.0f);
+    }    
+      sar_msgs::msg::OpticalFlowData msg;
 
     msg.tau = this->dataPtr->Tau_DH;
     msg.theta_x = this->dataPtr->Theta_x_DH;
-    msg.theta_y = b[1];
+    msg.theta_y = this->dataPtr->Theta_y_DH;
     
 
     this->dataPtr->opticalflow_publisher->publish(msg);

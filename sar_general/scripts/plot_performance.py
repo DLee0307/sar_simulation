@@ -33,7 +33,7 @@ def main(args=None):
     BASE_PATH = os.path.join(workspace_path, 'src', 'sar_simulation')
     LOG_DIR = f"{BASE_PATH}/sar_general" 
 
-    fileName = "PolicyPerformance_Data_Tau_DH_DLR[2-4].csv"
+    fileName = "75deg.csv"
     filePath = os.path.join(LOG_DIR,fileName)
 
     df = pd.read_csv(filePath, sep=',', comment="#")
@@ -76,10 +76,10 @@ def main(args=None):
     ax.set_rmin(0)
     ax.set_rmax(R.max())
 
-    ## SAVE FIGURE WITH TEXT
-    config_str = f"Trg_Tau_Cam: DRL[2-4] \
-        \nTrg_Acc: DRL[2-4]" 
-    fig.text(0,1,config_str,transform=plt.gcf().transFigure,ha='left',va='top',fontsize=6)
+    # ## SAVE FIGURE WITH TEXT
+    # config_str = f"Trg_Tau_Cam: DRL[2-4] \
+    #     \nTrg_Acc: DRL[2-4]" 
+    # fig.text(0,1,config_str,transform=plt.gcf().transFigure,ha='left',va='top',fontsize=6)
 
 
     plt.show(block=True)

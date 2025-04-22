@@ -33,7 +33,7 @@ def main(args=None):
     BASE_PATH = os.path.join(workspace_path, 'src', 'sar_simulation')
     LOG_DIR = f"{BASE_PATH}/sar_general" 
 
-    fileName = "75deg.csv"
+    fileName = "PolicyPerformance_stucco.csv"
     filePath = os.path.join(LOG_DIR,fileName)
 
     df = pd.read_csv(filePath, sep=',', comment="#")

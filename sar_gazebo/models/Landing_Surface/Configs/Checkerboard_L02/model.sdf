@@ -12,17 +12,21 @@
     	<pose>0 0 0.005 0 0 0</pose>
         <geometry>
           <box>
-            <!--<size>4 4 0.01</size>-->
-            <!--<size>16 16 0.01</size>-->
-            <size>128 128 0.01</size> <!--stucco-->
-            <!--<size>0.7 1.0 0.01</size>-->
+            <!-- <size>4 4 0.01 </size>-->
+            <!-- <size>16 16 0.01 </size> --> <!-- chessboard -->
+            <!-- <size>128 128 0.01 </size> --> <!-- stucco -->
+            <!-- <size>8 8 0.01 </size> --> <!-- brick -->
+            <size>16 16 0.01 </size> <!-- tree -->
+            <!--<size>0.7 1.0 0.01 </size>-->
           </box>
         </geometry>
         <material>
         <pbr>
             <metal>
             <!-- <albedo_map>model://Configs/Checkerboard_L02/Surface_Texture/Images/chessboard_L_0.33.jpg</albedo_map> -->
-            <albedo_map>model://Configs/Checkerboard_L02/Surface_Texture/Images/stucco.jpg</albedo_map>
+            <!-- <albedo_map>model://Configs/Checkerboard_L02/Surface_Texture/Images/stucco.jpg</albedo_map> -->
+            <!-- <albedo_map>model://Configs/Checkerboard_L02/Surface_Texture/Images/brick.jpg</albedo_map> -->
+            <albedo_map>model://Configs/Checkerboard_L02/Surface_Texture/Images/tree.jpg</albedo_map>
             
             <!--<albedo_map>model://Configs/Checkerboard_L02/Surface_Texture/Images/Checkerboard_L02_2.jpg</albedo_map>-->
             <!--<albedo_map>model://Configs/Checkerboard_L02/Surface_Texture/Images/chessboard.png</albedo_map>-->

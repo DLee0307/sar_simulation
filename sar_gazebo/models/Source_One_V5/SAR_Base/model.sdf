@@ -284,11 +284,11 @@
     <link name='Camera'>
       <!-- <pose>0 0 69.3e-3 0 0 0</pose> --> <!-- on the battery -->
       <!-- <pose>-63.5e-3 0 52e-3 0 0 0</pose> --> <!-- backside -->
-      <!-- <pose>-63.5e-3 0 185e-3 0 0 0</pose>  --> <!-- backside --> 
+      <!-- <pose>-63.5e-3 0 185e-3 0 0 0</pose> --> <!-- backside --> 
       <!-- <pose>0 0 180.25e-3 0 0 0</pose> --> <!-- CenterHigh --> 
       <pose>63.5e-3 0 52e-3 0 0 0</pose> <!-- FrontMiddle --> 
       <!-- <pose>65.5e-3 0 50e-3 0 -0.262 3.14</pose> --> <!-- frontside 75deg --> 
-      <!-- <pose>65.5e-3 0 50e-3 0 -0.523 3.14</pose>--> <!-- frontside 60deg --> 
+      <!-- <pose>65.5e-3 0 50e-3 0 -0.523 3.14</pose> --> <!-- frontside 60deg --> 
       <!-- <pose>65.5e-3 0 50e-3 0 -0.785 3.14</pose> --> <!-- frontside 45deg --> 
 
       <inertial>

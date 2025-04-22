@@ -197,7 +197,7 @@ gz service -s /world/empty/create \
 
       <plugin filename="ImageDisplay" name="Image Display">
         <gz-gui>
-          <title>RGB camera</title>
+          <title>Camera View</title>
           <property key="state" type="string">floating</property>
           <property type="double" key="width">350</property>
           <property type="double" key="height">315</property>

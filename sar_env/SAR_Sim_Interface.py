@@ -636,9 +636,9 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         self.sendCmd("GZ_StickyPads",cmd_vals=[1.0,1.0,1.0],cmd_flag=cmd_flag)
 
     def handle_test_policy(self):
-        self.adjustSimSpeed(0.05)
+        self.adjustSimSpeed(0.1)
         self.sendCmd("GZ_StickyPads",cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
-        self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
+        #self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
 
     def handle_test_policy_(self):
         self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
@@ -646,8 +646,8 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
     def handle_OpticalFlow_Accuracy(self):
 
-        for V_mag in np.arange(3.5, 4.5, 0.5):  # V_mag: 2.0 ~ 4.0 (Increment by 0.5)
-            for V_angle in np.arange(90, 95, 5):  # V_angle: 15 ~ 90 (Increment by 5)
+        for V_mag in np.arange(4.0, 4.5, 0.5):  # V_mag: 2.0 ~ 4.0 (Increment by 0.5)
+            for V_angle in np.arange(60, 95, 5):  # V_angle: 15 ~ 90 (Increment by 5)
                 self.V_mag = V_mag
                 self.V_angle = V_angle
 
@@ -740,7 +740,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
 #)))))
 
-                while Tau_CM >= 0.50:
+                while Tau_CM >= 0.55:
                     #self._getObs_Tau()
                     Tau_DH, Theta_x_DH, Tau_CR, Theta_x, D_perp_CR, Tau_CM = self._getObs_Tau()
                     time.sleep(0.1)
@@ -754,7 +754,8 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
                 Tau_values = []
 
-                while Tau_CM >= 0.20:
+                while Tau_CM >= 0.05:
+                    print("Tau_CM : ",Tau_CM)
                     #self._getObs_Tau()
                     Tau_DH, Theta_x_DH, Tau_CR, Theta_x, D_perp_CR, Tau_CM = self._getObs_Tau()
                     time.sleep(0.1)

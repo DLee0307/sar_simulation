@@ -75,6 +75,31 @@ install(TARGETS Practice
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin)
 
+# Rolling_Shutter_Plugin
+add_library(Rolling_Shutter_Plugin SHARED plugins/src/Rolling_Shutter_Plugin.cpp)
+
+ament_target_dependencies(Rolling_Shutter_Plugin
+  gz-sim8
+  gz-sensors8
+  rclcpp
+  sar_msgs
+  std_msgs
+  sensor_msgs
+)
+
+target_link_libraries(Rolling_Shutter_Plugin
+  gz-sim8::gz-sim8
+  gz-sensors8::gz-sensors8
+  gz-msgs10::gz-msgs10
+  ${rclcpp_LIBRARIES}
+
+)
+
+install(TARGETS Rolling_Shutter_Plugin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin)
+
 # Camera_Plugin
 add_library(Camera_Plugin SHARED plugins/src/Camera_Plugin.cpp)
 

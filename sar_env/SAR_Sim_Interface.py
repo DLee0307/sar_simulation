@@ -378,14 +378,14 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
         # Run the command
         self.sendCmd('Pos',cmd_vals=pos,cmd_flag=1.0)
-        self._iterStep(100)
+        self._iterStep(100) # For stabilization
 
         model_name = self.SAR_Config
         x, y, z = pos[0], pos[1], pos[2]
 
         self.pausePhysics(pause_flag=True)
 
-        # Use subprocess to call the GZ service for setting pose
+        # Use subprocess to call the GZ service for setting pose - twice setting pose for stabilization
         # Need to chane "SAR_Config"
         cmd = [
             'gz', 'service', '-s', '/world/empty/set_pose',
@@ -407,6 +407,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         self.pausePhysics(pause_flag=True)
         #self.callService('/gazebo/set_model_state',state_srv,SetModelState)
         self._iterStep(1000)
+        # for stabilization
 
         # ## SET DESIRED VEL IN CONTROLLER
         # self.sendCmd('GZ_Const_Vel_Traj',cmd_vals=[np.nan,vel[0],0.0],cmd_flag=0.0)
@@ -420,6 +421,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
         time.sleep(1)
         # ## SET DESIRED VEL IN CONTROLLER
+        # making desired velocity via acceleration
         self.sendCmd('Const_Vel_traj',cmd_vals=[vel[0],self.TrajAcc_Max[0],self.TrajJerk_Max[0]],cmd_flag=0.0)
         self._iterStep(2)
         #self.sendCmd('Const_Vel_traj',cmd_vals=[np.nan,vel[1],0.0],cmd_flag=1.0)
@@ -454,6 +456,8 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 #/////
 
         # If step is terminated due to impact or out of bound
+        
+        # Deactivate Optical_Flow_Flag
         self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
         self.adjustSimSpeed(1.0)
 
@@ -488,6 +492,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         self._iterStep(1000)
         time.sleep(1)
 
+        #Detach the pad with ceiling
         rclpy.spin_once(self)
         self.sendCmd('GZ_StickyPads',cmd_vals=[1.0,1.0,1.0],cmd_flag=1.0)
         self._iterStep(10)
@@ -500,7 +505,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 # https://github.com/gazebosim/gz-sim/pull/2440
 # https://github.com/gazebosim/gz-sim/issues/2318
 
-        # Use subprocess to call the GZ service for setting pose
+        # Use subprocess to call the GZ service for setting pose Twice pose setting for stabilization
         # Need to chane "SAR_Config"
         cmd = [
             'gz', 'service', '-s', '/world/empty/set_pose',

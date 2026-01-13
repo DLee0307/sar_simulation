@@ -228,6 +228,7 @@ static struct vec Gyro_dyn;
 
 // OPTICAL FLOW Flag
 bool Optical_Flow_Flag = false;
+bool Rolling_Shutter_Flag = false;
 
 // OPTICAL FLOW STATES (GROUND TRUTH)
 float Tau = 0.0f;       // [s]
@@ -516,7 +517,7 @@ void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd)
             Armed_Flag = CTRL_Cmd->cmd_flag;
             break;
 
-        case 92: // Upload Gazebo Velocity Trajectory Values (Instantaneous Acceleration)
+        case 89: // Upload Gazebo Velocity Trajectory Values (Instantaneous Acceleration)
 
             Traj_Type = GZ_CONST_VEL;
             axis = (axis_direction)CTRL_Cmd->cmd_flag;
@@ -551,9 +552,15 @@ void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd)
 
             break;
 
-        case 94: // Optical_Flow_Flag
+        case 92: // Optical_Flow_Flag
             Optical_Flow_Flag = CTRL_Cmd->cmd_flag;
             break;
+
+        case 93: // Rolling_Shutter_Flag
+            Rolling_Shutter_Flag = CTRL_Cmd->cmd_flag;
+            break;
+
+
 
     }
 }

@@ -46,9 +46,10 @@ void SAR_DataConverter::ConsoleLoop()
 
 
         mvprintw(10, 0,"============== World States =============");
-        mvprintw(11, 0,"r_B_O [m]:           % 6.2f % 6.2f % 6.2f",Pose_B_O.position.x,Pose_B_O.position.y,Pose_B_O.position.z);
-        mvprintw(12, 0,"V_B_O [m/s]:         % 6.2f % 6.2f % 6.2f",Twist_B_O.linear.x,Twist_B_O.linear.y,Twist_B_O.linear.z);
-        mvprintw(13, 0,"a_B_O [m/s^2]:       % 6.2f % 6.2f % 6.2f",Accel_B_O.linear.x,Accel_B_O.linear.y,Accel_B_O.linear.z);
+        mvprintw(11, 0,"r_B_O [m]:           % 6.4f % 6.2f % 6.4f",Pose_B_O.position.x,Pose_B_O.position.y,Pose_B_O.position.z);
+        mvprintw(12, 0,"V_B_O [m/s]:         % 6.4f % 6.2f % 6.4f",Twist_B_O.linear.x,Twist_B_O.linear.y,Twist_B_O.linear.z);
+        //mvprintw(13, 0,"a_B_O [m/s^2]:       % 6.2f % 6.2f % 6.2f",Accel_B_O.linear.x,Accel_B_O.linear.y,Accel_B_O.linear.z);
+        mvprintw(13, 0,"Ori [rad]:       % 6.2f % 6.2f % 6.4f",Pose_B_O.orientation.x,Pose_B_O.orientation.y,Pose_B_O.orientation.z);
         mvprintw(14, 0,"Omega_B_O [rad/s]:   % 6.2f % 6.2f % 6.2f",Twist_B_O.angular.x,Twist_B_O.angular.y,Twist_B_O.angular.z);
         mvprintw(15, 0,"AngAcc_B_O [rad/s^2]:% 6.2f % 6.2f % 6.2f",Accel_B_O.angular.x,Accel_B_O.angular.y,Accel_B_O.angular.z);
         mvprintw(16, 0,"V_B_O:  (% 5.2f % 6.2f)",Vel_mag_B_O,Vel_angle_B_O);

@@ -37,6 +37,7 @@ float64 a_trg
 float64 a_rot
 
 bool optical_flow_flag
+bool rolling_shutter_flag
 
 # ==========================
 #  STATES AT POLICY TRIGGER

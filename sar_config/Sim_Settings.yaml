@@ -6,6 +6,7 @@ SAR_Controller:
       #SAR_Type: "Crazyflie"
       #SAR_Type: "Impulse_Micro"
       SAR_Type: "Source_One_V5"
+      #SAR_Config: "Base_Model"
       #SAR_Config: "A30_L70"
       #SAR_Config: "A30_L150"
       SAR_Config: "A30_L200"
@@ -20,7 +21,7 @@ SAR_Controller:
       
       Pos_X_init: 3.0    # [m]
       Pos_Y_init: 0.0    # [m]
-      Pos_Z_init: 2.5    # [m]
+      Pos_Z_init: 2.55    # [m]
       Plane_Angle_init: 0.0 # [deg]
 
     CAM_SETTINGS:

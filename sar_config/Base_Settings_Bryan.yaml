@@ -1,11 +1,13 @@
 SAR_SETTINGS:
   SAR_Type: 'Source_One_V5'
   SAR_Config: 'A30_L200'
+  #SAR_Type: "Impulse_Micro"
+  #SAR_Config: "A15_L150"
 
   # Policy_Type: "PARAM_OPTIM"
   # Policy_Type: "DEEP_RL_SB3" 
-  # Policy_Type: "DEEP_RL_ONBOARD" 
-  Policy_Type: "DEEP_RL_ONBOARD_DH" 
+  Policy_Type: "DEEP_RL_ONBOARD" 
+  # Policy_Type: "DEEP_RL_ONBOARD_DH" 
 
 
 PLANE_SETTINGS: # INITIAL PLANE POSE SETTINGS

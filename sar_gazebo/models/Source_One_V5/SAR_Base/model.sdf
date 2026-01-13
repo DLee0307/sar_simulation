@@ -328,6 +328,8 @@
         </geometry>
       </collision>
 <!--http://classic.gazebosim.org/tutorials?tut=ros_gzplugins-->
+<!--camear sensor part-->
+
       <sensor name="camera" type="camera">
         <!-- <pose>0 0 0.3e-1 0 -1.57 0</pose> -->
         <pose>0 0 20e-3 0 -1.57 0</pose>
@@ -342,14 +344,16 @@
           <image>
             <!-- <width>16</width>
             <height>16</height> -->
-            <width>64</width>
-            <height>64</height>
+            <!-- <width>64</width>
+            <height>64</height> -->
+            <width>80</width>
+            <height>80</height>
             <!--64<format>R8G8B8</format>-->
             <format>L8</format>
           </image>
           <clip>
             <near>0.02</near>
-            <far>10</far>
+            <far>20</far>
           </clip>
 <!--          <noise>
             <type>gaussian</type>
@@ -363,12 +367,12 @@
           </noise>
 -->          
           <lens>
-            <type>sterographic</type>
-            <!-- <type>pinhole</type> -->
+            <!-- <type>sterographic</type> -->
+            <type>pinhole</type>
           </lens>
         </camera>
         <always_on>1</always_on>
-        <topic>camera</topic>
+        <topic>/camera</topic>
       </sensor>
 
       <visual name='camera_center'>
@@ -489,12 +493,27 @@
         name="gz::sim::systems::Set_Velocity_Plugin">
     </plugin>
 -->
-<!---->
-    <plugin
+
+    <!-- <plugin
         filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libCamera_Plugin.so"
         name="gz::sim::systems::Camera_Plugin">
-    </plugin>
+    </plugin> -->
 
+    <!-- -->
+    <plugin
+        filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libRolling_Shutter_Plugin.so"
+        name="gz::sim::systems::Rolling_Shutter_Plugin">
+        <world_name>empty</world_name>
+        <camera_topic>/camera</camera_topic>
+        <steps_per_ms>1</steps_per_ms>
+        <rs_width>80</rs_width>
+        <rs_height>80</rs_height>
+        <block_rows>10</block_rows>
+        <readout_ms>8</readout_ms>
+        <blank_ms>2</blank_ms>
+        <out_topic>/camera/rolling_shutter</out_topic>
+        <frame_id>rolling_shutter_camera</frame_id>
+    </plugin>
 
     <plugin
         filename="/home/dlee/ros2_ws/install/sar_gazebo/lib/libMotor_Plugin.so"

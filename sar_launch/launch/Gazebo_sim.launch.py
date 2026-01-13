@@ -51,7 +51,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
         ),
-        launch_arguments={'gz_args': f'-r {os.path.expanduser("~/ros2_ws/src/sar_simulation/sar_gazebo/worlds/empty.world")}'}.items(),  # 절대 경로로 empty.world 파일 설정
+        launch_arguments={'gz_args': f' -r {os.path.expanduser("~/ros2_ws/src/sar_simulation/sar_gazebo/worlds/empty.world")}'}.items(),  # 절대 경로로 empty.world 파일 설정
     )
 
     # SAR Spawn
@@ -74,7 +74,7 @@ def generate_launch_description():
     GROUND_SPAWN = Node(
         package='ros_gz_sim',
         executable='create',
-        arguments=['-file', Ground_SDF_Path, '-z', '-17.5'],
+        arguments=['-file', Ground_SDF_Path, '-x', '-20.0', '-z', '-37.5'],
         output='screen',
     )    
 

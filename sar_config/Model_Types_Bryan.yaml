@@ -216,6 +216,7 @@ SAR_Type:
         i_range_z: 0.1
 
         ## ORIENTATION XY
+        #R_kp_xy: 2.7
         R_kp_xy: 0.9
         R_kd_xy: 0.1
         R_ki_xy: 0.0
@@ -268,6 +269,12 @@ SAR_Type:
           Ref_Ixx: 3.17e-3          # [kg*m^2]
           Ref_Iyy: 2.71e-3          # [kg*m^2]
           Ref_Izz: 5.27e-3          # [kg*m^2] 
+
+          Leg_Angle:  0              # [deg]
+          Leg_Length:  0       # [m]
+  
+          Gamma_eff:  0           # [deg]
+          L_eff:  0            # [m]
 
         # ============================================================== # 
          

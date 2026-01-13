@@ -414,6 +414,10 @@ class SAR_Base_Interface(Node):
         ## CALC STARTING POSITION IN GLOBAL COORDS
         # (Derivation: Research_Notes_Book_3.pdf (9/17/23))
         r_P_O = np.array(self.r_P_O)                        # Plane Position wrt to Origin - {X_W,Y_W,Z_W}
+
+        ##DH
+        r_P_O = (4.05,0.0,2.7)
+
         r_P_B = np.array([(Tau_CR_start + Tau_Bonus)*V_tx,
                           0,
                           (Tau_Body_start + Tau_Bonus)*V_perp])             # Body Position wrt to Plane - {t_x,t_y,n_p}
@@ -539,6 +543,10 @@ class SAR_Base_Interface(Node):
         cmd_flag = self.userInput("Turn optical flow flag On/Off (1,0): ",float)
         self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=cmd_flag)
 
+    def handle_Rolling_Shutter_Flag(self):
+        cmd_flag = self.userInput("Turn rolling shutter flag On/Off (1,0): ",float)
+        self.sendCmd("Rolling_Shutter_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=cmd_flag)
+
     def handle_Ang_Accel(self):
         cmd_vals = self.userInput("Set desired angular acceleration values (x,y,z): ",float)
         cmd_flag = self.userInput("Ang_Accel control On/Off (1,0): ",float)
@@ -620,6 +628,9 @@ class SAR_Base_Interface(Node):
 
         ## POS VELOCITY CONDITIONS MET
         r_B_O = self.startPos_ImpactTraj(V_B_P,Acc=None)
+
+        print("Plane_Angle_rad value : ", self.Plane_Angle_rad)
+        print("self.r_P_O :",self.r_P_O)
 
         ## APPROVE START POSITION
         print(YELLOW,f"Start Position: ({r_B_O[0]:.2f},{self.r_B_O[1]:.2f},{r_B_O[2]:.2f})",RESET)
@@ -774,11 +785,11 @@ class SAR_Base_Interface(Node):
             'Motor_CMD':31,
 
 
-
+            'GZ_Const_Vel_Traj':89,
             'GZ_Pose_Reset':90,
-            'GZ_StickyPads':91,
-            'GZ_Const_Vel_Traj':92,
-            'Optical_Flow_Flag':94,
+            'GZ_StickyPads':91, #turn on the Sticky_Lug_Plugin
+            'Optical_Flow_Flag':92, #turn on the Camera_Plugin
+            'Rolling_Shutter_Flag':93, #turn on the Rolling_Shutter_Plugin
             'test_policy':95,
             'OpticalFlow_Accuracy':98
         }

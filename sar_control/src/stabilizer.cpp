@@ -180,7 +180,7 @@ void Controller::OpticalFlow_Update_Callback(const sar_msgs::msg::OpticalFlowDat
 
     // std::cout << "$$$$$$D_perp : " << D_perp << std::endl;
     // std::cout << "$$$$$$Vel_B_P.z : " << Vel_B_P.z << std::endl;
-    // double Tau_groundtruth = Tau - 0.07175/Vel_B_P.z; //camera general
+    double Tau_groundtruth = Tau - 0.07175/Vel_B_P.z; //camera general
     // double Tau_groundtruth = Tau - 0.20475/Vel_B_P.z; //camera up
 
 
@@ -695,6 +695,7 @@ void Controller::publishCtrlData()
 
     //
     CtrlData_msg.optical_flow_flag = Optical_Flow_Flag;
+    CtrlData_msg.rolling_shutter_flag = Rolling_Shutter_Flag;
 
     // ESTIMATED OPTICAL FLOW DATA
     CtrlData_msg.optical_flow_cam.x = Theta_x_Cam;

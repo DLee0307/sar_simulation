@@ -250,6 +250,7 @@ extern float thrust_override[4];    // Motor thrusts [g]
 
 // OPTICAL FLOW Flag
 extern bool Optical_Flow_Flag;
+extern bool Rolling_Shutter_Flag;
 
 // OPTICAL FLOW STATES (GROUND TRUTH)
 extern float Tau;           // [s]

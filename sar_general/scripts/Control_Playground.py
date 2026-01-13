@@ -45,11 +45,13 @@ def cmd_send(env):
             #30: env.handle_Thrust_CMD,
             #31: env.handle_Motor_CMD,
 
+            89: env.handle_GZ_Global_Vel_traj,
             #90: env.handle_GZ_Pose_Reset,
             91: env.handle_GZ_StickyPads,
-            92: env.handle_GZ_Global_Vel_traj,
+            92: env.handle_Optical_Flow_Flag,
+            93: env.handle_Rolling_Shutter_Flag,
             #93: env.handle_GZ_Rel_Vel_traj,
-            94: env.handle_Optical_Flow_Flag,
+            
             95: env.handle_test_policy,
             96: env.handle_test_policy_,
             98: env.handle_OpticalFlow_Accuracy,
@@ -58,10 +60,11 @@ def cmd_send(env):
         
         try:
             print("========== Command Types ==========")
-            print("0: Ctrl_Reset  7: Ang_Accel    10: P2P_traj          20: Tumble_Detect    24: Arm_Quad    90: GZ_Pose_Reset")
-            print("1: Pos         8: Policy       11: Global_Vel_traj   21: Load_Params      30: Thrust_CMD  91: GZ_StickyPads")
-            print("2: Vel         9: Plane_Pose   12: Rel_Vel_traj      22: Start_Logging    31: Motor_CMD   92: GZ_Global_Vel_traj")
-            print("5: Stop                        13: Impact_traj       23: Cap_Logging                      93: GZ_Rel_Vel_traj")
+            print("0: Ctrl_Reset  7: Ang_Accel    10: P2P_traj          20: Tumble_Detect    24: Arm_Quad    89: GZ_Global_Vel_traj")
+            print("1: Pos         8: Policy       11: Global_Vel_traj   21: Load_Params      30: Thrust_CMD  ")
+            print("2: Vel         9: Plane_Pose   12: Rel_Vel_traj      22: Start_Logging    31: Motor_CMD   ")
+            print("5: Stop                        13: Impact_traj       23: Cap_Logging                      ")
+            print("90: GZ_Pose_Reset    91: GZ_StickyPads   92: Optical_Flow_Flag    93: Rolling_Sutter_Flag")
 
 
             cmd = env.userInput("\nCmd: ",int)

@@ -1,8 +1,8 @@
 #include "SAR_DataConverter.h"
 SAR_DataConverter::SAR_DataConverter()
     : Node("SAR_DataConverter_Node") {
+        //std::cout << "!!!!!!!!!!!!!" << std::endl;
 
-	//std::cout << "!!!!!!!!!!!!!!!!!" << std::endl;
         cmd_input_service_ = this->create_service<sar_msgs::srv::CTRLCmdSrv>("/SAR_DC/CMD_Input", std::bind(&SAR_DataConverter::CMD_SAR_DC_Callback, this, std::placeholders::_1, std::placeholders::_2));
         CMD_Output_Service_Sim = this->create_client<sar_msgs::srv::CTRLCmdSrv>("/CTRL/Cmd_ctrl"); //To Stabilizer
         CMD_Output_Service_Exp = this->create_client<crazyflie_interfaces::srv::CTRLCmdSrv>("/cf1/Cmd_ctrl"); // To crazyflie_server.cpp
@@ -23,9 +23,24 @@ SAR_DataConverter::SAR_DataConverter()
             RCLCPP_INFO(this->get_logger(), "/cf231/Cmd_ctrl service is available");
         }*/
 
+        // GAZEBO PIPELINE
+        cf1_States_B_O_Sub = this->create_subscription<crazyflie_interfaces::msg::LogDataGeneric>("/cf1/States_B_O", 1, std::bind(&SAR_DataConverter::cf1_States_B_O_Callback, this, std::placeholders::_1));
+
         // INTERNAL SENSOR SUBSCRIBERS
         CTRL_Data_Sub = this->create_subscription<sar_msgs::msg::CtrlData>("/CTRL/data", 1, std::bind(&SAR_DataConverter::CtrlData_Callback, this, std::placeholders::_1));
         CTRL_Debug_Sub = this->create_subscription<sar_msgs::msg::CtrlDebug>("/CTRL/debug", 1, std::bind(&SAR_DataConverter::CtrlDebug_Callback, this, std::placeholders::_1));
+
+        // GAZEBO PIPELINE
+        SAR_Sticky_Pad_Connect_Sub_1 = this->create_subscription<sar_msgs::msg::StickyPadConnect>("/SAR_Internal/Leg_Connections1", 1, std::bind(&SAR_DataConverter::Pad_Connections_Callback_1, this, std::placeholders::_1));
+        SAR_Sticky_Pad_Connect_Sub_2 = this->create_subscription<sar_msgs::msg::StickyPadConnect>("/SAR_Internal/Leg_Connections2", 1, std::bind(&SAR_DataConverter::Pad_Connections_Callback_2, this, std::placeholders::_1));
+        SAR_Sticky_Pad_Connect_Sub_3 = this->create_subscription<sar_msgs::msg::StickyPadConnect>("/SAR_Internal/Leg_Connections3", 1, std::bind(&SAR_DataConverter::Pad_Connections_Callback_3, this, std::placeholders::_1));
+        SAR_Sticky_Pad_Connect_Sub_4 = this->create_subscription<sar_msgs::msg::StickyPadConnect>("/SAR_Internal/Leg_Connections4", 1, std::bind(&SAR_DataConverter::Pad_Connections_Callback_4, this, std::placeholders::_1));
+        
+        activate_stickypads_service_1 = this->create_client<sar_msgs::srv::ActivateStickyPads>("/SAR_Internal/Sticky_Leg_1");
+        activate_stickypads_service_2 = this->create_client<sar_msgs::srv::ActivateStickyPads>("/SAR_Internal/Sticky_Leg_2");
+        activate_stickypads_service_3 = this->create_client<sar_msgs::srv::ActivateStickyPads>("/SAR_Internal/Sticky_Leg_3");
+        activate_stickypads_service_4 = this->create_client<sar_msgs::srv::ActivateStickyPads>("/SAR_Internal/Sticky_Leg_4");
+        // pad_connections_service = this->create_client<sar_msgs::srv::PadConnections>("/SAR_Internal/Pad_Connections");
 
         // CRAZYSWARM PIPELINE
         cf1_States_B_O_Sub = this->create_subscription<crazyflie_interfaces::msg::LogDataGeneric>("/cf1/States_B_O", 1, std::bind(&SAR_DataConverter::cf1_States_B_O_Callback, this, std::placeholders::_1));
@@ -41,7 +56,7 @@ SAR_DataConverter::SAR_DataConverter()
         // ROS2 PARAMETER
         ROS_Parmas_Sub = this->create_subscription<sar_msgs::msg::ROSParams>("/ROS2/PARAMETER", 1, std::bind(&SAR_DataConverter::ROSParams_Callback, this, std::placeholders::_1));
 
-        //@@@ Clock 객체를 초기화
+        //Initialize Clock Class
         clock_ = std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
 
         // INITIALIZE STATE DATA PUBLISHERS
@@ -50,11 +65,15 @@ SAR_DataConverter::SAR_DataConverter()
         ImpactData_Pub = this->create_publisher<sar_msgs::msg::SARImpactData>("/SAR_DC/ImpactData", 1);
         MiscData_Pub = this->create_publisher<sar_msgs::msg::SARMiscData>("/SAR_DC/MiscData", 1);
 
+        // LOGGING 
+        Logging_Service = this->create_service<sar_msgs::srv::LoggingCMD>("/SAR_DC/DataLogging", std::bind(&SAR_DataConverter::DataLogging_Callback, this, std::placeholders::_1, std::placeholders::_2));
+
         // INITIALIZE SAR_DC THREADS
         SAR_DC_Thread = std::thread(&SAR_DataConverter::MainLoop, this);
         ConsoleOutput_Thread = std::thread(&SAR_DataConverter::ConsoleLoop, this);
+        Logging_Thread = std::thread(&SAR_DataConverter::LoggingLoop, this);
 
-
+        this->node.Subscribe("/ENV/SurfaceContact", &SAR_DataConverter::Surface_Contact_Callback, this);
 }
 
 bool SAR_DataConverter::CMD_SAR_DC_Callback(const sar_msgs::srv::CTRLCmdSrv::Request::SharedPtr request,
@@ -72,6 +91,65 @@ bool SAR_DataConverter::CMD_SAR_DC_Callback(const sar_msgs::srv::CTRLCmdSrv::Req
     req_copy_sim->cmd_vals = request->cmd_vals;
     req_copy_sim->cmd_flag = request->cmd_flag;
     req_copy_sim->cmd_rx = request->cmd_rx;
+
+    switch (request->cmd_type)
+    {
+        case 0:
+
+            resetStateData();
+            resetTriggerData();
+            resetImpactData();
+            
+            // std::cout << "resetTriggerData is run " << std::endl;
+
+            // if (DATA_TYPE.compare("SIM") == 0)
+            // {
+            //     // RESET SIM SPEED
+            //     SAR_DataConverter::adjustSimSpeed(SIM_SPEED);
+            //     SLOWDOWN_TYPE = 0;
+            // }            
+            
+            break;
+
+        case 91:
+            if(request->cmd_flag == 0.0){
+                Sticky_Flag = false;
+                // SAR_DataConverter::activateStickyFeet();
+                // std::cout << "case 91 " << std::endl;
+                // std::cout << "activateStickyFeet is run " << std::endl;
+            }
+            else{
+                Sticky_Flag = true;
+                //SAR_DataConverter::activateStickyFeet();
+                //std::cout << "case 91 " << std::endl;
+                //std::cout << "activateStickyFeet is run " << std::endl;
+            }
+            // auto request_ASP = std::make_shared<sar_msgs::srv::ActivateStickyPads::Request>();
+            // request_ASP->sticky_flag = Sticky_Flag;
+            // auto result_ASP = activate_stickypads_service_1->async_send_request(request_ASP);
+            SAR_DataConverter::activateStickyFeet();
+            //std::cout << "activateStickyFeet is run " << std::endl;
+
+            break;
+
+        default:
+            break;
+    }
+
+    // if(request->cmd_type == 91){
+    //     if(request->cmd_flag == 0.0){
+    //         Sticky_Flag = false;
+    //     }
+    //     else{
+    //         Sticky_Flag = true;
+    //         //std::cout << "case 91 " << std::endl;
+    //     }
+    //     // auto request_ASP = std::make_shared<sar_msgs::srv::ActivateStickyPads::Request>();
+    //     // request_ASP->sticky_flag = Sticky_Flag;
+    //     // auto result_ASP = activate_stickypads_service_1->async_send_request(request_ASP);
+    //     SAR_DataConverter::activateStickyFeet();
+    // }
+
 /*
     std::cout << "Service is requested in DataConverter" << std::endl;
     std::cout << "cmd_type: " << request->cmd_type << std::endl;
@@ -83,7 +161,8 @@ bool SAR_DataConverter::CMD_SAR_DC_Callback(const sar_msgs::srv::CTRLCmdSrv::Req
 */
     if (DATA_TYPE == "SIM")
     {
-        std::cout << "Sending request to CMD_Output_Service_Sim" << std::endl;
+        //!!! is for experiment work
+        //!!!std::cout << "Sending request to CMD_Output_Service_Sim" << std::endl;
         auto result = CMD_Output_Service_Sim->async_send_request(req_copy_sim);
 /*
         // 동기적 서비스 호출 처리
@@ -98,7 +177,7 @@ bool SAR_DataConverter::CMD_SAR_DC_Callback(const sar_msgs::srv::CTRLCmdSrv::Req
         } else {
             std::cerr << "Service call to SIM failed to complete" << std::endl;
         }*/
-        std::cout << "CMD_SAR_DC_Callback in SAR_DataConverter.cpp is completed" << std::endl;
+        //!!!std::cout << "CMD_SAR_DC_Callback in SAR_DataConverter.cpp is completed" << std::endl;
         return request->cmd_rx;
     }
     else {

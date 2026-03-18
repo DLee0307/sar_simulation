@@ -136,20 +136,6 @@ bool SAR_DataConverter::CMD_SAR_DC_Callback(const sar_msgs::srv::CTRLCmdSrv::Req
             break;
     }
 
-    // if(request->cmd_type == 91){
-    //     if(request->cmd_flag == 0.0){
-    //         Sticky_Flag = false;
-    //     }
-    //     else{
-    //         Sticky_Flag = true;
-    //         //std::cout << "case 91 " << std::endl;
-    //     }
-    //     // auto request_ASP = std::make_shared<sar_msgs::srv::ActivateStickyPads::Request>();
-    //     // request_ASP->sticky_flag = Sticky_Flag;
-    //     // auto result_ASP = activate_stickypads_service_1->async_send_request(request_ASP);
-    //     SAR_DataConverter::activateStickyFeet();
-    // }
-
 /*
     std::cout << "Service is requested in DataConverter" << std::endl;
     std::cout << "cmd_type: " << request->cmd_type << std::endl;

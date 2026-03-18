@@ -30,7 +30,7 @@ RESET = '\033[0m'  # Reset to default color
 
 class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
     #def __init__(self,Ang_Acc_range=[-90.0,-80.0],V_mag_range=[1,4],V_angle_range=[15,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=True,GZ_Timeout=False):
-    def __init__(self,Ang_Acc_range=[-90.0,-80.0],V_mag_range=[1,4],V_angle_range=[15,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=False,GZ_Timeout=False):
+    def __init__(self,Ang_Acc_range=[-90.0,-85.0],V_mag_range=[1,2],V_angle_range=[90,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=False,GZ_Timeout=False):
         SAR_Sim_Interface.__init__(self, GZ_Timeout=GZ_Timeout)
         gym.Env.__init__(self)
 
@@ -323,7 +323,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         self._iterStep(n_steps=100)
         
         # Add code from DH : Beacause of lock step?
-        time.sleep(8)
+        time.sleep(6)
 
         #rclpy.spin_once(self)
         ## ROUND OUT STEPS TO BE IN SYNC WITH CONTROLLER
@@ -345,7 +345,7 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
 #/////
 
-        self.calOF_activation()
+        # self.calOF_activation()
         
 #/////
 
@@ -530,8 +530,8 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         self.sendCmd("Policy",[0.0,a_Rot,self.Ang_Acc_range[0]],cmd_flag=self.Ang_Acc_range[1])
 #/////
 
-        self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)        
-        self.adjustSimSpeed(1.0)
+        # self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)        
+        # self.adjustSimSpeed(1.0)
 
 #/////
         time.sleep(0.1)
@@ -778,18 +778,18 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         if self.BodyContact_Flag:
             R_Legs = max(R_Legs-0.25,0)
 
-#/////
-        if self.CameraContact_Flag:
+#$$$$$
+        # if self.CameraContact_Flag:
 
-            ## CALC REWARD VALUES
-            print("Camera is contacted")
-            self.CameraContact_Flag = False
-            # R_tx = 0
-            # R_LT = 0
-            # R_GM = 0
-            # R_Phi = 0
-            # R_Legs = 0
-#/////
+        #     ## CALC REWARD VALUES
+        #     print("Camera is contacted")
+        #     self.CameraContact_Flag = False
+        #     # R_tx = 0
+        #     # R_LT = 0
+        #     # R_GM = 0
+        #     # R_Phi = 0
+        #     # R_Legs = 0
+#$$$$$
         self.reward_vals = [R_dist,R_tau_cr,R_tx,R_LT,R_GM,R_Phi,R_Legs]
         R_t = np.dot(self.reward_vals,list(self.reward_weights.values()))
         self.reward = R_t/self.W_max
@@ -891,7 +891,7 @@ if __name__ == "__main__":
 
     rclpy.init()
 
-    env = SAR_Sim_DeepRL(Ang_Acc_range=[-90.0,-80.0],V_mag_range=[1,4],V_angle_range=[15,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=False)
+    env = SAR_Sim_DeepRL(Ang_Acc_range=[-90.0,-85.0],V_mag_range=[1,2],V_angle_range=[90,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=False)
 
     time.sleep(3)
     env._setTestingConditions()

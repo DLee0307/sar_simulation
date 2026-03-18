@@ -110,7 +110,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         rclpy.spin_once(self)
         result = self.callService('/CTRL/Get_Obs',srv, CTRLGetObs)
         rclpy.spin_once(self)
-        time.sleep(1)
+        time.sleep(0.5)
         #print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
         # if result:
@@ -201,40 +201,40 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
 #/////
 
-        Tau_DH = resp.tau_dh
-        Theta_x_DH = resp.theta_x_dh
-        # Theta_y_DH = resp.theta_y_dh
+        # Tau_DH = resp.tau_dh
+        # Theta_x_DH = resp.theta_x_dh
+        # # Theta_y_DH = resp.theta_y_dh
 
-        # Tau = resp.tau
-        # print("Tau", Tau)
+        # # Tau = resp.tau
+        # # print("Tau", Tau)
 
-        # print("Tau_DH", Tau_DH)
-        # print("Theta_x_DH", Theta_x_DH)
-        # # print("Theta_y_DH", Theta_y_DH)
+        # # print("Tau_DH", Tau_DH)
+        # # print("Theta_x_DH", Theta_x_DH)
+        # # # print("Theta_y_DH", Theta_y_DH)
         
-        if np.isnan(Tau_DH):
-            Tau_DH = 5
-
-        else:
-            Tau_DH = np.clip(Tau_DH, -5, 5)
-
-        if np.isnan(Theta_x_DH):
-            Theta_x_DH = 20
-
-        else:
-            Theta_x_DH = np.clip(Theta_x_DH, -20, 20)
-
-        # if np.isnan(Theta_y_DH):
-        #     Theta_y_DH = 20
+        # if np.isnan(Tau_DH):
+        #     Tau_DH = 5
 
         # else:
-        #     Theta_y_DH = np.clip(Theta_y_DH, -20, 20)
+        #     Tau_DH = np.clip(Tau_DH, -5, 5)
 
-        Tau_DH_scaled = self.scaleValue(Tau_DH,original_range=[-5,5],target_range=[-1,1])
-        Theta_x_DH_scaled = self.scaleValue(Theta_x_DH,original_range=[-20,20],target_range=[-1,1])
-        # Theta_y_DH_scaled = self.scaleValue(Theta_y_DH,original_range=[-20,20],target_range=[-1,1])
+        # if np.isnan(Theta_x_DH):
+        #     Theta_x_DH = 20
 
-        scaled_obs_list = [Tau_DH_scaled, Theta_x_DH_scaled]
+        # else:
+        #     Theta_x_DH = np.clip(Theta_x_DH, -20, 20)
+
+        # # if np.isnan(Theta_y_DH):
+        # #     Theta_y_DH = 20
+
+        # # else:
+        # #     Theta_y_DH = np.clip(Theta_y_DH, -20, 20)
+
+        # Tau_DH_scaled = self.scaleValue(Tau_DH,original_range=[-5,5],target_range=[-1,1])
+        # Theta_x_DH_scaled = self.scaleValue(Theta_x_DH,original_range=[-20,20],target_range=[-1,1])
+        # # Theta_y_DH_scaled = self.scaleValue(Theta_y_DH,original_range=[-20,20],target_range=[-1,1])
+
+        # scaled_obs_list = [Tau_DH_scaled, Theta_x_DH_scaled]
 
 #/////
 
@@ -277,25 +277,28 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         
 #######
 
-        # Tau_CM = resp.tau_cm
-        # Theta_x_CM = resp.theta_x_cm
+        Tau_CM = resp.tau_cm
+        Theta_x_CM = resp.theta_x_cm
 
-        # if np.isnan(Tau_CM):
-        #     Tau_CM = 5
+        # print("Tau_CM", Tau_CM)
+        # print("Theta_x_CM", Theta_x_CM)   
 
-        # else:
-        #     Tau_CM = np.clip(Tau_CM, -5, 5)
+        if np.isnan(Tau_CM):
+            Tau_CM = 5
 
-        # if np.isnan(Theta_x_CM):
-        #     Theta_x_CM = 20
+        else:
+            Tau_CM = np.clip(Tau_CM, -5, 5)
 
-        # else:
-        #     Theta_x_CM = np.clip(Theta_x_CM, -20, 20)
+        if np.isnan(Theta_x_CM):
+            Theta_x_CM = 20
 
-        # Tau_CM_scaled = self.scaleValue(Tau_CM,original_range=[-5,5],target_range=[-1,1])
-        # Theta_x_CM_scaled = self.scaleValue(Theta_x_CM,original_range=[-20,20],target_range=[-1,1])
+        else:
+            Theta_x_CM = np.clip(Theta_x_CM, -20, 20)
+
+        Tau_CM_scaled = self.scaleValue(Tau_CM,original_range=[-5,5],target_range=[-1,1])
+        Theta_x_CM_scaled = self.scaleValue(Theta_x_CM,original_range=[-20,20],target_range=[-1,1])
         
-        # scaled_obs_list = [Tau_CM_scaled, Theta_x_CM_scaled]
+        scaled_obs_list = [Tau_CM_scaled, Theta_x_CM_scaled]
 
 #######
 
@@ -303,20 +306,20 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         ## OBSERVATION VECTOR
         obs = np.array(scaled_obs_list,dtype=np.float32)
 #/////
-        print("Tau_DH", obs[0])
-        print("Theta_x_DH", obs[1])
+        # print("Tau_DH_Scaled", obs[0])
+        # print("Theta_x_DH_Scaled", obs[1])
 #/////
 
 #@@@@@
-        # print("Tau_CR", obs[0])
-        # print("Theta_x", obs[1]) 
-        # print("D_perp_CR", obs[2]) 
+        # print("Tau_CR_Scaled", obs[0])
+        # print("Theta_x_Scaled", obs[1]) 
+        # print("D_perp_CR_Scaled", obs[2]) 
 #@@@@@
 
 
 ######
-        # print("Tau_CM", obs[0])
-        # print("Theta_x_CM", obs[1])
+        print("Tau_CM_Scaled", obs[0])
+        print("Theta_x_CM_Scaled", obs[1])
 ######
 
         return obs
@@ -365,7 +368,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
             '--reqtype', 'gz.msgs.Pose',
             '--reptype', 'gz.msgs.Boolean',
             '--timeout', '3000',
-            '--req', f'name: "A30_L200, position: {{x: {x}, y: {y}, z: {z}}}, orientation: {{x: 0, y: 0, z: 0, w: 1}}'
+            '--req', f'name: "A15_L250, position: {{x: {x}, y: {y}, z: {z}}}, orientation: {{x: 0, y: 0, z: 0, w: 1}}'
         ]
 
         result = subprocess.run(cmd, capture_output=True, text=True)
@@ -392,7 +395,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
             '--reqtype', 'gz.msgs.Pose',
             '--reptype', 'gz.msgs.Boolean',
             '--timeout', '3000',
-            '--req', f'name: "A30_L200", position: {{x: {x}, y: {y}, z: {z}}}, orientation: {{x: 0, y: 0, z: 0, w: 1}}'
+            '--req', f'name: "A15_L250", position: {{x: {x}, y: {y}, z: {z}}}, orientation: {{x: 0, y: 0, z: 0, w: 1}}'
         ]
 
         result = subprocess.run(cmd, capture_output=True, text=True)
@@ -455,11 +458,11 @@ class SAR_Sim_Interface(SAR_Base_Interface):
 
 #/////
 
-        # If step is terminated due to impact or out of bound
+        # # # If step is terminated due to impact or out of bound
         
-        # Deactivate Optical_Flow_Flag
-        self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
-        self.adjustSimSpeed(1.0)
+        # # Deactivate Optical_Flow_Flag
+        # self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)
+        # self.adjustSimSpeed(1.0)
 
 #/////
 
@@ -476,7 +479,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
             '--reqtype', 'gz.msgs.Pose',
             '--reptype', 'gz.msgs.Boolean',
             '--timeout', '3000',
-            '--req', f'name: "A30_L200", position: {{x: 0, y: 0, z: {z_0}}}, orientation: {{x: 0, y: 0, z: 0, w: 1}}'
+            '--req', f'name: "A15_L250", position: {{x: 0, y: 0, z: {z_0}}}, orientation: {{x: 0, y: 0, z: 0, w: 1}}'
         ]
 
         result = subprocess.run(cmd, capture_output=True, text=True)
@@ -512,7 +515,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
             '--reqtype', 'gz.msgs.Pose',
             '--reptype', 'gz.msgs.Boolean',
             '--timeout', '3000',
-            '--req', f'name: "A30_L200", position: {{x: 0, y: 0, z: {z_0}}}, orientation: {{x: 0, y: 0, z: 0, w: 1}}'
+            '--req', f'name: "A15_L250", position: {{x: 0, y: 0, z: {z_0}}}, orientation: {{x: 0, y: 0, z: 0, w: 1}}'
         ]
 
         result = subprocess.run(cmd, capture_output=True, text=True)
@@ -548,7 +551,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
             '--reqtype', 'gz.msgs.Pose',
             '--reptype', 'gz.msgs.Boolean',
             '--timeout', '3000',
-            '--req', f'name: "A30_L200", position: {{x: 0, y: 0, z: {z_0}}}, orientation: {{x: 0, y: 0, z: 0, w: 1}}'
+            '--req', f'name: "A15_L250", position: {{x: 0, y: 0, z: {z_0}}}, orientation: {{x: 0, y: 0, z: 0, w: 1}}'
         ]
 
         result = subprocess.run(cmd, capture_output=True, text=True)
@@ -578,7 +581,7 @@ class SAR_Sim_Interface(SAR_Base_Interface):
             '--reqtype', 'gz.msgs.Pose',
             '--reptype', 'gz.msgs.Boolean',
             '--timeout', '3000',
-            '--req', f'name: "A30_L200", position: {{x: 0, y: 0, z: {z_0}}}, orientation: {{x: 0, y: 0, z: 0, w: 1}}'
+            '--req', f'name: "A15_L250", position: {{x: 0, y: 0, z: {z_0}}}, orientation: {{x: 0, y: 0, z: 0, w: 1}}'
         ]
 
         result = subprocess.run(cmd, capture_output=True, text=True)
@@ -1047,6 +1050,8 @@ class SAR_Sim_Interface(SAR_Base_Interface):
         """
         Asynchronously call the service and handle the response.
         """
+        #print("callService in SAR_Sim_Interface.py is started")
+
         client = self.create_client(srv_type, srv_addr)
 
         # Wait until the service is available.

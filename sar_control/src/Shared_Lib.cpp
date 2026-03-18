@@ -712,10 +712,10 @@ bool updateOpticalFlowAnalytic(const state_t *state, const sensorData_t *sensors
     Tau = clamp(D_perp/(Vel_B_P.z + 1e-6f),0.0f,5.0f);
     //Tau = clamp(D_perp/(Vel_B_P.z + 1e-6f),0.0f,5.0f);
     
-    Theta_x_CM = clamp(Vel_B_P.x/(D_perp-0.072),-20.0f,20.0f); //Centermiddle camera location : 72mm
+    Theta_x_CM = clamp(Vel_B_P.x/(D_perp-0.035),-20.0f,20.0f); //Centermiddle openMV camera location : 35mm
     // std::cout << "Theta_x: " << Theta_x << std::endl;
     // std::cout << "Theta_x_CM: " << Theta_x_CM << std::endl;
-    Tau_CM = clamp((D_perp-0.072)/(Vel_B_P.z + 1e-6f),-5.0f,5.0f); //Centermiddle camera location : 72mm
+    Tau_CM = clamp((D_perp-0.035)/(Vel_B_P.z + 1e-6f),-5.0f,5.0f); //Centermiddle camera location : 35mm
 
     Tau_CR = clamp(D_perp_CR/(Vel_B_P.z + 1e-6f),-5.0f,5.0f);
 

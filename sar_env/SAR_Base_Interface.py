@@ -414,9 +414,18 @@ class SAR_Base_Interface(Node):
         ## CALC STARTING POSITION IN GLOBAL COORDS
         # (Derivation: Research_Notes_Book_3.pdf (9/17/23))
         r_P_O = np.array(self.r_P_O)                        # Plane Position wrt to Origin - {X_W,Y_W,Z_W}
+        #print("!self.r_P_O :",self.r_P_O)
+        #result same with Sim_Settings.yaml
+        #print("!r_P_O :",r_P_O)
+        #result same with Sim_Settings.yaml
 
         ##DH
-        r_P_O = (4.05,0.0,2.7)
+        #r_P_O = (3.0,0.0,2.5) #simulation
+        #r_P_O = (4.15,0.0,2.7) #experiment
+        #print("@self.r_P_O :",self.r_P_O)
+        #result same with Sim_Settings.yaml
+        print("@r_P_O :",r_P_O)
+        #result same with r_P_O the above (4.05 0.0 2.7)
 
         r_P_B = np.array([(Tau_CR_start + Tau_Bonus)*V_tx,
                           0,
@@ -444,6 +453,9 @@ class SAR_Base_Interface(Node):
         x_0 = r_B_O[0] - V_B_O[0]**2/(2*a_x) - V_B_O[0]*t_z     # X-position Vel reached
         y_0 = r_B_O[1]                                          # Y-position Vel reached
         z_0 = r_B_O[2] - V_B_O[2]**2/(2*a_z)                    # Z-position Vel reached    
+
+        print("#r_B_O :",r_B_O)
+        print("#V_B_O :",r_B_O)
 
         return [x_0,y_0,z_0]
 
@@ -612,6 +624,9 @@ class SAR_Base_Interface(Node):
         ## GET RELATIVE VEL CONDITIONS 
         V_mag,V_angle = self.userInput("Flight Velocity (V_mag,V_angle):",float)
 
+        #print("V_mag value : ", V_mag)
+        #print("V_angle value : ", V_angle)
+
         ## CALC RELATIVE VELOCITIES
         V_x = V_mag*np.cos(np.radians(V_angle))
         #print("V_tx value : ", V_tx)
@@ -619,21 +634,25 @@ class SAR_Base_Interface(Node):
         V_z = V_mag*np.sin(np.radians(V_angle))
         #print("V_perp value : ", V_perp)
         V_B_O = np.array([V_x,V_y,V_z])
-        #print("V_B_P value : ", V_B_P)
+        #print("V_B_O value : ", V_B_O)
+
+        self.Plane_Angle_rad = 0.0
 
         ## CALCULATE GLOBAL VELOCITIES
         V_B_P = self.R_WP(V_B_O,self.Plane_Angle_rad)
+        #print("V_B_P value : ", V_B_P)
         #print("Plane_Angle_rad value : ", self.Plane_Angle_rad)
         
 
         ## POS VELOCITY CONDITIONS MET
         r_B_O = self.startPos_ImpactTraj(V_B_P,Acc=None)
 
-        print("Plane_Angle_rad value : ", self.Plane_Angle_rad)
-        print("self.r_P_O :",self.r_P_O)
+        #print("Plane_Angle_rad valuew : ", self.Plane_Angle_rad)
+        print("Final : r_B_O :",r_B_O)
+        #result same with Sim_Settings.yaml
 
         ## APPROVE START POSITION
-        print(YELLOW,f"Start Position: ({r_B_O[0]:.2f},{self.r_B_O[1]:.2f},{r_B_O[2]:.2f})",RESET)
+        print(YELLOW,f"Start Position: ({r_B_O[0]:.2f},{r_B_O[1]:.2f},{r_B_O[2]:.2f})",RESET)
         str_input = self.userInput("Approve start position (y/n): ",str)
         if str_input == 'y':
             self.sendCmd('P2P_traj',cmd_vals=[np.nan,r_B_O[0],0.5],cmd_flag=0.0)
@@ -671,7 +690,20 @@ class SAR_Base_Interface(Node):
         #self.sendCmd("Plane_Pose",cmd_vals=[self.Plane_Pos_x_init,self.Plane_Pos_y_init,self.Plane_Pos_z_init],cmd_flag=self.Plane_Angle_deg_init)
         
         self.sendCmd("Arm_Quad",cmd_vals=[1.0,1.0,1.0], cmd_flag=cmd_flag)
+
+    def handle_OpenMV_TTC(self):
+
+        #cmd_flag = self.userInput("Arm Quad On/Off (1,0): ",int)
+        cmd_flag = self.userInput("OpenMV TTC Estimation On/Off (1,0): ",float)
         
+        self.sendCmd("OpenMV_TTC",cmd_vals=[1.0,1.0,1.0], cmd_flag=cmd_flag)    
+
+    def handle_OpenMV_Recording(self):
+
+        #cmd_flag = self.userInput("Arm Quad On/Off (1,0): ",int)
+        cmd_flag = self.userInput("OpenMV Recording On/Off (1,0): ",float)
+        
+        self.sendCmd("OpenMV_Recording",cmd_vals=[1.0,1.0,1.0], cmd_flag=cmd_flag)        
     
     def handle_Tumble_Detect(self):
 
@@ -780,6 +812,8 @@ class SAR_Base_Interface(Node):
             'Start_Logging':22,
             'Cap_Logging':23,
             'Arm_Quad':24,
+            'OpenMV_TTC':25,
+            'OpenMV_Recording':26,
 
             'Thrust_CMD':30,
             'Motor_CMD':31,

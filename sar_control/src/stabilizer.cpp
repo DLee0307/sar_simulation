@@ -197,7 +197,9 @@ void Controller::OpticalFlow_Update_Callback(const sar_msgs::msg::OpticalFlowDat
 
     //!!!std::cout << "Tau - Tau_DH : " << Tau_DIFF << std::endl;
 
-    //!!!std::cout << "Tau_DH : " << Tau_DH << std::endl;
+    // std::cout << "Tau_DH : " << Tau_DH << std::endl;
+    // std::cout << "Tau_CM : " << Tau_CM << std::endl;
+    // std::cout << "Theta_x_DH : " << Theta_x_DH << std::endl;
     //!!!std::cout << "Tau : " << Tau << std::endl;
 
 
@@ -309,7 +311,10 @@ void Controller::loadInitParams()
     {
         Policy = DEEP_RL_ONBOARD_DH;
     }
-
+    else if (strcmp(POLICY_TYPE_STR.c_str(),"MANUAL_DH")==0)
+    {
+        Policy = MANUAL_DH;
+    }
 
     /// Declare PARAMETERS from Model_Types.yaml
     // UPDATE INERTIAL PARAMETERS

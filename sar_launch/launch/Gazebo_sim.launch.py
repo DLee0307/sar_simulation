@@ -74,7 +74,7 @@ def generate_launch_description():
     GROUND_SPAWN = Node(
         package='ros_gz_sim',
         executable='create',
-        arguments=['-file', Ground_SDF_Path, '-x', '-20.0', '-z', '-37.5'],
+        arguments=['-file', Ground_SDF_Path, '-x', '-20.0', '-z', '-20'], #-37.5
         output='screen',
     )    
 

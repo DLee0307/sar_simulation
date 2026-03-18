@@ -21,25 +21,25 @@ if __name__ == '__main__':
 
     # 환경 설정
     env_kwargs = {
-        "Ang_Acc_range": [-90.0, -80.0],
+        "Ang_Acc_range": [-90.0, -88.0],
         "Plane_Angle_range": [0, 0],
-        "V_mag_range": [2.0, 4.0],
-        "V_angle_range": [15.0, 90.0],
+        "V_mag_range": [1.0, 1.5],
+        "V_angle_range": [90.0, 90.0],
         "Render": False,
         "GZ_Timeout": True
     }
     RL_Manager = RL_Training_Manager(
         env=SAR_Sim_DeepRL, 
         Group_Name='', 
-        Log_Name='SOV5_A30_L200_0deg_aRot90_S3D', 
+        Log_Name='SOV5OPENMV_A15_L250_0deg_aRot90_S3D', 
         env_kwargs=env_kwargs
     )
 
     # 저장된 모델 및 리플레이 버퍼 로드0
     RL_Manager.load_model(
-        t_step_load=13900, 
+        t_step_load=150, 
         GroupName='', 
-        LogName='SOV5_A30_L200_0deg_aRot90_S3D', 
+        LogName='SOV5OPENMV_A15_L250_0deg_aRot90_S3D', 
         Params_only=False, 
         load_replay_buffer=True
     )

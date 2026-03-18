@@ -309,17 +309,41 @@ SAR_Controller:
               Gamma_eff:  15.07
               L_eff:  214.81E-3
 
+            # A15_L250:
+            #   Ref_Mass:  798.00E-3
+            #   Ref_Ixx:   7.95E-3
+            #   Ref_Iyy:   7.49E-3
+            #   Ref_Izz:   5.85E-3
+      
+            #   Leg_Angle:  15
+            #   Leg_Length:  250.00E-3
+      
+            #   Gamma_eff:  14.27
+            #   L_eff:  263.85E-3
+
             A15_L250:
-              Ref_Mass:  798.00E-3
-              Ref_Ixx:   7.95E-3
-              Ref_Iyy:   7.49E-3
-              Ref_Izz:   5.85E-3
+              Ref_Mass:  830.00E-3
+              Ref_Ixx:   7.96E-3
+              Ref_Iyy:   7.67E-3
+              Ref_Izz:   6.02E-3
       
               Leg_Angle:  15
               Leg_Length:  250.00E-3
       
               Gamma_eff:  14.27
-              L_eff:  263.85E-3
+              L_eff:  263.85E-3     
+
+            A15_L250_Cam:
+              Ref_Mass:  830.00E-3
+              Ref_Ixx:   7.96E-3
+              Ref_Iyy:   7.67E-3
+              Ref_Izz:   6.02E-3
+      
+              Leg_Angle:  15
+              Leg_Length:  250.00E-3
+      
+              Gamma_eff:  14.27
+              L_eff:  263.85E-3              
 
             
 
@@ -748,3 +772,93 @@ SAR_Controller:
       
               Gamma_eff:  53.02
               L_eff:  146.82E-3
+
+
+      Source_One_V5_OpenMV:
+          CtrlGains:
+            ## POSITION XY
+            P_kp_xy: 5.0
+            P_kd_xy: 3.2
+            P_ki_xy: 0.0
+            i_range_xy: 0.1
+
+            ## POSITION Z
+            P_kp_z: 10.0
+            P_kd_z: 5.0
+            P_ki_z: 4.0
+            i_range_z: 0.1
+
+            ## ORIENTATION XY
+            #R_kp_xy: 2.7
+            R_kp_xy: 0.9
+            R_kd_xy: 0.1
+            R_ki_xy: 0.0
+            i_range_R_xy: 0.1
+
+            ## ORIENTATION Z
+            R_kp_z: 0.025
+            R_kd_z: 0.015
+            R_ki_z: 0.025
+            i_range_R_z: 0.1
+
+          System_Params:
+
+            Thrust_Coeff: 1.43e-6           # Thrust Coeff [N/(rad/s)]
+            Torque_Coeff: 1.57e-8           # Torque Coeff [N*m/(rad/s)]
+            C_tf: 1.1e-2                    # Torque-Thrust Coeff [N*m/N]
+            Tau_up: 9.8e-3                  # Motor Time Constant (Up) [s]
+            Tau_down: 31.9e-3               # Motor Time Constant (Down) [s]
+            Thrust_max: 800.0                 # Max motor thrust [g]
+
+            Prop_Front: [72.6e-3, 86.6e-3]  # Front Prop Location [m]
+            Prop_Rear:  [72.6e-3, 86.6e-3]  # Rear Prop Location [m]
+            Forward_Reach: 150.0e-3         # Max Forward Reach [m]
+
+
+            Base_Mass: 693.0e-3             # [kg]
+            Base_Ixx: 3.17e-3               # [kg*m^2]
+            Base_Iyy: 2.71e-3               # [kg*m^2]
+            Base_Izz: 5.27e-3               # [kg*m^2] 
+
+            TrajAcc_Max: [0.5,0.0,6.0]    # Max Accel for trajectory generation [m/s^2]
+            TrajJerk_Max: [20.0,20.0,20.0]     # Max Jerk for trajectory generation [m/s^3]
+
+          Leg_Params:
+
+            K_Pitch: 8.5                   # Y-Axis Stiffness [N*m/rad]
+            DR_Pitch: 0.3                   # Y-Axis Damping Ratio
+            PosDir_Pitch_Limit: 0.0         # Y-Axis Upper Limit [deg]
+            NegDir_Pitch_Limit: 75.0        # Y-Axis Upper Limit [deg]
+
+            K_Yaw: 8.5                     # Z-Axis Stiffness [N*m/rad]
+            DR_Yaw: 0.7                     # Z-Axis Damping Ratio
+            PosDir_Yaw_Limit: 20.0          # Z-Axis Upper Limit [deg]
+            NegDir_Yaw_Limit: 20.0          # Z-Axis Upper Limit [deg]
+          
+          Config:
+
+            Base_Model:      
+              Ref_Mass: 693.0e-3        # [kg]
+              Ref_Ixx: 3.17e-3          # [kg*m^2]
+              Ref_Iyy: 2.71e-3          # [kg*m^2]
+              Ref_Izz: 5.27e-3          # [kg*m^2] 
+
+              Leg_Angle:  0              # [deg]
+              Leg_Length:  0       # [m]
+      
+              Gamma_eff:  0           # [deg]
+              L_eff:  0            # [m]
+
+            # ============================================================== # 
+            
+            A15_L250:
+              Ref_Mass:  830.00E-3
+              Ref_Ixx:   7.96E-3
+              Ref_Iyy:   7.67E-3
+              Ref_Izz:   6.02E-3
+      
+              Leg_Angle:  15
+              Leg_Length:  250.00E-3
+      
+              Gamma_eff:  14.27
+              L_eff:  263.85E-3

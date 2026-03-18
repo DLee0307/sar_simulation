@@ -307,7 +307,8 @@ typedef enum {
     PARAM_OPTIM = 0,
     DEEP_RL_SB3 = 1,
     DEEP_RL_ONBOARD = 2,
-	DEEP_RL_ONBOARD_DH =3,
+	DEEP_RL_ONBOARD_DH = 3,
+	MANUAL_DH = 4,
 }PolicyType;
 extern PolicyType Policy;
 

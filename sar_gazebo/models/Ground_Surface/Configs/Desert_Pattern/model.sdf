@@ -13,7 +13,7 @@
         <pose>0 0 0 0 0 0</pose>
         <geometry>
           <box>
-            <size>40 40 0.01</size>
+            <size>160 160 0.01</size>
           </box>
         </geometry>
 	    <material>

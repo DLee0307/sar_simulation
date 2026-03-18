@@ -12,6 +12,7 @@ import rclpy
 
 # For run this code I need to command below in terminal.
 # python3 T3_Policy_Data_Collection_DH.py --TrainConfig /home/dlee/ros2_ws/src/sar_simulation/sar_projects/NewDeepRL/Config_Files/SOV5_3D_Sim/Data_SOV5_A30_L200_0deg_aRot90_S3D_DH.json
+# python3 T3_Policy_Data_Collection_DH.py --TrainConfig /home/dlee/ros2_ws/src/sar_simulation/sar_projects/NewDeepRL/Config_Files/SOV5OPENMV_3D_Sim/Data_SOV5OPENMV_A15_L250_0deg_aRot90_S3D_DH.json
 
 ## DEFINE BASE PATH
 workspace_path = os.path.expanduser('~/ros2_ws')

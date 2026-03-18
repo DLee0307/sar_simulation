@@ -1,6 +1,9 @@
 SAR_SETTINGS:
   SAR_Type: 'Source_One_V5'
-  SAR_Config: 'A15_L250'
+  #SAR_Type: 'Source_One_V5_OpenMV'
+  #SAR_Config: 'A15_L250'
+  SAR_Config: 'A30_L200'
+  #SAR_Config: 'A15_L250_Cam'
   #SAR_Type: "Impulse_Micro"
   #SAR_Config: "A15_L150"
 
@@ -8,6 +11,7 @@ SAR_SETTINGS:
   # Policy_Type: "DEEP_RL_SB3" 
   Policy_Type: "DEEP_RL_ONBOARD" 
   # Policy_Type: "DEEP_RL_ONBOARD_DH" 
+  # Policy_Type: "MANUAL_DH" 
 
 
 PLANE_SETTINGS: # INITIAL PLANE POSE SETTINGS

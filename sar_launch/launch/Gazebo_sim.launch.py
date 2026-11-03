@@ -2,83 +2,74 @@ import os
 import yaml
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess, SetEnvironmentVariable, IncludeLaunchDescription, RegisterEventHandler
-from launch.event_handlers import OnProcessExit
+from launch.actions import ExecuteProcess, SetEnvironmentVariable, IncludeLaunchDescription, TimerAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-
 from launch_ros.actions import Node
 
 def generate_launch_description():
 
-    # Define the path to the YAML file
     yaml_file_path = os.path.expanduser('~/ros2_ws/src/sar_simulation/sar_config/Sim_Settings.yaml')
 
-    # Load the YAML file
     with open(yaml_file_path, 'r') as file:
         config = yaml.safe_load(file)
 
-    # Extract the SAR_Type1
     SAR_TYPE = config['SAR_Controller']['ros__parameters']['SAR_SETTINGS']['SAR_Type']
     SAR_CONFIG = config['SAR_Controller']['ros__parameters']['SAR_SETTINGS']['SAR_Config']
-    SAR_SDF_Path = os.path.expanduser(f'~/ros2_ws/src/sar_simulation/sar_gazebo/models/{SAR_TYPE}/Configs/{SAR_CONFIG}/model.sdf')
+    SAR_SDF_Path = os.path.expanduser(
+        f'~/ros2_ws/src/sar_simulation/sar_gazebo/models/{SAR_TYPE}/Configs/{SAR_CONFIG}/model.sdf'
+    )
 
     PLANE_TYPE = config['SAR_Controller']['ros__parameters']['PLANE_SETTINGS']['Plane_Type']
     PLANE_CONFIG = config['SAR_Controller']['ros__parameters']['PLANE_SETTINGS']['Plane_Config']
-    Plane_SDF_Path = os.path.expanduser(f'~/ros2_ws/src/sar_simulation/sar_gazebo/models/{PLANE_TYPE}/Configs/{PLANE_CONFIG}/model.sdf')
+    Plane_SDF_Path = os.path.expanduser(
+        f'~/ros2_ws/src/sar_simulation/sar_gazebo/models/{PLANE_TYPE}/Configs/{PLANE_CONFIG}/model.sdf'
+    )
 
     GROUND_TYPE = config['SAR_Controller']['ros__parameters']['GROUND_SETTINGS']['Ground_Type']
     GROUND_CONFIG = config['SAR_Controller']['ros__parameters']['GROUND_SETTINGS']['Ground_Config']
-    Ground_SDF_Path = os.path.expanduser(f'~/ros2_ws/src/sar_simulation/sar_gazebo/models/{GROUND_TYPE}/Configs/{GROUND_CONFIG}/model.sdf')
+    Ground_SDF_Path = os.path.expanduser(
+        f'~/ros2_ws/src/sar_simulation/sar_gazebo/models/{GROUND_TYPE}/Configs/{GROUND_CONFIG}/model.sdf'
+    )
 
-    # SET GZ_SIM_RESOURCE_PATH
-    SAR_SDF_Path_BASE = os.path.expanduser(f'~/ros2_ws/src/sar_simulation/sar_gazebo/models/{SAR_TYPE}')
-    Plane_SDF_Path_BASE = os.path.expanduser(f'~/ros2_ws/src/sar_simulation/sar_gazebo/models/{PLANE_TYPE}')
-    Ground_SDF_Path_BASE = os.path.expanduser(f'~/ros2_ws/src/sar_simulation/sar_gazebo/models/{GROUND_TYPE}')
+    models_root = os.path.expanduser('~/ros2_ws/src/sar_simulation/sar_gazebo/models')
+    world_path = os.path.expanduser('~/ros2_ws/src/sar_simulation/sar_gazebo/worlds/empty.world')
 
-    COMBINED_PATH_BASE =  f"{SAR_SDF_Path_BASE}:{Plane_SDF_Path_BASE}:{Ground_SDF_Path_BASE}"
+    # include로 참조되는 base 모델 경로들
+    SAR_BASE_PATH = os.path.join(models_root, 'SAR_Base')
+    PLANE_BASE_PATH = os.path.join(models_root, 'Plane_Base_Model')
+    GROUND_BASE_PATH = os.path.join(models_root, 'Ground_Base_Model')
 
-    # Package Directories
+    # config 모델 타입 경로들
+    SAR_TYPE_PATH = os.path.join(models_root, SAR_TYPE)
+    PLANE_TYPE_PATH = os.path.join(models_root, PLANE_TYPE)
+    GROUND_TYPE_PATH = os.path.join(models_root, GROUND_TYPE)
+
+    existing_gz_path = os.environ.get('GZ_SIM_RESOURCE_PATH', '')
+
+    gz_resource_paths = [
+        models_root,
+        SAR_BASE_PATH,
+        PLANE_BASE_PATH,
+        GROUND_BASE_PATH,
+        SAR_TYPE_PATH,
+        PLANE_TYPE_PATH,
+        GROUND_TYPE_PATH,
+    ]
+
+    if existing_gz_path:
+        gz_resource_paths.append(existing_gz_path)
+
+    combined_gz_resource_path = ':'.join(gz_resource_paths)
+
     pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
 
-    # Gazebo Sim
-    # gazebo = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource(
-    #         os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
-    #     ),
-    #     launch_arguments={'gz_args': '-r empty.sdf'}.items(),
-    # )
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
         ),
-        launch_arguments={'gz_args': f' -r {os.path.expanduser("~/ros2_ws/src/sar_simulation/sar_gazebo/worlds/empty.world")}'}.items(),  # 절대 경로로 empty.world 파일 설정
+        launch_arguments={'gz_args': f'-r {world_path}'}.items(),
     )
 
-    # SAR Spawn
-    SAR_SPAWN = Node(
-        package='ros_gz_sim',
-        executable='create',
-        arguments=['-file', SAR_SDF_Path, '-z', '0.4'],
-        output='screen',
-    )
-
-    # Plane Spawn
-    PLANE_SPAWN = Node(
-        package='ros_gz_sim',
-        executable='create',
-        arguments=['-file', Plane_SDF_Path, '-x', '3.0', '-z', '2.50'], # 2.55 # 2.59(last)
-        output='screen',
-    )
-
-    # Ground Spawn
-    GROUND_SPAWN = Node(
-        package='ros_gz_sim',
-        executable='create',
-        arguments=['-file', Ground_SDF_Path, '-x', '-20.0', '-z', '-20'], #-37.5
-        output='screen',
-    )    
-
-    # Clock Bridge
     CLOCK_BRIDGE = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
@@ -86,32 +77,60 @@ def generate_launch_description():
         output='screen',
     )
 
+    SAR_SPAWN = Node(
+        package='ros_gz_sim',
+        executable='create',
+        arguments=['-file', SAR_SDF_Path, '-z', '0.4'],
+        output='screen',
+    )
+
+    PLANE_SPAWN = Node(
+        package='ros_gz_sim',
+        executable='create',
+        arguments=['-file', Plane_SDF_Path, '-x', '5.0', '-z', '2.75'], #2.85
+        output='screen',
+    )
+
     SAR_CONTROLLER = Node(
         package='sar_control',
         executable='SAR_Controller',
-        name='sar_controller',
+        name='SAR_Controller',
         output='screen',
-        parameters=[{'use_sim_time': True}],
+        parameters=[
+            yaml_file_path,
+            {'use_sim_time': True}
+        ],
     )
 
-    controller_terminal_command = ExecuteProcess(
-        cmd=['gnome-terminal', '--disable-factory', '--geometry', '85x46+1050+0', '--',
-             'ros2', 'run', 'sar_control', 'SAR_Controller', '--ros-args', '--param', 'use_sim_time:=true'],
-        shell=True
+    GROUND_SPAWN = Node(
+        package='ros_gz_sim',
+        executable='create',
+        arguments=['-file', Ground_SDF_Path, '-x', '0.0', '-z', '-10.0'],
+        output='screen',
     )
-    
+
+    # controller_terminal_command = ExecuteProcess(
+    #     cmd=[
+    #         'gnome-terminal',
+    #         '--disable-factory',
+    #         '--geometry', '85x46+1050+0',
+    #         '--',
+    #         'bash', '-lc',
+    #         'ros2 run sar_control SAR_Controller --ros-args -p use_sim_time:=true'
+    #     ],
+    #     output='screen'
+    # )
+
     return LaunchDescription([
         SetEnvironmentVariable(
             name='GZ_SIM_RESOURCE_PATH',
-            value= COMBINED_PATH_BASE
-        ),     
+            value=combined_gz_resource_path
+        ),
+
         gazebo,
-        SAR_SPAWN,
-        PLANE_SPAWN,
-        GROUND_SPAWN,
-        CLOCK_BRIDGE,
-        #SAR_CONTROLLER
-        controller_terminal_command
+        TimerAction(period=1.0, actions=[CLOCK_BRIDGE]),
+        TimerAction(period=1.5, actions=[GROUND_SPAWN]),
+        TimerAction(period=2.0, actions=[PLANE_SPAWN]),
+        TimerAction(period=2.5, actions=[SAR_SPAWN]),
+        TimerAction(period=3.0, actions=[SAR_CONTROLLER]),
     ])
-
-

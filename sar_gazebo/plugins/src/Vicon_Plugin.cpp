@@ -49,7 +49,7 @@ void Vicon_Plugin::Configure(const Entity &_entity,
   this->dataPtr->model = Model(_entity);
 
   // CHECK THE MODEL
-  std::cout << "Start Vicon_Plugin, Model Name: " << this->dataPtr->model.Name(_ecm) << std::endl;
+  // std::cout << "Start Vicon_Plugin, Model Name: " << this->dataPtr->model.Name(_ecm) << std::endl;
   if (!this->dataPtr->model.Valid(_ecm))
   {
     gzerr << "Vicon_Plugin plugin should be attached to a model entity. "
@@ -102,9 +102,9 @@ void Vicon_Plugin::Configure(const Entity &_entity,
       gzerr << "Pose component not found for entity: " << this->dataPtr->linkEntity << std::endl;
       // Adding Pose Cmoponent
       _ecm.CreateComponent(this->dataPtr->linkEntity, components::WorldPose());
-      std::cout << "Added Pose component for entity: " << this->dataPtr->linkEntity << std::endl;
+      // std::cout << "Added Pose component for entity: " << this->dataPtr->linkEntity << std::endl;
     } else {
-      std::cout << "Pose component found for entity: " << this->dataPtr->linkEntity << std::endl;
+      // std::cout << "Pose component found for entity: " << this->dataPtr->linkEntity << std::endl;
     }
   
     // Checking Velocity Component
@@ -113,9 +113,9 @@ void Vicon_Plugin::Configure(const Entity &_entity,
       gzerr << "Velocity component not found for entity: " << this->dataPtr->linkEntity << std::endl;
       // Adding Velocity Cmoponent
       _ecm.CreateComponent(this->dataPtr->linkEntity, components::WorldLinearVelocity());
-      std::cout << "Added Velocity component for entity: " << this->dataPtr->linkEntity << std::endl;
+      // std::cout << "Added Velocity component for entity: " << this->dataPtr->linkEntity << std::endl;
     } else {
-      std::cout << "Velocity component found for entity: " << this->dataPtr->linkEntity << std::endl;
+      // std::cout << "Velocity component found for entity: " << this->dataPtr->linkEntity << std::endl;
     }
   }
   //std::cout << "linkName!!: " << this->dataPtr->linkName << std::endl;

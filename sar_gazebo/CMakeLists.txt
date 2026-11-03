@@ -28,6 +28,12 @@ find_package(sensor_msgs REQUIRED)
 find_package(gz-msgs10 REQUIRED)
 #find_package(gz-physics REQUIRED)
 
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(
+  APRILTAG REQUIRED IMPORTED_TARGET apriltag
+)
+
 gz_find_package(gz-physics7
   COMPONENTS
     heightmap
@@ -99,6 +105,33 @@ install(TARGETS Rolling_Shutter_Plugin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin)
+
+# Active_Vision_Plugin
+add_library(Active_Vision_Plugin SHARED
+  plugins/src/Active_Vision_Plugin.cpp
+)
+
+# C++17 required for std::clamp()
+target_compile_features(Active_Vision_Plugin PRIVATE cxx_std_17)
+
+ament_target_dependencies(Active_Vision_Plugin
+  gz-sim8
+  gz-sensors8
+)
+
+target_link_libraries(Active_Vision_Plugin
+  gz-sim8::gz-sim8
+  gz-sensors8::gz-sensors8
+  gz-msgs10::gz-msgs10
+  PkgConfig::APRILTAG
+  ${rclcpp_LIBRARIES}
+)
+
+install(TARGETS Active_Vision_Plugin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+)
 
 # Camera_Plugin
 add_library(Camera_Plugin SHARED plugins/src/Camera_Plugin.cpp)

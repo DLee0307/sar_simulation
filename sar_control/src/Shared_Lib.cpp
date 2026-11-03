@@ -259,6 +259,44 @@ int32_t Cam_dt = 100;       // Time Between Images [ms]
 //int32_t UART_arr[UART_ARR_SIZE] = {0};
 bool isOFUpdated = false;
 
+// Experiment
+// Measured offset from mocap/body origin to OpenMV camera optical center [m]
+// Based on:
+// mocap/body origin ≈ [-16, 0, 62] mm
+// camera center     ≈ [88, 0, 61] mm
+// offset            ≈ [104, 0, -1] mm
+// struct vec r_Cam_B = {0.104f, 0.000f, -0.001f};
+// struct vec r_Cam_O = {0.0f, 0.0f, 0.0f};
+
+// Simulation
+// Measured offset from simulation body/model origin to camera optical center [m]
+// Based on:
+// sim body/model origin  ≈ [0, 0, 0] mm
+// camera optical center  ≈ [79, 0, 33] mm
+// offset                 ≈ [79, 0, 33] mm
+struct vec r_Cam_B = {0.079f, 0.000f, 0.033f};
+struct vec r_Cam_O = {0.0f, 0.0f, 0.0f};
+
+// =================================
+//     CAMERA WRT ORIGIN STATES
+// =================================
+struct vec Pos_Cam_O = {0.0f, 0.0f, 0.0f};
+struct vec Vel_Cam_O = {0.0f, 0.0f, 0.0f};
+
+// =================================
+//     CAMERA WRT PLANE STATES
+// =================================
+struct vec Pos_P_Cam = {0.0f, 0.0f, 0.0f};
+struct vec Vel_Cam_P = {0.0f, 0.0f, 0.0f};
+
+// =================================
+//     CAMERA-BASED OPTICAL FLOW STATES
+// =================================
+float D_perp_Cam = 0.0f;
+float Tau_Cam_GT = 0.0f;
+float Theta_x_Cam_GT = 0.0f;
+float Theta_y_Cam_GT = 0.0f;
+
 // =================================
 //  FLAGS AND SYSTEM INITIALIZATION
 // =================================
@@ -329,8 +367,10 @@ float D_perp_CR_trg = 0.0f;                        // Distance from CR to plane 
 float Tau_trg = 0.0f;               // [s]
 float Tau_CR_trg = 0.0f;            // [s]
 float Tau_CM_trg = 0.0f;            // [s]
-float Theta_x_CM_trg = 0.0f;            // [s]
+float Theta_x_CM_trg = 0.0f;        // [rad/s]
 float Tau_DH_trg = 0.0f;            // [s]
+float Tau_Cam_GT_trg = 0.0f;        // [s]
+float Theta_x_Cam_GT_trg = 0.0f;    // [rad/s]
 float Theta_x_trg = 0.0f;           // [rad/s]
 float Theta_x_DH_trg = 0.0f;        // [rad/s]
 float Theta_y_trg = 0.0f;           // [rad/s]
@@ -420,6 +460,7 @@ void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd)
             Policy_Armed_Flag = !Policy_Armed_Flag;
             break;
 
+
         case 10: // Upload Point-to-Point Trajectory Values
 
             Traj_Type = P2P;
@@ -455,7 +496,44 @@ void CTRL_Command(struct CTRL_CmdPacket *CTRL_Cmd)
                     break;
             }
 
-            break;
+            break;            
+
+        // case 10: // Upload Point-to-Point Trajectory Values (XYZ at once)
+
+        //     Traj_Type = P2P;
+
+        //     // Current position as trajectory start
+        //     s_0_t[0] = Pos_B_O.x;
+        //     s_0_t[1] = Pos_B_O.y;
+        //     s_0_t[2] = Pos_B_O.z;
+
+        //     // Desired final position
+        //     s_f_t[0] = CTRL_Cmd->cmd_val1;
+        //     s_f_t[1] = CTRL_Cmd->cmd_val2;
+        //     s_f_t[2] = CTRL_Cmd->cmd_val3;
+
+        //     // Use one common peak acceleration for all axes
+        //     a_t[0] = CTRL_Cmd->cmd_flag;
+        //     a_t[1] = CTRL_Cmd->cmd_flag;
+        //     a_t[2] = CTRL_Cmd->cmd_flag;
+
+        //     // Reset trajectory timers
+        //     t_traj[0] = 0.0f;
+        //     t_traj[1] = 0.0f;
+        //     t_traj[2] = 0.0f;
+
+        //     // Debug
+        //     // std::cout << "[P2P] start=("
+        //     //         << s_0_t[0] << ", " << s_0_t[1] << ", " << s_0_t[2]
+        //     //         << ") target=("
+        //     //         << s_f_t[0] << ", " << s_f_t[1] << ", " << s_f_t[2]
+        //     //         << ") accel=" << CTRL_Cmd->cmd_flag << std::endl;
+            
+        //     Traj_Active[0] = 1.0f;
+        //     Traj_Active[1] = 1.0f;
+        //     Traj_Active[2] = 1.0f;
+
+        //     break;
 
         case 11: // Upload Constant Velocity Trajectory Values
 
@@ -718,6 +796,19 @@ bool updateOpticalFlowAnalytic(const state_t *state, const sensorData_t *sensors
     Tau_CM = clamp((D_perp-0.035)/(Vel_B_P.z + 1e-6f),-5.0f,5.0f); //Centermiddle camera location : 35mm
 
     Tau_CR = clamp(D_perp_CR/(Vel_B_P.z + 1e-6f),-5.0f,5.0f);
+
+    D_perp_Cam = Pos_P_Cam.z;
+    if (fabsf(D_perp_Cam) < 0.02f)
+    {
+        D_perp_Cam = 0.0f;
+    }
+
+    Theta_x_Cam_GT = clamp(Vel_Cam_P.x / (D_perp_Cam + 1e-6f), -20.0f, 20.0f);
+    Theta_y_Cam_GT = clamp(Vel_Cam_P.y / (D_perp_Cam + 1e-6f), -20.0f, 20.0f);
+    Tau_Cam_GT = clamp(D_perp_Cam / (Vel_Cam_P.z + 1e-6f), 0.0f, 5.0f);
+    // std::cout << "Tau_Cam_GT: " << Tau_Cam_GT << std::endl;
+    // std::cout << "D_perp_Cam: " << D_perp_Cam << std::endl;
+    // std::cout << "Vel_Cam_P.z: " << Vel_Cam_P.z << std::endl;
 
     return true;
 }

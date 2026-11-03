@@ -320,7 +320,7 @@ void Sticky_Leg_Plugin::Configure(const Entity &_entity,
   {
     sdf::ElementPtr elem = sdfClone->GetElement("JointName");
     this->dataPtr->Joint_Name = elem->Get<std::string>();
-    std::cout << "Joint_Name: " << this->dataPtr->Joint_Name << std::endl; 
+    // std::cout << "Joint_Name: " << this->dataPtr->Joint_Name << std::endl; 
   }
 
   // GRAB THE LINK FROM SDF
@@ -328,7 +328,7 @@ void Sticky_Leg_Plugin::Configure(const Entity &_entity,
   {
     sdf::ElementPtr elem = sdfClone->GetElement("LinkName");
     this->dataPtr->Link_Name = elem->Get<std::string>();
-    std::cout << "Link_Name: " << this->dataPtr->Link_Name << std::endl; 
+    // std::cout << "Link_Name: " << this->dataPtr->Link_Name << std::endl; 
   }
 
   // GRAB THE LEGNUMBER FROM SDF
@@ -336,7 +336,7 @@ void Sticky_Leg_Plugin::Configure(const Entity &_entity,
   {
     sdf::ElementPtr elem = sdfClone->GetElement("LegNumber");
     this->dataPtr->Leg_Number = elem->Get<int>();
-    std::cout << "Leg_Number: " << this->dataPtr->Leg_Number << std::endl; 
+    // std::cout << "Leg_Number: " << this->dataPtr->Leg_Number << std::endl; 
   }
 
   if (_sdf->HasElement("child_link"))
@@ -358,7 +358,7 @@ void Sticky_Leg_Plugin::Configure(const Entity &_entity,
   this->dataPtr->ros_node = std::make_shared<rclcpp::Node>("sticky_leg_plugin_node_" + std::to_string(this->dataPtr->Leg_Number));
   this->dataPtr->Sticky_Pad_Connect_Publisher = this->dataPtr->ros_node->create_publisher<sar_msgs::msg::StickyPadConnect>("/SAR_Internal/Leg_Connections" + std::to_string(this->dataPtr->Leg_Number), 5);
   this->dataPtr->Leg_Connect_Service = this->dataPtr->ros_node->create_service<sar_msgs::srv::ActivateStickyPads>("/SAR_Internal/Sticky_Leg_" + std::to_string(this->dataPtr->Leg_Number), std::bind(&Sticky_Leg_Plugin::Service_Callback, this, std::placeholders::_1, std::placeholders::_2));
-  std::cout << "Service Name: /SAR_Internal/Sticky_Leg_" << this->dataPtr->Leg_Number << std::endl;
+  // std::cout << "Service Name: /SAR_Internal/Sticky_Leg_" << this->dataPtr->Leg_Number << std::endl;
 
   this->SubscribeToContacts();
 }
@@ -435,7 +435,7 @@ void Sticky_Leg_Plugin::PreUpdate(const UpdateInfo &/*_info*/,
   else if(Sticky_Flag == false){
       if (kNullEntity != this->dataPtr->detachableJointEntity)
       {
-        std::cout << "detachableJointEntity is not null : " << std::endl;
+        // std::cout << "detachableJointEntity is not null : " << std::endl;
 
         // // DetachableJoint 삭제
         // _ecm.RemoveComponent<components::DetachableJoint>(this->dataPtr->detachableJointEntity);
@@ -455,7 +455,7 @@ void Sticky_Leg_Plugin::PreUpdate(const UpdateInfo &/*_info*/,
         this->dataPtr->contact_flag = false;
         this->dataPtr->attach_flag = false;
 
-        std::cout << "[Leg_" << this->dataPtr->Leg_Number << "]: Detachable joint removed." << std::endl;
+        // std::cout << "[Leg_" << this->dataPtr->Leg_Number << "]: Detachable joint removed." << std::endl;
 
         // // StickyPadConnect 메시지 업데이트 및 발행
         // switch(this->dataPtr->Leg_Number)

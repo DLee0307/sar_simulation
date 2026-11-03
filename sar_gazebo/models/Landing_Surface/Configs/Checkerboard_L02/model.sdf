@@ -24,8 +24,9 @@
         <material>
         <pbr>
             <metal>
-            <albedo_map>model://Configs/Checkerboard_L02/Surface_Texture/Images/ceiling_sine_L025_32m_8192.png</albedo_map>
-            <albedo_map>model://Configs/Checkerboard_L02/Surface_Texture/Images/chessboard_L_0.33.jpg</albedo_map>
+            <albedo_map>model://Configs/Checkerboard_L02/Surface_Texture/Images/ceiling_32m_apriltag36h11_id0_3p0m_4096.png</albedo_map>
+            <!-- <albedo_map>model://Configs/Checkerboard_L02/Surface_Texture/Images/ceiling_sine_L025_32m_8192.png</albedo_map> -->
+            <!-- <albedo_map>model://Configs/Checkerboard_L02/Surface_Texture/Images/chessboard_L_0.33.jpg</albedo_map> -->
             <!-- <albedo_map>model://Configs/Checkerboard_L02/Surface_Texture/Images/stucco.jpg</albedo_map> -->
             <!-- <albedo_map>model://Configs/Checkerboard_L02/Surface_Texture/Images/brick.jpg</albedo_map> -->
             <!-- <albedo_map>model://Configs/Checkerboard_L02/Surface_Texture/Images/tree.jpg</albedo_map> -->

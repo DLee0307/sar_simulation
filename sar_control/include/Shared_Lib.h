@@ -280,6 +280,33 @@ extern int32_t Cam_dt;      // Time Between Images [ms]
 //extern int32_t UART_arr[UART_ARR_SIZE];
 extern bool isOFUpdated;
 
+///OpenMV
+// =================================
+//     CAMERA OFFSET PARAMETERS
+// =================================
+extern struct vec r_Cam_B;            // Camera offset from body/mocap origin, body frame [m]
+extern struct vec r_Cam_O;            // Camera offset from body/mocap origin, world frame [m]
+
+// =================================
+//     CAMERA WRT ORIGIN STATES
+// =================================
+extern struct vec Pos_Cam_O;          // Camera position in world/origin frame [m]
+extern struct vec Vel_Cam_O;          // Camera velocity in world/origin frame [m/s]
+
+// =================================
+//     CAMERA WRT PLANE STATES
+// =================================
+extern struct vec Pos_P_Cam;          // Plane relative to camera, expressed in plane frame [m]
+extern struct vec Vel_Cam_P;          // Camera velocity expressed in plane frame [m/s]
+
+// =================================
+//     CAMERA-BASED OPTICAL FLOW STATES
+// =================================
+extern float D_perp_Cam;              // Camera-to-plane perpendicular distance [m]
+extern float Tau_Cam_GT;              // Analytic TTC at camera center [s]
+extern float Theta_x_Cam_GT;          // Analytic OF x at camera center [rad/s]
+extern float Theta_y_Cam_GT;          // Analytic OF y at camera center [rad/s]
+///OpenMV End
 
 // =================================
 //  FLAGS AND SYSTEM INITIALIZATION
@@ -360,8 +387,10 @@ extern float Vel_angle_B_P_trg;         // Velocity angle relative [deg]
 extern float Tau_trg;                   // [rad/s]
 extern float Tau_CR_trg;                // [rad/s]
 extern float Tau_CM_trg;                // [rad/s]
-extern float Theta_x_CM_trg;                // [rad/s]
+extern float Theta_x_CM_trg;            // [rad/s]
 extern float Tau_DH_trg;                // [rad/s]
+extern float Tau_Cam_GT_trg;            // [rad/s]
+extern float Theta_x_Cam_GT_trg;        // [rad/s]
 extern float Theta_x_trg;               // [rad/s]
 extern float Theta_x_DH_trg;            // [rad/s]
 extern float Theta_y_trg;               // [rad/s]

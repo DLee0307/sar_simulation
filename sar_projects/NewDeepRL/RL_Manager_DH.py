@@ -145,7 +145,7 @@ class RL_Training_Manager():
             self.model.load_replay_buffer(replay_buffer_path)
 
     # model_save_freq=2e3
-    def train_model(self,model_save_freq=50,reward_check_freq=200,S3_upload_freq=1000,reset_timesteps=False,t_step_max=500e3):
+    def train_model(self,model_save_freq=100,reward_check_freq=500,S3_upload_freq=1000,reset_timesteps=False,t_step_max=500e3):
         if reset_timesteps == True:
 
             self.model.tensorboard_log = self.TB_Log_Dir
@@ -252,6 +252,8 @@ class RL_Training_Manager():
                 "Tau_CM_trg",
                 "Theta_x_CM_trg",
                 "Tau_DH_trg",
+                "Tau_Cam_GT_trg",
+                "Theta_x_Cam_GT_trg",
                 "Tau_trg",
                 "Theta_x_trg",
                 "D_perp_CR_trg",
@@ -345,6 +347,8 @@ class RL_Training_Manager():
                                 self.env.Tau_CM_trg,
                                 self.env.Theta_x_CM_trg,
                                 self.env.Tau_DH_trg,
+                                self.env.Tau_Cam_GT_trg,
+                                self.env.Theta_x_Cam_GT_trg,
                                 self.env.Tau_trg,
                                 self.env.Theta_x_trg,
                                 self.env.D_perp_CR_trg,
@@ -696,6 +700,8 @@ class RewardCallback(BaseCallback):
             self.logger.record('z_Custom/Tau_CM_trg',info_dict["Tau_CM_trg"])
             self.logger.record('z_Custom/Theta_x_CM_trg',info_dict["Theta_x_CM_trg"])
             self.logger.record('z_Custom/Tau_DH_trg',info_dict["Tau_DH_trg"])
+            self.logger.record('z_Custom/Tau_Cam_GT_trg',info_dict["Tau_Cam_GT_trg"])
+            self.logger.record('z_Custom/Theta_x_Cam_GT_trg',info_dict["Theta_x_Cam_GT_trg"])
             self.logger.record('z_Custom/Trg_Flag',int(info_dict["Trg_Flag"]))
             self.logger.record('z_Custom/Impact_Flag_Ext',int(info_dict["Impact_Flag_Ext"]))
             self.logger.record('z_Custom/D_perp_pad_min',info_dict["D_perp_pad_min"])
@@ -845,15 +851,17 @@ class RewardCallback(BaseCallback):
         if len(self.saved_models) > self.keep_last_n_models:
 
             for model_path, replay_buffer_path, s3_model_path, s3_replay_buffer_path in self.saved_models[:-self.keep_last_n_models]:
-                
+
                 # Delete local files
                 if os.path.exists(model_path):
                     os.remove(model_path)
+
                 if os.path.exists(replay_buffer_path):
                     os.remove(replay_buffer_path)
-                
-                # Delete from S3
-                self.RLM.delete_file_from_S3(s3_model_path)
-                self.RLM.delete_file_from_S3(s3_replay_buffer_path)
+
+                # Delete from S3 only if S3 upload is enabled and function exists
+                if getattr(self.RLM, "S3_Upload_Flag", False) and hasattr(self.RLM, "delete_file_from_S3"):
+                    self.RLM.delete_file_from_S3(s3_model_path)
+                    self.RLM.delete_file_from_S3(s3_replay_buffer_path)
 
             self.saved_models = self.saved_models[-self.keep_last_n_models:]

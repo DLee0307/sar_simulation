@@ -10,10 +10,20 @@ import json
 import rclpy
 
 # For run this code I need to command below in terminal.
+# cd ros2_ws/src/sar_simulation/sar_projects/NewDeepRL
 # python3 T1_Policy_Pre-Training_DH.py --TrainConfig /home/dlee/ros2_ws/src/sar_simulation/sar_projects/NewDeepRL/Config_Files/SOV5_3D_Sim/SOV5_A30_L200_0deg_aRot90_S3D.json
 # python3 T1_Policy_Pre-Training_DH.py --TrainConfig /home/dlee/ros2_ws/src/sar_simulation/sar_projects/NewDeepRL/Config_Files/SOV5_3D_Sim/SOV5_A30_L200_0deg_aRot90_S3D_DH.json
+
+# A15_L200
+# python3 T1_Policy_Pre-Training_DH.py --TrainConfig /home/dlee/ros2_ws/src/sar_simulation/sar_projects/NewDeepRL/Config_Files/SOV5OPENMV_3D_Sim/SOV5OPENMV_A15_L200_0deg_aRot90_S3D.json
+
+# A15_L250
 # python3 T1_Policy_Pre-Training_DH.py --TrainConfig /home/dlee/ros2_ws/src/sar_simulation/sar_projects/NewDeepRL/Config_Files/SOV5OPENMV_3D_Sim/SOV5OPENMV_A15_L250_0deg_aRot90_S3D.json
-   
+
+# A15_L250(3input)
+# python3 T1_Policy_Pre-Training_DH.py --TrainConfig /home/dlee/ros2_ws/src/sar_simulation/sar_projects/NewDeepRL/Config_Files/SOV5OPENMV_3D_Sim/_SOV5OPENMV_A15_L250_0deg_aRot90_S3D_3input.json
+
+
 # To see  reward per time step
 # tensorboard --logdir=/home/dlee/ros2_ws/src/sar_simulation/sar_projects/NewDeepRL/TB_Logs
 

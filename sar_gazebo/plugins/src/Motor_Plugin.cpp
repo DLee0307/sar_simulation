@@ -285,7 +285,7 @@ void Motor_Plugin::Configure(const Entity &_entity,
   this->dataPtr->model = Model(_entity);
 
   // CHECK THE MODEL
-  std::cout << "Start Motor_Plugin, Model Name: " << this->dataPtr->model.Name(_ecm) << std::endl;
+  // std::cout << "Start Motor_Plugin, Model Name: " << this->dataPtr->model.Name(_ecm) << std::endl;
   if (!this->dataPtr->model.Valid(_ecm))
   {
     gzerr << "Motor_Plugin plugin should be attached to a model entity. "

@@ -109,7 +109,7 @@ public:
     // =============================
     //     CTRL COMMAND CALLBACKS
     // =============================
-    bool CMD_SAR_DC_Callback(const sar_msgs::srv::CTRLCmdSrv::Request::SharedPtr request,
+    void CMD_SAR_DC_Callback(const sar_msgs::srv::CTRLCmdSrv::Request::SharedPtr request,
                              sar_msgs::srv::CTRLCmdSrv::Response::SharedPtr response);
 
     // =======================
@@ -352,6 +352,8 @@ private:
     double Tau_CM_trg = NAN;
     double Theta_x_CM_trg = NAN;
     double Tau_DH_trg = NAN;
+    double Tau_Cam_GT_trg = NAN;
+    double Theta_x_Cam_GT_trg = NAN;
     double Theta_x_trg = NAN;
     double Theta_y_trg = NAN;
 
@@ -508,6 +510,8 @@ inline void SAR_DataConverter::resetTriggerData()
     Tau_CM_trg = NAN;
     Theta_x_CM_trg = NAN;
     Tau_DH_trg = NAN;
+    Tau_Cam_GT_trg = NAN;
+    Theta_x_Cam_GT_trg = NAN;
 
     // POLICY ACTIONS
     a_Trg_trg = NAN;

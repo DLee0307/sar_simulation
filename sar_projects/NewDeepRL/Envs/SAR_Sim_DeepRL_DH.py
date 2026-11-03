@@ -20,6 +20,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append('/home/dlee/ros2_ws/src/sar_simulation')
 
 from sar_env import SAR_Sim_Interface
+from sar_msgs.srv import CTRLGetObs
 
 EPS = 1e-6 # Epsilon (Prevent division by zero)
 YELLOW = '\033[93m'
@@ -30,9 +31,13 @@ RESET = '\033[0m'  # Reset to default color
 
 class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
     #def __init__(self,Ang_Acc_range=[-90.0,-80.0],V_mag_range=[1,4],V_angle_range=[15,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=True,GZ_Timeout=False):
-    def __init__(self,Ang_Acc_range=[-90.0,-85.0],V_mag_range=[1,2],V_angle_range=[90,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=False,GZ_Timeout=False):
+    def __init__(self,Ang_Acc_range=[-90.0,-85.0],V_mag_range=[1,2],V_angle_range=[90,90],Plane_Angle_range=[0,0],Render=True,Fine_Tune=False,GZ_Timeout=False,Obs_Mode="TauTheta"):
+
+        self.Obs_Mode = Obs_Mode
+
         SAR_Sim_Interface.__init__(self, GZ_Timeout=GZ_Timeout)
         gym.Env.__init__(self)
+        self.initialize_sim()
 
         if self.Policy_Type != "DEEP_RL_SB3":
             str_input = self.userInput(YELLOW + "Incorrect Policy Activated. Continue? (y/n): " + RESET,str)
@@ -104,6 +109,8 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         self.Theta_x_CM_trg = np.inf
         self.Tau_DH_trg = np.inf
         self.Theta_x_CM_trg = np.inf
+        self.Tau_Cam_GT_trg = np.inf
+        self.Theta_x_Cam_GT_trg = np.inf
         self.Tau_trg = np.inf
 
         ## DOMAIN RANDOMIZATION
@@ -113,7 +120,22 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         ## DEFINE OBSERVATION SPACE
         ## need change : observation space 4 Tau, theta_x, D_Perp, Plane angle
         ## $$$$$$$$$$$
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
+        # self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
+
+        if self.Obs_Mode == "TauTheta":
+            obs_dim = 2
+
+        elif self.Obs_Mode == "TauThetaDperpCam":
+            obs_dim = 3
+
+        else:
+            raise ValueError(
+                f"Invalid Obs_Mode='{self.Obs_Mode}'. "
+                "Use 'TauTheta' or 'TauThetaDperpCam'."
+            )
+
+        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
+
         self.obs_trg = np.zeros(self.observation_space.shape,dtype=np.float32) # Obs values at triggering
 
         ## DEFINE ACTION SPACE
@@ -131,50 +153,56 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         RealTimeTimer_thread.start()
 
     def _RealTimeTimer(self):
-
-        ## IF REAL TIME EXCEEDS TIMEOUT VALUE THEN RESTART SIM
         while True:
             if (time.time() - self.start_time_real > self.t_real_max) and not self.Done:
                 self.Done = True
                 print(YELLOW + f"Real Time Exceeded: {time.time() - self.start_time_real:.3f} s" + RESET)
-                print(YELLOW + f"Sim Likely Frozen: Restarting Simulation Env" + RESET)
+                print(YELLOW + "Sim Likely Frozen: Restarting Simulation Env" + RESET)
 
-                self._kill_Sim()
-                time.sleep(3)
-                self._restart_Sim()
-                self._start_monitoring_subprocesses()
-                # self.Sim_Status = "Running"
-                self._wait_for_sim_running()
-                time.sleep(8)                
+                ok = self._restart_sim_safely(ready_timeout=25.0)
+                if not ok:
+                    self.get_logger().error("Simulation did not recover after restart.")
+                else:
+                    self.start_time_real = time.time()
+                    self.Done = False
+
             time.sleep(1)
 
-    #!!! Need to change
-    def reset(self,seed=None,options=None):
 
-        if self.K_ep%3 == 0:
-            ## START SIMULATION
-            time.sleep(1)
-            self._kill_Sim()
-            time.sleep(4)
-            self._restart_Sim()
-            self._start_monitoring_subprocesses()
-            # self.Sim_Status = "Running"
-            self._wait_for_sim_running()
-            time.sleep(4)
-            rclpy.spin_once(self)
+    def reset(self, seed=None, options=None):
+        super().reset(seed=seed)
 
+        if self.K_ep % 5 == 0:
+            self.get_logger().info(f"Episode {self.K_ep}: restarting simulation environment")
 
-        self._wait_for_sim_running()
+            ok = self._restart_sim_safely(ready_timeout=25.0)
+            if not ok:
+                raise RuntimeError("Simulation was not fully ready after restart in reset().")
+        else:
+            ok = self.wait_for_fresh_state(min_state_inc=1, min_clock_inc=1, timeout_wall_sec=3.0)
+            if not ok:
+                self.get_logger().warn("Fresh state not received before resetPose")
+
+        time.sleep(3)
 
         self.start_time_real = time.time()
-        self.resetPose()
-        time.sleep(1) ## From DH
+
+        ok = self.resetPose()
+        if not ok:
+            raise RuntimeError("resetPose failed")
+
+        if not self._wait_for_post_reset_ready(timeout=8.0):
+            self.get_logger().warn("Post-reset state did not refresh in time.")
 
         self._resetParams()
         self._setTestingConditions()
-        self._initialStep()
-       
-        return self._getObs_DH(), {}
+        ok = self._initialStep()
+        if not ok:
+            raise RuntimeError("_initialStep failed")
+
+        obs = self._getObs_DH()
+        info = {}
+        return obs, info
 
 
     def _resetParams(self):
@@ -195,6 +223,8 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         self.Tau_CM_trg = np.inf
         self.Tau_DH_trg = np.inf
         self.Theta_x_CM_trg = np.inf
+        self.Tau_Cam_GT_trg = np.inf
+        self.Theta_x_Cam_GT_trg = np.inf
         self.Tau_trg = np.inf
 
         self.obs_trg = np.full(self.obs_trg.shape[0],np.nan)
@@ -202,6 +232,93 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
 
         self.a_Trg_trg = np.nan
         self.a_Rot_trg = np.nan
+
+    # def _setTestingConditions(self):
+
+    #     V_perp_min = 0.75       # 최소 수직속도 [m/s]
+    #     max_sample_tries = 1000
+
+    #     if self.Fine_Tuning_Flag:
+
+    #         valid_condition_found = False
+    #         start_idx = self.TestCondition_idx
+    #         checked_count = 0
+    #         total_conditions = len(self.TestingConditions)
+
+    #         while checked_count < total_conditions:
+    #             ## SET TESTING CONDITIONS
+    #             Plane_Angle = self.TestingConditions[self.TestCondition_idx][0]
+    #             V_angle_B_O = self.TestingConditions[self.TestCondition_idx][1]
+    #             V_mag_B_O = self.TestingConditions[self.TestCondition_idx][2]
+
+    #             # Add code from DH
+    #             if np.isnan(getattr(self, 'Plane_Angle_deg', np.nan)):
+    #                 self.Plane_Angle_deg = 0
+
+    #             ## CONVERT GLOBAL ANGLE TO RELATIVE ANGLE
+    #             ## self._setPlanePose(self.r_P_O,Plane_Angle)
+    #             V_angle_candidate = self.Plane_Angle_deg + V_angle_B_O
+    #             V_mag_candidate = V_mag_B_O
+
+    #             ## 수직속도 계산
+    #             V_perp = V_mag_candidate * np.sin(np.deg2rad(V_angle_candidate))
+
+    #             ## UPDATE TESTING CONDITION INDEX
+    #             self.TestCondition_idx += 1
+    #             if self.TestCondition_idx >= len(self.TestingConditions):
+
+    #                 if self.TestCondition_Wrap == True:
+    #                     self.Fine_Tuning_Flag = False
+    #                     self.TestCondition_idx = np.nan
+    #                     break
+
+    #                 self.TestCondition_idx = 0
+    #                 self.TestCondition_Wrap = True
+
+    #             checked_count += 1
+
+    #             ## 조건 만족 시 채택
+    #             if V_perp >= V_perp_min:
+    #                 self.V_mag = V_mag_candidate
+    #                 self.V_angle = V_angle_candidate
+    #                 valid_condition_found = True
+    #                 break
+
+    #         if not valid_condition_found:
+    #             raise RuntimeError(
+    #                 f"No valid fine-tuning test condition found with V_perp >= {V_perp_min} m/s"
+    #             )
+
+    #     else:
+
+    #         ## SAMPLE SET PLANE POSE
+    #         Plane_Angle_Low = self.Plane_Angle_range[0]
+    #         Plane_Angle_High = self.Plane_Angle_range[1]
+    #         Plane_Angle = np.random.uniform(Plane_Angle_Low, Plane_Angle_High)
+    #         # self._setPlanePose(self.r_P_O,Plane_Angle)
+
+    #         ## SAMPLE VELOCITY AND FLIGHT ANGLE WITH REJECT SAMPLING
+    #         valid_sample_found = False
+
+    #         for _ in range(max_sample_tries):
+    #             V_mag, V_angle = self._sampleFlightConditions(self.V_mag_range, self.V_angle_range)
+
+    #             ## 수직속도 계산
+    #             V_perp = V_mag * np.sin(np.deg2rad(V_angle))
+
+    #             ## 조건 만족 시 채택
+    #             if V_perp >= V_perp_min:
+    #                 self.V_mag = V_mag
+    #                 self.V_angle = V_angle
+    #                 valid_sample_found = True
+    #                 break
+
+    #         if not valid_sample_found:
+    #             raise RuntimeError(
+    #                 f"Failed to sample valid flight condition with V_perp >= {V_perp_min} m/s "
+    #                 f"after {max_sample_tries} attempts. "
+    #                 f"Check V_mag_range={self.V_mag_range}, V_angle_range={self.V_angle_range}"
+    #             )
 
     def _setTestingConditions(self):
 
@@ -246,278 +363,775 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
             V_mag,V_angle = self._sampleFlightConditions(self.V_mag_range,self.V_angle_range)
             self.V_mag = V_mag
             self.V_angle = V_angle
-            
+
+    # def _setTestingConditions(self):
+
+    #     V_perp_min = 0.5       # minimum plane-normal/perpendicular speed [m/s]
+    #     max_sample_tries = 1000
+
+    #     if self.Fine_Tuning_Flag:
+
+    #         valid_condition_found = False
+    #         checked_count = 0
+    #         total_conditions = len(self.TestingConditions)
+
+    #         while checked_count < total_conditions:
+    #             ## SET TESTING CONDITIONS
+    #             Plane_Angle = self.TestingConditions[self.TestCondition_idx][0]
+    #             V_angle_B_O = self.TestingConditions[self.TestCondition_idx][1]
+    #             V_mag_B_O = self.TestingConditions[self.TestCondition_idx][2]
+
+    #             if np.isnan(getattr(self, 'Plane_Angle_deg', np.nan)):
+    #                 self.Plane_Angle_deg = 0
+
+    #             # Same convention as your current code:
+    #             # self.V_angle is used later as the angle for V_perp = V_mag*sin(V_angle)
+    #             V_angle_candidate = self.Plane_Angle_deg + V_angle_B_O
+    #             V_mag_candidate = V_mag_B_O
+
+    #             ## Calculate perpendicular velocity
+    #             V_perp = V_mag_candidate * np.sin(np.deg2rad(V_angle_candidate))
+
+    #             ## Update testing condition index
+    #             self.TestCondition_idx += 1
+    #             if self.TestCondition_idx >= len(self.TestingConditions):
+
+    #                 if self.TestCondition_Wrap:
+    #                     self.Fine_Tuning_Flag = False
+    #                     self.TestCondition_idx = 0
+    #                     break
+
+    #                 self.TestCondition_idx = 0
+    #                 self.TestCondition_Wrap = True
+
+    #             checked_count += 1
+
+    #             ## Accept only if V_perp is large enough
+    #             if V_perp >= V_perp_min:
+    #                 self.V_mag = V_mag_candidate
+    #                 self.V_angle = V_angle_candidate
+    #                 valid_condition_found = True
+
+    #                 print(
+    #                     f"[Selected Flight Condition] "
+    #                     f"V_mag={self.V_mag:.3f} m/s, "
+    #                     f"V_angle={self.V_angle:.3f} deg, "
+    #                     f"V_perp={V_perp:.3f} m/s"
+    #                 )
+    #                 break
+
+    #         if not valid_condition_found:
+    #             raise RuntimeError(
+    #                 f"No valid fine-tuning test condition found with "
+    #                 f"V_perp >= {V_perp_min} m/s"
+    #             )
+
+    #     else:
+
+    #         ## SAMPLE SET PLANE POSE
+    #         Plane_Angle_Low = self.Plane_Angle_range[0]
+    #         Plane_Angle_High = self.Plane_Angle_range[1]
+    #         Plane_Angle = np.random.uniform(Plane_Angle_Low, Plane_Angle_High)
+    #         # self._setPlanePose(self.r_P_O, Plane_Angle)
+
+    #         ## SAMPLE VELOCITY AND FLIGHT ANGLE WITH REJECT SAMPLING
+    #         valid_sample_found = False
+
+    #         for _ in range(max_sample_tries):
+    #             V_mag, V_angle = self._sampleFlightConditions(
+    #                 self.V_mag_range,
+    #                 self.V_angle_range
+    #             )
+
+    #             ## Calculate perpendicular velocity
+    #             V_perp = V_mag * np.sin(np.deg2rad(V_angle))
+
+    #             ## Accept only if V_perp is large enough
+    #             if V_perp >= V_perp_min:
+    #                 self.V_mag = V_mag
+    #                 self.V_angle = V_angle
+    #                 valid_sample_found = True
+
+    #                 print(
+    #                     f"[Selected Flight Condition] "
+    #                     f"V_mag={self.V_mag:.3f} m/s, "
+    #                     f"V_angle={self.V_angle:.3f} deg, "
+    #                     f"V_perp={V_perp:.3f} m/s"
+    #                 )
+    #                 break
+
+    #         if not valid_sample_found:
+    #             raise RuntimeError(
+    #                 f"Failed to sample valid flight condition with "
+    #                 f"V_perp >= {V_perp_min} m/s after {max_sample_tries} attempts. "
+    #                 f"Check V_mag_range={self.V_mag_range}, "
+    #                 f"V_angle_range={self.V_angle_range}"
+    #             )
+
+    #Previous
+#     def _initialStep(self):
+
+#         print("_initialStep is run")
+#         ## DOMAIN RANDOMIZATION (UPDATE INERTIAL VALUES)
+#         Iyy_DR = self.Ref_Iyy + np.random.normal(0,self.Iyy_std)
+#         Mass_DR = self.Ref_Mass + np.random.normal(0,self.Mass_std)
+#         #self._setModelInertia(Mass_DR,[self.Ref_Ixx,Iyy_DR,self.Ref_Izz])
+
+#         # Add code from DH
+#         if np.isnan(getattr(self, 'Plane_Angle_rad', np.nan)):
+#             self.Plane_Angle_rad = 0
+
+#         # Add code from DH
+#         if np.isnan(getattr(self, 'r_P_O', [np.nan])[0]):
+#             self.r_P_O = [3.0, 0.0, 2.5]
+
+#         ## CALC STARTING VELOCITY IN GLOBAL COORDS
+#         V_tx = self.V_mag*np.cos(np.deg2rad(self.V_angle))
+#         V_perp = self.V_mag*np.sin(np.deg2rad(self.V_angle))
+#         V_B_P = np.array([V_tx,0,V_perp])               # {t_x,n_p}
+#         V_B_O = self.R_PW(V_B_P,self.Plane_Angle_rad)   # {X_W,Z_W}
+        
+#         print(
+#             f"[Flight Condition] "
+#             f"V_mag={self.V_mag:.3f} m/s, "
+#             f"V_angle={self.V_angle:.3f} deg, "
+#             f"Plane_Angle={self.Plane_Angle_deg:.3f} deg"
+#         )
+
+#         ## CALCULATE STARTING TAU VALUE
+#         # self.Tau_CR_start = self.t_rot_max*np.random.uniform(0.9,1.1) # Add noise to starting condition
+#         self.Tau_CR_start = 0.5 + np.random.uniform(-0.05,0.05)
+#         try:
+#             self.Tau_Body_start = (self.Tau_CR_start + self.Collision_Radius/(V_perp+EPS)) # Tau read by body
+#         except Exception as e:
+#             print(f"Tau_Body_start calculation failed: {e}")
+#             raise
+#         self.Tau_Accel_start = 1 # Acceleration time to desired velocity conditions [s]
+
+#         ## CALC STARTING POSITION IN GLOBAL COORDS
+#         # (Derivation: Research_Notes_Book_3.pdf (9/17/23))
+
+#         r_P_O = np.array(self.r_P_O)                                        # Plane Position wrt to Origin - {X_W,Z_W}
+#         #print("r_P_O : ", r_P_O)
+#         r_P_B = np.array([(self.Tau_CR_start + self.Tau_Accel_start)*V_tx,
+#                           0,
+#                           (self.Tau_Body_start + self.Tau_Accel_start)*V_perp])  # Body Position wrt to Plane - {t_x,n_p}
+#         #print("r_P_B : ", r_P_B)
+#         r_B_O = r_P_O - self.R_PW(r_P_B,self.Plane_Angle_rad)    
+#         #print("r_B_O : ", r_B_O)
+
+#         ## DESIRED ACCELERATION VALUES Added by DH
+#         Acc = self.TrajAcc_Max
+    
+#         a_x = Acc[0]
+#         a_z = Acc[2]
+
+#         ## CALC OFFSET POSITIONS
+#         t_x = V_B_O[0]/a_x    # Time required to reach Vx
+#         t_z = V_B_O[2]/a_z    # Time required to reach Vz
+#         t_total = t_x + t_z + 1
+
+#         x_0 = r_B_O[0] - V_B_O[0]**2/(2*a_x) - V_B_O[0]*t_z     # X-position Vel reached
+#         y_0 = r_B_O[1]                                          # Y-position Vel reached
+#         z_0 = r_B_O[2] - V_B_O[2]**2/(2*a_z)                    # Z-position Vel reached  
+
+#         r_B_O = np.array([x_0,y_0,z_0])
+
+#         ## LAUNCH QUAD W/ DESIRED VELOCITY
+#         self.initial_state = (r_B_O,V_B_O)
+
+#         # self.Sim_VelTraj(pos=r_B_O,vel=V_B_O,t_total=t_total)
+#         # self._iterStep(n_steps=100)
+        
+#         # # Add code from DH : Beacause of lock step?
+#         # time.sleep(6)
+
+#         # print("_initialStep_r_B_O : ", r_B_O)
+#         # print("_initialStep_V_B_O : ", V_B_O)
+#         ok = self.Sim_VelTraj(pos=r_B_O, vel=V_B_O, t_total=t_total)
+#         if not ok:
+#             self.get_logger().error("_initialStep failed: Sim_VelTraj failed")
+#             return False
+
+#         ok = self.step_and_wait(n_steps=50, tick_timeout=5.0, state_timeout=3.0)
+#         if not ok:
+#             self.get_logger().error("_initialStep failed: post-Sim_VelTraj stabilization failed")
+#             return False
+
+        
+#         ## ROUND OUT STEPS TO BE IN SYNC WITH CONTROLLER
+#         cur_tick = self._getTick()
+#         tick_mod = cur_tick % 10
+#         if tick_mod != 0:
+#             n_steps = 10 - tick_mod
+#             ok = self.step_and_wait(n_steps=n_steps, tick_timeout=3.0, state_timeout=2.0)
+#             if not ok:
+#                 self.get_logger().error("_initialStep failed: tick alignment failed")
+#                 return False
+
+#         ## RESET/UPDATE TIME CONDITIONS
+#         self.start_time_ep = self._getTime()
+#         print("_getTime:", self.start_time_ep)
+#         self.start_time_trg = np.nan
+#         self.start_time_impact = np.nan
+#         self.t_flight_max = self.Tau_Body_start*2.0   # [s]
+#         self.t_trg_max = self.Tau_Body_start*2.5 # DH_ changed Previous 2.5 not /5 [s]
+
+#         # print("self.SAR_Type", self.SAR_Type)
+#         # print("self.SAR_Config", self.SAR_Config)
+#         # print("self.Policy_Type", self.Policy_Type)
+
+# #/////
+
+#         # Activate optical flow only when the selected source is the real camera.
+#         if getattr(self, "Optical_Flow_Source", "").strip() == "Camera":
+#             self.calOF_activation()
+#         # self.calOF_activation()
+        
+# #/////
+
+#         ok = self.step_and_wait(n_steps=50, tick_timeout=5.0, state_timeout=3.0)
+#         if not ok:
+#             self.get_logger().error("_initialStep failed: post-Sim_VelTraj stabilization failed")
+#             return False
+
+#         print("_initialStep is completed")
+
+#         return True
+
     def _initialStep(self):
 
         print("_initialStep is run")
+
         ## DOMAIN RANDOMIZATION (UPDATE INERTIAL VALUES)
-        Iyy_DR = self.Ref_Iyy + np.random.normal(0,self.Iyy_std)
-        Mass_DR = self.Ref_Mass + np.random.normal(0,self.Mass_std)
-        #self._setModelInertia(Mass_DR,[self.Ref_Ixx,Iyy_DR,self.Ref_Izz])
+        Iyy_DR = self.Ref_Iyy + np.random.normal(0, self.Iyy_std)
+        Mass_DR = self.Ref_Mass + np.random.normal(0, self.Mass_std)
+        # self._setModelInertia(Mass_DR, [self.Ref_Ixx, Iyy_DR, self.Ref_Izz])
 
         # Add code from DH
         if np.isnan(getattr(self, 'Plane_Angle_rad', np.nan)):
             self.Plane_Angle_rad = 0
+
         # Add code from DH
         if np.isnan(getattr(self, 'r_P_O', [np.nan])[0]):
             self.r_P_O = [3.0, 0.0, 2.5]
 
         ## CALC STARTING VELOCITY IN GLOBAL COORDS
-        V_tx = self.V_mag*np.cos(np.deg2rad(self.V_angle))
-        V_perp = self.V_mag*np.sin(np.deg2rad(self.V_angle))
-        V_B_P = np.array([V_tx,0,V_perp])               # {t_x,n_p}
-        V_B_O = self.R_PW(V_B_P,self.Plane_Angle_rad)   # {X_W,Z_W}
+        V_tx = self.V_mag * np.cos(np.deg2rad(self.V_angle))
+        V_perp = self.V_mag * np.sin(np.deg2rad(self.V_angle))
+        V_B_P = np.array([V_tx, 0, V_perp])               # {t_x,n_p}
+        V_B_O = self.R_PW(V_B_P, self.Plane_Angle_rad)    # {X_W,Z_W}
 
-        if V_perp <= 1.0:
-            ## CALCULATE STARTING TAU VALUE
-            # self.Tau_CR_start = self.t_rot_max*np.random.uniform(0.9,1.1) # Add noise to starting condition
-            self.Tau_CR_start = 0.5 + np.random.uniform(-0.05,0.05)
-            try:
-                self.Tau_Body_start = (self.Tau_CR_start + self.Collision_Radius/(V_perp+EPS)) # Tau read by body
-            except:
-                print("Exception")
-            self.Tau_Accel_start = 1 # Acceleration time to desired velocity conditions [s]
+        print(
+            f"[Flight Condition] "
+            f"V_mag={self.V_mag:.3f} m/s, "
+            f"V_angle={self.V_angle:.3f} deg, "
+            f"Plane_Angle={self.Plane_Angle_deg:.3f} deg, "
+            f"V_perp={V_perp:.3f} m/s"
+        )
 
-        else:
-            ## CALCULATE STARTING TAU VALUE
-            # self.Tau_CR_start = self.t_rot_max*np.random.uniform(0.9,1.1) # Add noise to starting condition
-            self.Tau_CR_start = 0.5 + np.random.uniform(-0.05,0.05)
-            try:
-                self.Tau_Body_start = (self.Tau_CR_start + self.Collision_Radius/(V_perp+EPS)) # Tau read by body
-            except:
-                print("Exception")
-            self.Tau_Accel_start = 1 # Acceleration time to desired velocity conditions [s]
+        ## CALCULATE STARTING TAU VALUE
+        self.Tau_CR_start = 0.5 + np.random.uniform(-0.05, 0.05)
+
+        try:
+            self.Tau_Body_start = (
+                self.Tau_CR_start + self.Collision_Radius / (V_perp + EPS)
+            )  # Tau read by body
+        except Exception as e:
+            print(f"Tau_Body_start calculation failed: {e}")
+            raise
+
+        self.Tau_Accel_start = 1  # Acceleration time to desired velocity conditions [s]
 
         ## CALC STARTING POSITION IN GLOBAL COORDS
         # (Derivation: Research_Notes_Book_3.pdf (9/17/23))
+        r_P_O = np.array(self.r_P_O)  # Plane Position wrt to Origin - {X_W,Z_W}
 
-        r_P_O = np.array(self.r_P_O)                                        # Plane Position wrt to Origin - {X_W,Z_W}
-        r_P_B = np.array([(self.Tau_CR_start + self.Tau_Accel_start)*V_tx,
-                          0,
-                          (self.Tau_Body_start + self.Tau_Accel_start)*V_perp])  # Body Position wrt to Plane - {t_x,n_p}
-        r_B_O = r_P_O - self.R_PW(r_P_B,self.Plane_Angle_rad)    
-        #print("r_P_B : ", r_P_B)
+        r_P_B = np.array([
+            (self.Tau_CR_start + self.Tau_Accel_start) * V_tx,
+            0,
+            (self.Tau_Body_start + self.Tau_Accel_start) * V_perp
+        ])  # Body Position wrt to Plane - {t_x,n_p}
+
+        r_B_O = r_P_O - self.R_PW(r_P_B, self.Plane_Angle_rad)
 
         ## DESIRED ACCELERATION VALUES Added by DH
         Acc = self.TrajAcc_Max
-    
         a_x = Acc[0]
         a_z = Acc[2]
 
         ## CALC OFFSET POSITIONS
-        t_x = V_B_O[0]/a_x    # Time required to reach Vx
-        t_z = V_B_O[2]/a_z    # Time required to reach Vz
+        t_x = V_B_O[0] / a_x    # Time required to reach Vx
+        t_z = V_B_O[2] / a_z    # Time required to reach Vz
         t_total = t_x + t_z + 1
 
-        x_0 = r_B_O[0] - V_B_O[0]**2/(2*a_x) - V_B_O[0]*t_z     # X-position Vel reached
-        y_0 = r_B_O[1]                                          # Y-position Vel reached
-        z_0 = r_B_O[2] - V_B_O[2]**2/(2*a_z)                    # Z-position Vel reached  
+        x_0 = r_B_O[0] - V_B_O[0] ** 2 / (2 * a_x) - V_B_O[0] * t_z
+        y_0 = r_B_O[1]
+        z_0 = r_B_O[2] - V_B_O[2] ** 2 / (2 * a_z)
 
-        r_B_O = np.array([x_0,y_0,z_0])
+        r_B_O = np.array([x_0, y_0, z_0])
 
         ## LAUNCH QUAD W/ DESIRED VELOCITY
-        self.initial_state = (r_B_O,V_B_O)
-        #print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& r_B_O :",r_B_O)
-        #print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& V_B_O :",V_B_O)
-        self.Sim_VelTraj(pos=r_B_O,vel=V_B_O,t_total=t_total)
-        self._iterStep(n_steps=100)
-        
-        # Add code from DH : Beacause of lock step?
-        time.sleep(6)
+        self.initial_state = (r_B_O, V_B_O)
 
-        #rclpy.spin_once(self)
+        ok = self.Sim_VelTraj(pos=r_B_O, vel=V_B_O, t_total=t_total)
+        if not ok:
+            self.get_logger().error("_initialStep failed: Sim_VelTraj failed")
+            return False
+
+        ok = self.step_and_wait(n_steps=50, tick_timeout=5.0, state_timeout=3.0)
+        if not ok:
+            self.get_logger().error("_initialStep failed: post-Sim_VelTraj stabilization failed")
+            return False
+
         ## ROUND OUT STEPS TO BE IN SYNC WITH CONTROLLER
-        if self._getTick()%10 != 0:
-            n_steps = 10 - (self._getTick()%10)
-            self._iterStep(n_steps=n_steps)
+        cur_tick = self._getTick()
+        tick_mod = cur_tick % 10
+        if tick_mod != 0:
+            n_steps = 10 - tick_mod
+            ok = self.step_and_wait(
+                n_steps=n_steps,
+                tick_timeout=3.0,
+                state_timeout=2.0
+            )
+            if not ok:
+                self.get_logger().error("_initialStep failed: tick alignment failed")
+                return False
+
+        # ============================================================
+        # DH ADD:
+        # Tau_Cam_GT gate before starting the policy episode.
+        #
+        # Policy starts only when:
+        #       0.1 <= Tau_Cam_GT <= 0.8
+        #
+        # If Tau_Cam_GT is outside this valid window, advance the sim
+        # by 100 steps and check again.
+        #
+        # Important:
+        #   - Use raw resp.tau_cam_gt directly.
+        #   - Do not use _getObs_DH() here because that returns scaled obs.
+        #   - start_time_ep is set AFTER this gate, so this extra wait
+        #     is not counted as policy flight time.
+        # ============================================================
+        tau_cam_min = 0.1
+        tau_cam_max = 0.9
+        extra_chunk_steps = 100
+        max_extra_chunks = 30   # safety limit: 30 * 100 = 3000 sim steps
+
+        for k in range(max_extra_chunks):
+            resp = self.callService(
+                '/CTRL/Get_Obs',
+                CTRLGetObs.Request(),
+                CTRLGetObs
+            )
+
+            if resp is None:
+                self.get_logger().warn(
+                    "[Initial Tau Gate] /CTRL/Get_Obs returned None. "
+                    f"Advancing {extra_chunk_steps} more steps."
+                )
+
+                ok = self.step_and_wait(
+                    n_steps=extra_chunk_steps,
+                    tick_timeout=5.0,
+                    state_timeout=3.0
+                )
+                if not ok:
+                    self.get_logger().error(
+                        "_initialStep failed: Tau_Cam_GT gate step_and_wait failed"
+                    )
+                    return False
+
+                continue
+
+            tau_cam_gt = float(resp.tau_cam_gt)
+
+            print(
+                f"[Initial Tau Gate] "
+                f"k={k}, Tau_Cam_GT={tau_cam_gt:.6f}, "
+                f"valid_window=[{tau_cam_min:.3f}, {tau_cam_max:.3f}]"
+            )
+
+            # Start policy only when Tau_Cam_GT is inside [0.1, 0.8].
+            if np.isfinite(tau_cam_gt) and (tau_cam_min <= tau_cam_gt <= tau_cam_max):
+                break
+
+            # Tau_Cam_GT is outside the valid window.
+            # This includes:
+            #   - Tau_Cam_GT < 0.1  : too close / invalid / not ready
+            #   - Tau_Cam_GT > 0.8  : too far
+            #   - NaN / inf         : invalid
+            self.get_logger().warn(
+                f"[Initial Tau Gate] Tau_Cam_GT outside valid window: "
+                f"{tau_cam_gt:.6f}. "
+                f"Valid window = [{tau_cam_min:.3f}, {tau_cam_max:.3f}]. "
+                f"Advancing {extra_chunk_steps} more steps."
+            )
+
+            ok = self.step_and_wait(
+                n_steps=extra_chunk_steps,
+                tick_timeout=5.0,
+                state_timeout=3.0
+            )
+            if not ok:
+                self.get_logger().error(
+                    "_initialStep failed: Tau_Cam_GT gate step_and_wait failed"
+                )
+                return False
+
+        else:
+            self.get_logger().warn(
+                f"[Initial Tau Gate] Tau_Cam_GT did not enter valid window "
+                f"[{tau_cam_min:.3f}, {tau_cam_max:.3f}] after "
+                f"{max_extra_chunks * extra_chunk_steps} steps. "
+                "Continuing anyway."
+            )
 
         ## RESET/UPDATE TIME CONDITIONS
         self.start_time_ep = self._getTime()
         print("_getTime:", self.start_time_ep)
+
         self.start_time_trg = np.nan
         self.start_time_impact = np.nan
-        self.t_flight_max = self.Tau_Body_start*2.0   # [s]
-        self.t_trg_max = self.Tau_Body_start*2.5 # DH_ changed Previous 2.5 not /5 [s]
+        self.t_flight_max = self.Tau_Body_start * 2.0
+        self.t_trg_max = self.Tau_Body_start * 2.5
 
-        # print("self.SAR_Type", self.SAR_Type)
-        # print("self.SAR_Config", self.SAR_Config)
-        # print("self.Policy_Type", self.Policy_Type)
+        # Activate optical flow only when the selected source is the real camera.
+        if getattr(self, "Optical_Flow_Source", "").strip() == "Camera":
+            self.calOF_activation()
 
-#/////
-
-        # self.calOF_activation()
-        
-#/////
-
-        self._iterStep(n_steps=20)
+        ok = self.step_and_wait(n_steps=50, tick_timeout=5.0, state_timeout=3.0)
+        if not ok:
+            self.get_logger().error("_initialStep failed: final stabilization failed")
+            return False
 
         print("_initialStep is completed")
 
+        return True
+
+    def _get_tau_cam_gt_raw(self):
+        resp = self.callService(
+            '/CTRL/Get_Obs',
+            CTRLGetObs.Request(),
+            CTRLGetObs
+        )
+
+        if resp is None:
+            self.get_logger().warn("_get_tau_cam_gt_raw failed: /CTRL/Get_Obs returned None")
+            return np.nan
+
+        return float(resp.tau_cam_gt)
+
     def step(self, action):
         print("step is started")
-
-        # 1. TAKE ACTION
-        # 2. UPDATE STATE
-        # 3. CALC REWARD
-        # 4. CHECK TERMINATION
-        # 5. RETURN VALUES
-
-        #self._wait_for_sim_running()
         time.sleep(0.1)
 
-        ## ROUND OUT STEPS TO BE IN SYNC WITH CONTROLLER
+        def _build_info(reward, a_Rot):
+            return {
+                "reward_vals": self.reward_vals,
+                "reward": reward,
+                "a_Rot": a_Rot,
+                "Trg_Flag": self.Trg_Flag,
+                "Impact_Flag_Ext": self.Impact_Flag_Ext,
+                "D_perp_pad_min": self.D_perp_pad_min,
+                "Tau_CR_trg": self.Tau_CR_trg,
+                "Tau_CM_trg": self.Tau_CM_trg,
+                "Theta_x_CM_trg": self.Theta_x_CM_trg,
+                "Tau_Cam_GT_trg": self.Tau_Cam_GT_trg,
+                "Theta_x_Cam_GT_trg": self.Theta_x_Cam_GT_trg,           
+                "Tau_DH_trg": self.Tau_DH_trg,
+                "Plane_Angle": self.Plane_Angle_deg,
+                "V_mag": self.V_mag,
+                "V_angle": self.V_angle,
+                "TestCondition_idx": self.TestCondition_idx,
+            }
 
-        #rclpy.spin_once(self)
-        if self._getTick()%10 != 0:
-            n_steps = 10 - (self._getTick()%10)
-            self._iterStep(n_steps=n_steps)
+        def _truncate_with_error(msg, reward=np.nan, a_Rot=np.nan, obs=None):
+            self.error_str = msg
+            print(YELLOW, self.error_str, RESET)
 
-        a_Trg = action[0]
-        a_Rot = self.scaleValue(action[1],original_range=[-1,1], target_range=self.Ang_Acc_range)
+            if obs is None:
+                try:
+                    obs = self._getObs_DH()
+                except Exception:
+                    obs = np.zeros(self.observation_space.shape, dtype=np.float32)
+
+            info_dict = _build_info(reward=reward, a_Rot=a_Rot)
+            info_dict["error"] = msg
+            return obs, reward, False, True, info_dict
+
+        # 0) step 시작 전 최소한 fresh state 확인
+        ok = self.wait_for_fresh_state(min_state_inc=1, min_clock_inc=1, timeout_wall_sec=1.0)
+        if not ok:
+            return _truncate_with_error("Episode Completed: stale state before step [Truncated]")
+
+        # 1) controller 100Hz 기준 tick 정렬
+        cur_tick = self._getTick()
+        tick_mod = cur_tick % 10
+        if tick_mod != 0:
+            n_steps = 10 - tick_mod
+            ok = self.step_and_wait(n_steps=n_steps, tick_timeout=2.0, state_timeout=2.0)
+            if not ok:
+                return _truncate_with_error(
+                    "Episode Completed: tick alignment failed [Truncated]"
+                )
+
+        # 2) action parsing
+        a_Trg = float(action[0])
+        a_Rot = self.scaleValue(action[1], original_range=[-1, 1], target_range=self.Ang_Acc_range)
 
         if self.Policy_Type != "DEEP_RL_SB3":
             a_Trg = 1.0
 
         ########## POLICY PRE-TRIGGER ##########
         if a_Trg <= self.Pol_Trg_Threshold:
-            #print("r_B_O[2]", self.r_B_O[2])
-            
-            ## 2) UPDATE STATE
-            self._iterStep(n_steps=10)
+            # 10 step 진행 + state sync
+            ok = self.step_and_wait(n_steps=10, tick_timeout=2.0, state_timeout=2.0)
+            if not ok:
+                return _truncate_with_error(
+                    "Episode Completed: pre-trigger sync failed [Truncated]",
+                    reward=0.0,
+                    a_Rot=a_Rot
+                )
+
             t_now = self._getTime()
 
-            # UPDATE RENDER
             self.render()
-
-            # GRAB NEXT OBS
-            rclpy.spin_once(self)
             next_obs = self._getObs_DH()
 
-            # 3) CALCULATE REWARD
             reward = 0.0
 
-            # 4) CHECK TERMINATION/TRUNCATED
-
-            # ============================
-            ##    Termination Criteria 
-            # ============================
-
-            if self.Done == True:
+            if self.Done is True:
                 self.error_str = "Episode Completed: Done [Terminated]"
                 terminated = True
                 truncated = False
-                print(YELLOW,self.error_str,RESET)
-            
-            ## IMPACT TERMINATION
-            elif self.Impact_Flag_Ext == True:
+                print(YELLOW, self.error_str, RESET)
+
+            elif self.Impact_Flag_Ext is True:
                 self.error_str = "Episode Completed: Impact [Terminated]"
-                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 terminated = True
                 truncated = False
-                print(YELLOW,self.error_str,RESET)
-                #print("self.reward", self.reward)
+                print(YELLOW, self.error_str, RESET)
 
-            elif self.r_B_O[2] < -15:
+            elif self.r_B_O[2] < -10:
                 self.error_str = "Episode Completed: Out of bounds [Terminated]"
                 terminated = True
                 truncated = False
-                print(YELLOW,self.error_str,RESET)
+                print(YELLOW, self.error_str, RESET)
 
-            ## EPISODE TIMEOUT
             elif (t_now - self.start_time_ep) > self.t_flight_max:
                 self.error_str = "Episode Completed: Time Exceeded [Truncated]"
                 terminated = False
                 truncated = True
-                print(YELLOW,self.error_str,RESET)
+                print(YELLOW, self.error_str, RESET)
 
-            ## REAL-TIME TIMEOUT
             elif (time.time() - self.start_time_real) > self.t_real_max:
-                self.error_str = "Episode Completed: Episode Time Exceeded [Truncated] "
+                self.error_str = "Episode Completed: Episode Time Exceeded [Truncated]"
                 terminated = False
                 truncated = True
-                print(YELLOW,self.error_str,f"{(time.time() - self.start_time_real):.3f} s",RESET)
+                print(YELLOW, self.error_str,
+                    f"{(time.time() - self.start_time_real):.3f} s", RESET)
 
             else:
                 terminated = False
                 truncated = False
 
-            info_dict = {
-                "reward_vals": self.reward_vals,
-                "reward": reward,
-                "a_Rot": a_Rot,
-                "Trg_Flag": self.Trg_Flag,
-                "Impact_Flag_Ext": self.Impact_Flag_Ext,
-                "D_perp_pad_min": self.D_perp_pad_min,
-                "Tau_CR_trg": self.Tau_CR_trg,
-                "Tau_CM_trg": self.Tau_CM_trg,
-                "Theta_x_CM_trg": self.Theta_x_CM_trg,
-                "Tau_DH_trg": self.Tau_DH_trg,
-                "Plane_Angle": self.Plane_Angle_deg,
-                "V_mag": self.V_mag,
-                "V_angle": self.V_angle,
-                "TestCondition_idx": self.TestCondition_idx,
-            }
-            
-            # 5) RETURN VALUES
-            return(
-                next_obs,
-                reward,
-                terminated,
-                truncated,
-                info_dict,
-            )
+            info_dict = _build_info(reward=reward, a_Rot=a_Rot)
+            return next_obs, reward, terminated, truncated, info_dict
 
         ########## POLICY POST-TRIGGER ##########
-        elif a_Trg >= self.Pol_Trg_Threshold:
-            #print("**************************************")
-
-            # GRAB TERMINAL OBS/ACTION
+        else:
+            # trigger 직전 obs/action 저장
             self.obs_trg = self._getObs_DH()
             self.action_trg = action
 
-            # 2) FINISH EPISODE
             self.start_time_trg = self._getTime()
-            terminated,truncated = self._finishSim(a_Rot)
-            self.Done = terminated 
+            terminated, truncated = self._finishSim(a_Rot)
+            self.Done = terminated
 
-            # 3) CALC REWARD
+            # finishSim 이후 fresh state 한번 더 확보
+            self.wait_for_fresh_state(min_state_inc=1, min_clock_inc=1, timeout_wall_sec=1.0)
+
             try:
-                rclpy.spin_once(self)
-                reward = self._CalcReward()  
+                reward = self._CalcReward()
                 print("reward : ", reward)
-
-            except (UnboundLocalError,ValueError) as e:
+            except (UnboundLocalError, ValueError) as e:
                 reward = np.nan
                 print(RED + f"Error: {e}" + RESET)
 
-            info_dict = {
-                "reward_vals": self.reward_vals,
-                "reward": reward,
-                "a_Rot": a_Rot,
-                "Trg_Flag": self.Trg_Flag,
-                "Impact_Flag_Ext": self.Impact_Flag_Ext,
-                "D_perp_pad_min": self.D_perp_pad_min,
-                "Tau_CR_trg": self.Tau_CR_trg,
-                "Tau_CM_trg": self.Tau_CM_trg,
-                "Theta_x_CM_trg": self.Theta_x_CM_trg,
-                "Tau_DH_trg": self.Tau_DH_trg,
-                "Plane_Angle": self.Plane_Angle_deg,
-                "V_mag": self.V_mag,
-                "V_angle": self.V_angle,
-                "TestCondition_idx": self.TestCondition_idx,
-            }
+            info_dict = _build_info(reward=reward, a_Rot=a_Rot)
+            return self.obs_trg, reward, terminated, truncated, info_dict
+
+    # def step(self, action):
+    #     print("step is started")
+
+    #     # 1. TAKE ACTION
+    #     # 2. UPDATE STATE
+    #     # 3. CALC REWARD
+    #     # 4. CHECK TERMINATION
+    #     # 5. RETURN VALUES
+
+    #     #self._wait_for_sim_running()
+    #     time.sleep(0.1)
+
+    #     ## ROUND OUT STEPS TO BE IN SYNC WITH CONTROLLER
+
+    #     #rclpy.spin_once(self)
+    #     if self._getTick()%10 != 0:
+    #         n_steps = 10 - (self._getTick()%10)
+    #         self._iterStep(n_steps=n_steps)
+
+    #     a_Trg = action[0]
+    #     a_Rot = self.scaleValue(action[1],original_range=[-1,1], target_range=self.Ang_Acc_range)
+
+    #     if self.Policy_Type != "DEEP_RL_SB3":
+    #         a_Trg = 1.0
+
+    #     ########## POLICY PRE-TRIGGER ##########
+    #     if a_Trg <= self.Pol_Trg_Threshold:
+    #         #print("r_B_O[2]", self.r_B_O[2])
+            
+    #         ## 2) UPDATE STATE
+    #         self._iterStep(n_steps=10)
+    #         t_now = self._getTime()
+
+    #         # UPDATE RENDER
+    #         self.render()
+
+    #         # GRAB NEXT OBS
+    #         rclpy.spin_once(self)
+    #         next_obs = self._getObs_DH()
+
+    #         # 3) CALCULATE REWARD
+    #         reward = 0.0
+
+    #         # 4) CHECK TERMINATION/TRUNCATED
+
+    #         # ============================
+    #         ##    Termination Criteria 
+    #         # ============================
+
+    #         if self.Done == True:
+    #             self.error_str = "Episode Completed: Done [Terminated]"
+    #             terminated = True
+    #             truncated = False
+    #             print(YELLOW,self.error_str,RESET)
+            
+    #         ## IMPACT TERMINATION
+    #         elif self.Impact_Flag_Ext == True:
+    #             self.error_str = "Episode Completed: Impact [Terminated]"
+    #             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    #             terminated = True
+    #             truncated = False
+    #             print(YELLOW,self.error_str,RESET)
+    #             #print("self.reward", self.reward)
+
+    #         elif self.r_B_O[2] < -4:
+    #             self.error_str = "Episode Completed: Out of bounds [Terminated]"
+    #             terminated = True
+    #             truncated = False
+    #             print(YELLOW,self.error_str,RESET)
+
+    #         ## EPISODE TIMEOUT
+    #         elif (t_now - self.start_time_ep) > self.t_flight_max:
+    #             self.error_str = "Episode Completed: Time Exceeded [Truncated]"
+    #             terminated = False
+    #             truncated = True
+    #             print(YELLOW,self.error_str,RESET)
+
+    #         ## REAL-TIME TIMEOUT
+    #         elif (time.time() - self.start_time_real) > self.t_real_max:
+    #             self.error_str = "Episode Completed: Episode Time Exceeded [Truncated] "
+    #             terminated = False
+    #             truncated = True
+    #             print(YELLOW,self.error_str,f"{(time.time() - self.start_time_real):.3f} s",RESET)
+
+    #         else:
+    #             terminated = False
+    #             truncated = False
+
+    #         info_dict = {
+    #             "reward_vals": self.reward_vals,
+    #             "reward": reward,
+    #             "a_Rot": a_Rot,
+    #             "Trg_Flag": self.Trg_Flag,
+    #             "Impact_Flag_Ext": self.Impact_Flag_Ext,
+    #             "D_perp_pad_min": self.D_perp_pad_min,
+    #             "Tau_CR_trg": self.Tau_CR_trg,
+    #             "Tau_CM_trg": self.Tau_CM_trg,
+    #             "Theta_x_CM_trg": self.Theta_x_CM_trg,
+    #             "Tau_Cam_GT_trg": self.Tau_Cam_GT_trg,
+    #             "Theta_x_Cam_GT_trg": self.Theta_x_Cam_GT_trg,    
+    #             "Tau_DH_trg": self.Tau_DH_trg,
+    #             "Plane_Angle": self.Plane_Angle_deg,
+    #             "V_mag": self.V_mag,
+    #             "V_angle": self.V_angle,
+    #             "TestCondition_idx": self.TestCondition_idx,
+    #         }
+            
+    #         # 5) RETURN VALUES
+    #         return(
+    #             next_obs,
+    #             reward,
+    #             terminated,
+    #             truncated,
+    #             info_dict,
+    #         )
+
+    #     ########## POLICY POST-TRIGGER ##########
+    #     elif a_Trg >= self.Pol_Trg_Threshold:
+    #         #print("**************************************")
+
+    #         # GRAB TERMINAL OBS/ACTION
+    #         self.obs_trg = self._getObs_DH()
+    #         self.action_trg = action
+
+    #         # 2) FINISH EPISODE
+    #         self.start_time_trg = self._getTime()
+    #         terminated,truncated = self._finishSim(a_Rot)
+    #         self.Done = terminated 
+
+    #         # 3) CALC REWARD
+    #         try:
+    #             rclpy.spin_once(self)
+    #             reward = self._CalcReward()  
+    #             print("reward : ", reward)
+
+    #         except (UnboundLocalError,ValueError) as e:
+    #             reward = np.nan
+    #             print(RED + f"Error: {e}" + RESET)
+
+    #         info_dict = {
+    #             "reward_vals": self.reward_vals,
+    #             "reward": reward,
+    #             "a_Rot": a_Rot,
+    #             "Trg_Flag": self.Trg_Flag,
+    #             "Impact_Flag_Ext": self.Impact_Flag_Ext,
+    #             "D_perp_pad_min": self.D_perp_pad_min,
+    #             "Tau_CR_trg": self.Tau_CR_trg,
+    #             "Tau_CM_trg": self.Tau_CM_trg,
+    #             "Theta_x_CM_trg": self.Theta_x_CM_trg,
+    #             "Tau_Cam_GT_trg": self.Tau_Cam_GT_trg,
+    #             "Theta_x_Cam_GT_trg": self.Theta_x_Cam_GT_trg,  
+    #             "Tau_DH_trg": self.Tau_DH_trg,
+    #             "Plane_Angle": self.Plane_Angle_deg,
+    #             "V_mag": self.V_mag,
+    #             "V_angle": self.V_angle,
+    #             "TestCondition_idx": self.TestCondition_idx,
+    #         }
 
 
-            # 5) RETURN VALUES
-            return(
-                self.obs_trg,
-                reward,
-                terminated,
-                truncated,
-                info_dict,
-            )
+    #         # 5) RETURN VALUES
+    #         return(
+    #             self.obs_trg,
+    #             reward,
+    #             terminated,
+    #             truncated,
+    #             info_dict,
+    #         )
 
-    def _finishSim(self,a_Rot):
+    def _finishSim(self, a_Rot):
         print("_finishSim is started")
         OnceFlag_Trg = False
         OnceFlag_Impact = False
@@ -526,99 +1140,241 @@ class SAR_Sim_DeepRL(SAR_Sim_Interface,gym.Env):
         truncated = False
 
         ## SEND TRIGGER ACTION TO CONTROLLER
-        rclpy.spin_once(self)
-        self.sendCmd("Policy",[0.0,a_Rot,self.Ang_Acc_range[0]],cmd_flag=self.Ang_Acc_range[1])
-#/////
+        ok = self.wait_for_fresh_state(
+            min_state_inc=1,
+            min_clock_inc=1,
+            timeout_wall_sec=1.0
+        )
+        if not ok:
+            self.get_logger().error("_finishSim failed: stale state before Policy command")
+            self.error_str = "Episode Completed: stale state before trigger [Truncated]"
+            return False, True
 
-        # self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)        
-        # self.adjustSimSpeed(1.0)
+        ok = self.sendCmd(
+            "Policy",
+            [0.0, a_Rot, self.Ang_Acc_range[0]],
+            cmd_flag=self.Ang_Acc_range[1]
+        )
+        if not ok:
+            self.get_logger().error("_finishSim failed: Policy command rejected")
+            self.error_str = "Episode Completed: Policy command failed [Truncated]"
+            return False, True
 
-#/////
-        time.sleep(0.1)
-        #print("Policy is sent", self.Ang_Acc_range[1])
+        # #/////
+
+        # Deactivate optical flow only when the selected source is the real camera.
+        if getattr(self, "Optical_Flow_Source", "").strip() == "Camera":
+            self.sendCmd(
+                "Optical_Flow_Flag",
+                cmd_vals=[1.0, 1.0, 1.0],
+                cmd_flag=0.0
+            )
+            self.adjustSimSpeed(1.0)
+
+        #         # self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)        
+        #         # self.adjustSimSpeed(1.0)
+
+        # #/////
 
         ## RUN REMAINING STEPS AT FULL SPEED
         self.pausePhysics(False)
 
+        ok = self.wait_for_fresh_state(
+            min_state_inc=1,
+            min_clock_inc=1,
+            timeout_wall_sec=1.0
+        )
+        if not ok:
+            self.get_logger().warn("_finishSim: no fresh state right after unpause")
+
         while not (terminated or truncated):
 
+            ok = self.wait_for_fresh_state(
+                min_state_inc=1,
+                min_clock_inc=1,
+                timeout_wall_sec=0.2
+            )
+            if not ok:
+                self.error_str = "Episode Completed: stale state during finishSim [Truncated]"
+                terminated = False
+                truncated = True
+                print(YELLOW, self.error_str, RESET)
+                break
+
             t_now = self._getTime()
-            #rclpy.spin_once(self)
 
             ## START TRIGGER AND IMPACT TERMINATION TIMERS
-            if (self.Trg_Flag == True and OnceFlag_Trg == False):
-                self.start_time_trg = t_now     # Starts countdown for when to reset run
-                OnceFlag_Trg = True             # Turns on to make sure this only runs once per rollout
+            if (self.Trg_Flag is True) and (OnceFlag_Trg is False):
+                self.start_time_trg = t_now
+                OnceFlag_Trg = True
 
-            if (self.Impact_Flag_Ext and OnceFlag_Impact == False):
-                self.start_time_trg = np.nan    # Nullify trigger timer
+            if (self.Impact_Flag_Ext is True) and (OnceFlag_Impact is False):
+                self.start_time_trg = np.nan
                 self.start_time_impact = t_now
                 OnceFlag_Impact = True
 
-
-            #self._get_Tcondition_Obs()
-            # 4) CHECK TERMINATION/TRUNCATED
-            rclpy.spin_once(self)
-            r_B_O =  self.r_B_O
+            r_B_O = self.r_B_O
             V_B_O = self.V_B_O
-            r_P_B = self.R_WP(self.r_P_O - r_B_O,self.Plane_Angle_rad) # {t_x,n_p}
-            V_B_P = self.R_WP(V_B_O,self.Plane_Angle_rad) # {t_x,n_p}
-            
-            #print("r_B_O[2]: ",r_B_O[2])
-            
-            #r_B_O[2] =  -17
+            r_P_B = self.R_WP(self.r_P_O - r_B_O, self.Plane_Angle_rad)
+            V_B_P = self.R_WP(V_B_O, self.Plane_Angle_rad)
 
-            # ============================
-            ##    Termination Criteria 
-            # ============================
+            trg_timeout = (
+                not np.isnan(self.start_time_trg) and
+                (t_now - self.start_time_trg) > self.t_trg_max
+            )
 
-            if self.Done == True:
-                self.error_str = "Episode Completed: Done [Terminated] "
+            impact_timeout = (
+                not np.isnan(self.start_time_impact) and
+                (t_now - self.start_time_impact) > self.t_impact_max
+            )
+
+            ## Termination Criteria
+            if self.Done is True:
+                self.error_str = "Episode Completed: Done [Terminated]"
                 terminated = True
                 truncated = False
-                print(YELLOW,self.error_str,RESET)
+                print(YELLOW, self.error_str, RESET)
 
-            ## TRIGGER TIMEOUT  
-            elif (t_now - self.start_time_trg) > self.t_trg_max:
-                self.error_str = "Episode Completed: Pitch Timeout [Truncated] "
+            elif trg_timeout:
+                self.error_str = "Episode Completed: Pitch Timeout [Truncated]"
                 terminated = False
                 truncated = True
-                print(YELLOW,self.error_str,f"{(t_now - self.start_time_trg):.3f} s",RESET)
-                time.sleep(1.5)
+                print(YELLOW, self.error_str, f"{(t_now - self.start_time_trg):.3f} s", RESET)
 
-            ## IMPACT TIMEOUT
-            elif (t_now - self.start_time_impact) > self.t_impact_max:
-                self.error_str = "Episode Completed: Impact Timeout [Truncated] "
+            elif impact_timeout:
+                self.error_str = "Episode Completed: Impact Timeout [Truncated]"
                 terminated = False
                 truncated = True
-                print(YELLOW,self.error_str,f"{(t_now - self.start_time_impact):.3f} s",RESET)
+                print(YELLOW, self.error_str, f"{(t_now - self.start_time_impact):.3f} s", RESET)
 
-            elif r_B_O[2] < -15:
+            elif r_B_O[2] < -10:
                 self.error_str = "Episode Completed: Out of bounds_1 [Terminated]"
                 terminated = True
                 truncated = False
-                print(YELLOW,self.error_str,RESET)
+                print(YELLOW, self.error_str, RESET)
 
-            elif np.abs(r_P_B[0]) > 1.4 and (self.D_perp < 1.5*self.L_eff) and (self.D_perp >= 0):
-                self.error_str = "Episode Completed: Out of Bounds_2 [Terminated]"
-                terminated = True
-                truncated = False
-                print(YELLOW,self.error_str,RESET)
+            # X direction out of bounds
+            # elif np.abs(r_P_B[0]) > 1.4 and (self.D_perp < 1.5 * self.L_eff) and (self.D_perp >= 0):
+            #     self.error_str = "Episode Completed: Out of Bounds_2 [Terminated]"
+            #     terminated = True
+            #     truncated = False
+            #     print(YELLOW, self.error_str, RESET)
 
-            ## REAL-TIME TIMEOUT
             elif (time.time() - self.start_time_real) > self.t_real_max:
-                self.error_str = "Episode Completed: Episode Time Exceeded [Truncated] "
+                self.error_str = "Episode Completed: Episode Time Exceeded [Truncated]"
                 terminated = False
                 truncated = True
-                print(YELLOW,self.error_str,f"{(time.time() - self.start_time_real):.3f} s",RESET)
+                print(YELLOW, self.error_str, f"{(time.time() - self.start_time_real):.3f} s", RESET)
 
             else:
                 terminated = False
                 truncated = False
 
         print("_finishSim is completed")
+        return terminated, truncated
+
+#     def _finishSim(self,a_Rot):
+#         print("_finishSim is started")
+#         OnceFlag_Trg = False
+#         OnceFlag_Impact = False
+
+#         terminated = False
+#         truncated = False
+
+#         ## SEND TRIGGER ACTION TO CONTROLLER
+#         rclpy.spin_once(self)
+#         self.sendCmd("Policy",[0.0,a_Rot,self.Ang_Acc_range[0]],cmd_flag=self.Ang_Acc_range[1])
+# #/////
+
+#         # self.sendCmd("Optical_Flow_Flag",cmd_vals=[1.0,1.0,1.0],cmd_flag=0.0)        
+#         # self.adjustSimSpeed(1.0)
+
+# #/////
+#         time.sleep(0.1)
+#         #print("Policy is sent", self.Ang_Acc_range[1])
+
+#         ## RUN REMAINING STEPS AT FULL SPEED
+#         self.pausePhysics(False)
+
+#         while not (terminated or truncated):
+
+#             t_now = self._getTime()
+#             #rclpy.spin_once(self)
+
+#             ## START TRIGGER AND IMPACT TERMINATION TIMERS
+#             if (self.Trg_Flag == True and OnceFlag_Trg == False):
+#                 self.start_time_trg = t_now     # Starts countdown for when to reset run
+#                 OnceFlag_Trg = True             # Turns on to make sure this only runs once per rollout
+
+#             if (self.Impact_Flag_Ext and OnceFlag_Impact == False):
+#                 self.start_time_trg = np.nan    # Nullify trigger timer
+#                 self.start_time_impact = t_now
+#                 OnceFlag_Impact = True
+
+
+#             #self._get_Tcondition_Obs()
+#             # 4) CHECK TERMINATION/TRUNCATED
+#             rclpy.spin_once(self)
+#             r_B_O =  self.r_B_O
+#             V_B_O = self.V_B_O
+#             r_P_B = self.R_WP(self.r_P_O - r_B_O,self.Plane_Angle_rad) # {t_x,n_p}
+#             V_B_P = self.R_WP(V_B_O,self.Plane_Angle_rad) # {t_x,n_p}
+            
+#             #print("r_B_O[2]: ",r_B_O[2])
+            
+#             #r_B_O[2] =  -17
+
+#             # ============================
+#             ##    Termination Criteria 
+#             # ============================
+
+#             if self.Done == True:
+#                 self.error_str = "Episode Completed: Done [Terminated] "
+#                 terminated = True
+#                 truncated = False
+#                 print(YELLOW,self.error_str,RESET)
+
+#             ## TRIGGER TIMEOUT  
+#             elif (t_now - self.start_time_trg) > self.t_trg_max:
+#                 self.error_str = "Episode Completed: Pitch Timeout [Truncated] "
+#                 terminated = False
+#                 truncated = True
+#                 print(YELLOW,self.error_str,f"{(t_now - self.start_time_trg):.3f} s",RESET)
+#                 time.sleep(1.5)
+
+#             ## IMPACT TIMEOUT
+#             elif (t_now - self.start_time_impact) > self.t_impact_max:
+#                 self.error_str = "Episode Completed: Impact Timeout [Truncated] "
+#                 terminated = False
+#                 truncated = True
+#                 print(YELLOW,self.error_str,f"{(t_now - self.start_time_impact):.3f} s",RESET)
+
+#             elif r_B_O[2] < -15:
+#                 self.error_str = "Episode Completed: Out of bounds_1 [Terminated]"
+#                 terminated = True
+#                 truncated = False
+#                 print(YELLOW,self.error_str,RESET)
+
+#             elif np.abs(r_P_B[0]) > 1.4 and (self.D_perp < 1.5*self.L_eff) and (self.D_perp >= 0):
+#                 self.error_str = "Episode Completed: Out of Bounds_2 [Terminated]"
+#                 terminated = True
+#                 truncated = False
+#                 print(YELLOW,self.error_str,RESET)
+
+#             ## REAL-TIME TIMEOUT
+#             elif (time.time() - self.start_time_real) > self.t_real_max:
+#                 self.error_str = "Episode Completed: Episode Time Exceeded [Truncated] "
+#                 terminated = False
+#                 truncated = True
+#                 print(YELLOW,self.error_str,f"{(time.time() - self.start_time_real):.3f} s",RESET)
+
+#             else:
+#                 terminated = False
+#                 truncated = False
+
+#         print("_finishSim is completed")
         
-        return terminated,truncated
+#         return terminated,truncated
 
     def _CalcReward(self):
 

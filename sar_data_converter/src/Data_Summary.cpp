@@ -117,6 +117,8 @@ void SAR_DataConverter::Publish_TriggerData()
     TriggerData_msg.tau_cm_trg = Tau_CM_trg;
     TriggerData_msg.theta_x_cm_trg = Theta_x_CM_trg;
     TriggerData_msg.tau_dh_trg = Tau_DH_trg;
+    TriggerData_msg.tau_cam_gt_trg = Tau_Cam_GT_trg;
+    TriggerData_msg.theta_x_cam_gt_trg = Theta_x_Cam_GT_trg;
 
     // POLICY ACTIONS
     //TriggerData_msg.nn_output_trg = NN_Output_trg;

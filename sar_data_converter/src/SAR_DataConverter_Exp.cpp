@@ -57,8 +57,9 @@ SAR_DataConverter::SAR_DataConverter()
 
 }
 
-bool SAR_DataConverter::CMD_SAR_DC_Callback(const sar_msgs::srv::CTRLCmdSrv::Request::SharedPtr request,
-                                            sar_msgs::srv::CTRLCmdSrv::Response::SharedPtr response)
+void SAR_DataConverter::CMD_SAR_DC_Callback(
+    const sar_msgs::srv::CTRLCmdSrv::Request::SharedPtr request,
+    sar_msgs::srv::CTRLCmdSrv::Response::SharedPtr response)
 {
     auto req_copy_exp = std::make_shared<crazyflie_interfaces::srv::CTRLCmdSrv::Request>();
     auto req_copy_sim = std::make_shared<sar_msgs::srv::CTRLCmdSrv::Request>();
@@ -66,116 +67,150 @@ bool SAR_DataConverter::CMD_SAR_DC_Callback(const sar_msgs::srv::CTRLCmdSrv::Req
     req_copy_exp->cmd_type = request->cmd_type;
     req_copy_exp->cmd_vals = request->cmd_vals;
     req_copy_exp->cmd_flag = request->cmd_flag;
-    req_copy_exp->cmd_rx = request->cmd_rx;
+    req_copy_exp->cmd_rx   = request->cmd_rx;
 
     req_copy_sim->cmd_type = request->cmd_type;
     req_copy_sim->cmd_vals = request->cmd_vals;
     req_copy_sim->cmd_flag = request->cmd_flag;
-    req_copy_sim->cmd_rx = request->cmd_rx;
-/*
-    std::cout << "Service is requested in DataConverter" << std::endl;
-    std::cout << "cmd_type: " << request->cmd_type << std::endl;
-    std::cout << "cmd_vals: " << request->cmd_vals.x << std::endl;
-    std::cout << "cmd_vals: " << request->cmd_vals.y << std::endl;
-    std::cout << "cmd_vals: " << request->cmd_vals.z << std::endl;
-    std::cout << "cmd_flag: " << request->cmd_flag << std::endl;
-    std::cout << "cmd_rx: " << request->cmd_rx << std::endl;
-*/
+    req_copy_sim->cmd_rx   = request->cmd_rx;
+
     if (DATA_TYPE == "SIM")
     {
-        std::cout << "Sending request to CMD_Output_Service_Sim" << std::endl;
         auto result = CMD_Output_Service_Sim->async_send_request(req_copy_sim);
-/*
-        // 동기적 서비스 호출 처리
-        if (rclcpp::spin_until_future_complete(shared_from_this(), result) == rclcpp::FutureReturnCode::SUCCESS) {
-            auto sim_response = result.get();
-            std::cout << "Service call completed with result: " << std::boolalpha << sim_response->srv_success << std::endl;
-            if (sim_response->srv_success) {
-                std::cout << "Service call to SIM succeeded" << std::endl;
-            } else {
-                std::cout << "Service call to SIM failed" << std::endl;
-            }
-        } else {
-            std::cerr << "Service call to SIM failed to complete" << std::endl;
-        }*/
-        std::cout << "CMD_SAR_DC_Callback in SAR_DataConverter.cpp is completed" << std::endl;
-        return request->cmd_rx;
+
+        // 응답 필드 이름은 실제 srv 정의에 맞게 쓰세요.
+        response->srv_success = true;
+        return;
     }
-    else {
-        //std::cout << "Sending request to CMD_Output_Service_Exp" << std::endl;
-        auto result = CMD_Output_Service_Exp->async_send_request(req_copy_exp);
-/*
-        // 동기적 서비스 호출 처리
-        if (rclcpp::spin_until_future_complete(shared_from_this(), result) == rclcpp::FutureReturnCode::SUCCESS) {
-            auto exp_response = result.get();
-            std::cout << "Service call completed with result: " << std::boolalpha << exp_response->srv_success << std::endl;
-            if (exp_response->srv_success) {
-                std::cout << "Service call to Exp succeeded" << std::endl;
-            } else {
-                std::cout << "Service call to Exp failed" << std::endl;
-            }
-        } else {
-            std::cerr << "Service call to Exp failed to complete" << std::endl;
-        }*/
-        //std::cout << "CMD_SAR_DC_Callback in SAR_DataConverter.cpp is completed" << std::endl;
-        return request->cmd_rx;
-    }
-    /*
-    // SIMULATION: SEND COMMAND VALUES TO SIM CONTROLLER (SEND AS SERVICE REQUEST)
-    auto req_copy_exp = std::make_shared<crazyflie_interfaces::srv::CTRLCmdSrv::Request>();
-    auto req_copy_sim = std::make_shared<sar_msgs::srv::CTRLCmdSrv::Request>();
-
-    req_copy_exp->cmd_type = request->cmd_type;
-    req_copy_exp->cmd_vals = request->cmd_vals;
-    req_copy_exp->cmd_flag = request->cmd_flag;
-    req_copy_exp->cmd_rx = request->cmd_rx;
-    
-    req_copy_sim->cmd_type = request->cmd_type;
-    req_copy_sim->cmd_vals = request->cmd_vals;
-    req_copy_sim->cmd_flag = request->cmd_flag;
-    req_copy_sim->cmd_rx = request->cmd_rx;
-
-    std::cout << "service is requested in DataConverter" <<  std::endl;
-    std::cout << "cmd_type: " << request->cmd_type << std::endl;
-    std::cout << "cmd_vals: " << request->cmd_vals.x << std::endl;
-    std::cout << "cmd_vals: " << request->cmd_vals.y << std::endl;
-    std::cout << "cmd_vals: " << request->cmd_vals.z << std::endl;
-    std::cout << "cmd_flag: " << request->cmd_flag << std::endl;
-    std::cout << "cmd_rx: " << request->cmd_rx << std::endl;
-    
-    //std::cout << "cmd_type: " << req_copy->cmd_type << std::endl;
-    //std::cout << "DATA_TYPE: " << DATA_TYPE.compare("SIM") << std::endl;
-
-
-    if (DATA_TYPE.compare("SIM") == 0)
-    {
-        auto result = CMD_Output_Service_Sim->async_send_request(req_copy_sim);
-        std::cout << "CMD_Output_Service_Sim" << std::endl;
-        return request->cmd_rx;
-    }
-    try {
-        auto result = CMD_Output_Service_Exp->async_send_request(req_copy_exp);
-        std::cout << "CMD_Output_Service_Exp request sent" << std::endl;
-
-        if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) == rclcpp::FutureReturnCode::SUCCESS) {
-            std::cout << "Service call succeeded" << std::endl;
-        } else {
-            std::cout << "Service call failed" << std::endl;
-        }
-
-    } catch (const std::exception& e) {
-        std::cerr << "Exception caught: " << e.what() << std::endl;
-    }
-*/
-    /*else
+    else
     {
         auto result = CMD_Output_Service_Exp->async_send_request(req_copy_exp);
-        std::cout << "CMD_Output_Service_Exp" << std::endl;
 
-        return request->cmd_rx;
+        // 응답 필드 이름은 실제 srv 정의에 맞게 쓰세요.
+        response->srv_success = true;
+        return;
     }
-*/
 }
+
+// bool SAR_DataConverter::CMD_SAR_DC_Callback(const sar_msgs::srv::CTRLCmdSrv::Request::SharedPtr request,
+//                                             sar_msgs::srv::CTRLCmdSrv::Response::SharedPtr response)
+// {
+//     auto req_copy_exp = std::make_shared<crazyflie_interfaces::srv::CTRLCmdSrv::Request>();
+//     auto req_copy_sim = std::make_shared<sar_msgs::srv::CTRLCmdSrv::Request>();
+
+//     req_copy_exp->cmd_type = request->cmd_type;
+//     req_copy_exp->cmd_vals = request->cmd_vals;
+//     req_copy_exp->cmd_flag = request->cmd_flag;
+//     req_copy_exp->cmd_rx = request->cmd_rx;
+
+//     req_copy_sim->cmd_type = request->cmd_type;
+//     req_copy_sim->cmd_vals = request->cmd_vals;
+//     req_copy_sim->cmd_flag = request->cmd_flag;
+//     req_copy_sim->cmd_rx = request->cmd_rx;
+// /*
+//     std::cout << "Service is requested in DataConverter" << std::endl;
+//     std::cout << "cmd_type: " << request->cmd_type << std::endl;
+//     std::cout << "cmd_vals: " << request->cmd_vals.x << std::endl;
+//     std::cout << "cmd_vals: " << request->cmd_vals.y << std::endl;
+//     std::cout << "cmd_vals: " << request->cmd_vals.z << std::endl;
+//     std::cout << "cmd_flag: " << request->cmd_flag << std::endl;
+//     std::cout << "cmd_rx: " << request->cmd_rx << std::endl;
+// */
+//     if (DATA_TYPE == "SIM")
+//     {
+//         std::cout << "Sending request to CMD_Output_Service_Sim" << std::endl;
+//         auto result = CMD_Output_Service_Sim->async_send_request(req_copy_sim);
+// /*
+//         // 동기적 서비스 호출 처리
+//         if (rclcpp::spin_until_future_complete(shared_from_this(), result) == rclcpp::FutureReturnCode::SUCCESS) {
+//             auto sim_response = result.get();
+//             std::cout << "Service call completed with result: " << std::boolalpha << sim_response->srv_success << std::endl;
+//             if (sim_response->srv_success) {
+//                 std::cout << "Service call to SIM succeeded" << std::endl;
+//             } else {
+//                 std::cout << "Service call to SIM failed" << std::endl;
+//             }
+//         } else {
+//             std::cerr << "Service call to SIM failed to complete" << std::endl;
+//         }*/
+//         std::cout << "CMD_SAR_DC_Callback in SAR_DataConverter.cpp is completed" << std::endl;
+//         return request->cmd_rx;
+//     }
+//     else {
+//         //std::cout << "Sending request to CMD_Output_Service_Exp" << std::endl;
+//         auto result = CMD_Output_Service_Exp->async_send_request(req_copy_exp);
+// /*
+//         // 동기적 서비스 호출 처리
+//         if (rclcpp::spin_until_future_complete(shared_from_this(), result) == rclcpp::FutureReturnCode::SUCCESS) {
+//             auto exp_response = result.get();
+//             std::cout << "Service call completed with result: " << std::boolalpha << exp_response->srv_success << std::endl;
+//             if (exp_response->srv_success) {
+//                 std::cout << "Service call to Exp succeeded" << std::endl;
+//             } else {
+//                 std::cout << "Service call to Exp failed" << std::endl;
+//             }
+//         } else {
+//             std::cerr << "Service call to Exp failed to complete" << std::endl;
+//         }*/
+//         //std::cout << "CMD_SAR_DC_Callback in SAR_DataConverter.cpp is completed" << std::endl;
+//         return request->cmd_rx;
+//     }
+//     /*
+//     // SIMULATION: SEND COMMAND VALUES TO SIM CONTROLLER (SEND AS SERVICE REQUEST)
+//     auto req_copy_exp = std::make_shared<crazyflie_interfaces::srv::CTRLCmdSrv::Request>();
+//     auto req_copy_sim = std::make_shared<sar_msgs::srv::CTRLCmdSrv::Request>();
+
+//     req_copy_exp->cmd_type = request->cmd_type;
+//     req_copy_exp->cmd_vals = request->cmd_vals;
+//     req_copy_exp->cmd_flag = request->cmd_flag;
+//     req_copy_exp->cmd_rx = request->cmd_rx;
+    
+//     req_copy_sim->cmd_type = request->cmd_type;
+//     req_copy_sim->cmd_vals = request->cmd_vals;
+//     req_copy_sim->cmd_flag = request->cmd_flag;
+//     req_copy_sim->cmd_rx = request->cmd_rx;
+
+//     std::cout << "service is requested in DataConverter" <<  std::endl;
+//     std::cout << "cmd_type: " << request->cmd_type << std::endl;
+//     std::cout << "cmd_vals: " << request->cmd_vals.x << std::endl;
+//     std::cout << "cmd_vals: " << request->cmd_vals.y << std::endl;
+//     std::cout << "cmd_vals: " << request->cmd_vals.z << std::endl;
+//     std::cout << "cmd_flag: " << request->cmd_flag << std::endl;
+//     std::cout << "cmd_rx: " << request->cmd_rx << std::endl;
+    
+//     //std::cout << "cmd_type: " << req_copy->cmd_type << std::endl;
+//     //std::cout << "DATA_TYPE: " << DATA_TYPE.compare("SIM") << std::endl;
+
+
+//     if (DATA_TYPE.compare("SIM") == 0)
+//     {
+//         auto result = CMD_Output_Service_Sim->async_send_request(req_copy_sim);
+//         std::cout << "CMD_Output_Service_Sim" << std::endl;
+//         return request->cmd_rx;
+//     }
+//     try {
+//         auto result = CMD_Output_Service_Exp->async_send_request(req_copy_exp);
+//         std::cout << "CMD_Output_Service_Exp request sent" << std::endl;
+
+//         if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result) == rclcpp::FutureReturnCode::SUCCESS) {
+//             std::cout << "Service call succeeded" << std::endl;
+//         } else {
+//             std::cout << "Service call failed" << std::endl;
+//         }
+
+//     } catch (const std::exception& e) {
+//         std::cerr << "Exception caught: " << e.what() << std::endl;
+//     }
+// */
+//     /*else
+//     {
+//         auto result = CMD_Output_Service_Exp->async_send_request(req_copy_exp);
+//         std::cout << "CMD_Output_Service_Exp" << std::endl;
+
+//         return request->cmd_rx;
+//     }
+// */
+// }
 
 
 void SAR_DataConverter::ROSParams_Callback(const sar_msgs::msg::ROSParams::SharedPtr msg)

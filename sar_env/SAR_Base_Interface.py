@@ -10,6 +10,8 @@ import getpass
 import asyncio
 import yaml
 import sys
+import threading
+import time
 
 import asyncio #For Debug
 
@@ -35,6 +37,7 @@ RESET = "\033[0m"  # Reset to default color
 class SAR_Base_Interface(Node):
 
     def __init__(self,Experiment_Setup=False):
+        super().__init__('SAR_Env_Node')
         
         ## LOGGING PARAMETERS
         sys.path.append('/home/dlee/ros2_ws/src/sar_simulation')
@@ -43,20 +46,30 @@ class SAR_Base_Interface(Node):
         self.Log_Name = "TestLog.csv"
         self.Error_Str = "No_Debug_Data"
 
+        ## Checking Sim Status
+        self.clock_msg_count = 0
+        self.state_msg_count = 0
+        self.last_clock_time = np.nan
+        self.last_state_wall_time = 0.0
+
         # ## LOGGING PARAMETERS
         # self.Username = getpass.getuser()
         # self.Log_Dir = f"/home/{self.Username}/ros2_ws/src/sar_simulation/sar_logging/local_logs"
         # self.Log_Name = "TestLog.csv"
         # self.Error_Str = "No_Debug_Data"
 
+        ## SERVICE CLIENT CACHE
+        self.service_clients = {}
+
         if not Experiment_Setup:  
-            super().__init__('SAR_Env_Node')
             self.loadBaseParams()
             self._preInit()
+            #super().__init__('SAR_Env_Node')
 
         else:
             self.loadBaseParams()
             self._preInit()
+            
 
 
         print(f"{GREEN}")
@@ -91,15 +104,16 @@ class SAR_Base_Interface(Node):
         # self.RL_Data_Pub = rospy.Publisher("/RL/Data",RL_Data,queue_size=10)
         # self.RL_History_Pub = rospy.Publisher("/RL/History",RL_History,queue_size=10)
 
+        self.cmd_input_client = self.create_client(CTRLCmdSrv, '/SAR_DC/CMD_Input')
         print("SAR_Base_Interface running is done")
 
 
     def loadBaseParams(self):
         # LOAD BASE PARAMETERS
         param_path_list = [
-            f"{self.BASE_PATH}/sar_config/Base_Settings_Bryan.yaml",
+            f"{self.BASE_PATH}/sar_config/Base_Settings.yaml",
             f"{self.BASE_PATH}/sar_config/Model_Types_Bryan.yaml",
-            f"{self.BASE_PATH}/sar_config/Cam_Types_Bryan.yaml",
+            f"{self.BASE_PATH}/sar_config/Cam_Types.yaml",
         ]
         
         for path in param_path_list:
@@ -183,9 +197,11 @@ class SAR_Base_Interface(Node):
         ## CAM PARAMETERS
         self.Cam_Config = self.get_parameter(f"CAM_SETTINGS.Cam_Config").get_parameter_value().string_value
         self.Cam_Active = self.get_parameter(f"CAM_SETTINGS.Cam_Active").get_parameter_value().bool_value
-        
+        self.Optical_Flow_Source = self.get_parameter(f"CAM_SETTINGS.Optical_Flow_Source").get_parameter_value().string_value
+
         # self.get_logger().info(f'Cam_Config: {self.Cam_Config}')
         # self.get_logger().info(f'Cam_Active: {self.Cam_Active}')
+        # self.get_logger().info(f'Optical_Flow_Source: {self.Optical_Flow_Source}')
 
         ## PLANE PARAMETERS
         self.Plane_Type = self.get_parameter(f"PLANE_SETTINGS.Plane_Type").get_parameter_value().string_value
@@ -261,132 +277,181 @@ class SAR_Base_Interface(Node):
         
         return self.t
 
-    def sendCmd(self,action,cmd_vals=[0.0,0.0,0.0],cmd_flag=1.0):
-        """Sends commands to SAR_DC->Controller via rosservice call
 
-        Args:
-            action (string): The desired command
-            cmd_vals (list, optional): Command values typically in [x,y,z] notation. Defaults to [0,0,0].
-            cmd_flag (float, optional): Used as either a on/off flag for command or an extra float value if needed. Defaults to 1.
-        """        
-        #print("sendCmd in SAR_Base_Interface.py is started")
+    def sendCmd(self, action, cmd_vals=None, cmd_flag=1.0):
+        """Send command to SAR_DC -> Controller via ROS2 service."""
 
-        ## CREATE SERVICE REQUEST MSG
-        srv = CTRLCmdSrv.Request() 
+        if action not in self.cmd_dict:
+            self.get_logger().warn(f"sendCmd failed: unknown action='{action}'")
+            return False
 
-        srv.cmd_type = self.cmd_dict[action]
-        srv.cmd_vals.x = cmd_vals[0]
-        srv.cmd_vals.y = cmd_vals[1]
-        srv.cmd_vals.z = cmd_vals[2]
-        srv.cmd_flag = cmd_flag
-        srv.cmd_rx = True
+        if cmd_vals is None:
+            cmd_vals = [0.0, 0.0, 0.0]
 
-        ## TO SAR_DataConverter
-        #print(f"Sending request: cmd_type={srv.cmd_type}, cmd_vals=({srv.cmd_vals.x}, {srv.cmd_vals.y}, {srv.cmd_vals.z}), cmd_flag={srv.cmd_flag}, cmd_rx={srv.cmd_rx}")
+        if not isinstance(cmd_vals, (list, tuple)) or len(cmd_vals) != 3:
+            self.get_logger().warn(
+                f"sendCmd failed: cmd_vals must be length 3, got {cmd_vals}"
+            )
+            return False
+
+        try:
+            srv = CTRLCmdSrv.Request()
+            srv.cmd_type = self.cmd_dict[action]
+            srv.cmd_vals.x = float(cmd_vals[0])
+            srv.cmd_vals.y = float(cmd_vals[1])
+            srv.cmd_vals.z = float(cmd_vals[2])
+            srv.cmd_flag = float(cmd_flag)
+            srv.cmd_rx = True
+        except Exception as e:
+            self.get_logger().warn(f"sendCmd failed while building request: {e}")
+            return False
+
         result = self.callService('/SAR_DC/CMD_Input', srv, CTRLCmdSrv)
 
-        # if result:
-        #     print(f"Service call succeeded: srv_success={result.srv_success}")
-        # else:
-        #     print("Service call failed")
-        # print("sendCmd in SAR_Base_Interface.py is completed")
+        if result is None:
+            self.get_logger().warn(f"sendCmd failed: no response for action={action}")
+            return False
 
-        # """Sends commands to SAR_DC->Controller via rosservice call
-
-        # Args:
-        #     action (string): The desired command
-        #     cmd_vals (list, optional): Command values typically in [x,y,z] notation. Defaults to [0,0,0].
-        #     cmd_flag (float, optional): Used as either a on/off flag for command or an extra float value if needed. Defaults to 1.
-        # """        
-        # print("sendCmd in SAR_Base_Interface.py is started")
+        if not result.srv_success:
+            self.get_logger().warn(
+                f"Command rejected by SAR_DC: action={action}"
+            )
+            return False
         
+        # self.get_logger().info(
+        #     f"Command accepted by SAR_DC: action={action}"
+        # )        
 
-        # ## CREATE SERVICE REQUEST MSG
-        # srv = CTRLCmdSrv.Request() 
+        return True
+    
+    def callService(self, srv_addr, srv_msg, srv_type, num_retries=3, call_timeout=2.0):
+        """
+        Call a ROS2 service using a cached client.
 
-        # srv.cmd_type = self.cmd_dict[action]
-        # srv.cmd_vals.x = cmd_vals[0]
-        # srv.cmd_vals.y = cmd_vals[1]
-        # srv.cmd_vals.z = cmd_vals[2]
-        # srv.cmd_flag = cmd_flag
-        # srv.cmd_rx = True
+        Important:
+        - While waiting for the async future, actively spin this node.
+        - This prevents timeouts caused by the future never being serviced.
+        """
+        client = self.getServiceClient(srv_type, srv_addr)
 
-        # ## TO SAR_DataConverter
-        # self.callService('/SAR_DC/CMD_Input',srv,CTRLCmdSrv)    
-        # print("sendCmd in SAR_Base_Interface.py is completed")
-
-    ## try several time for service
-
-
-    def callService(self, srv_addr, srv_msg, srv_type, num_retries=5):
-        print("callService in SAR_Base_Interface.py is started")
-        cli = self.create_client(srv_type, srv_addr)
-
-        # CHECK THAT SERVICE IS AVAILABLE
-        while not cli.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info(f"[WARNING] Service '{srv_addr}' not available, waiting...")
+        if not client.service_is_ready():
+            self.get_logger().warn(
+                f"Service '{srv_addr}' is not ready at call time."
+            )
+            return None
 
         for retry in range(num_retries):
             try:
-                #rclpy.spin_once(self) # need to check
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                print(f"Attempting to call service '{srv_addr}', attempt {retry + 1}")
-                future = cli.call_async(srv_msg)
-                loop.run_until_complete(future)
-
-                if future.result() is not None:
-                    print(f"Service call to '{srv_addr}' succeeded on attempt {retry + 1}")
-                    print(f"Service response: {future.result()}")
-                    loop.close()
-                    return future.result()
-                else:
-                    self.get_logger().warn(f"[WARNING] Attempt {retry + 1} to call service '{srv_addr}' failed: {future.exception()}")
-                    print(f"[WARNING] Attempt {retry + 1} to call service '{srv_addr}' failed: {future.exception()}")
-            except RuntimeError as e:
-                self.get_logger().error(f"[ERROR] Runtime error on attempt {retry + 1}: {e}")
-                print(f"Runtime error on attempt {retry + 1}: {e}")
+                future = client.call_async(srv_msg)
             except Exception as e:
-                self.get_logger().error(f"[ERROR] Unexpected error on attempt {retry + 1}: {e}")
-                print(f"Unexpected error on attempt {retry + 1}: {e}")
-            finally:
-                loop.close()
+                self.get_logger().warn(
+                    f"Failed to send async request to '{srv_addr}' "
+                    f"({retry+1}/{num_retries}): {e}"
+                )
+                continue
 
-        self.Done = True
-        self.get_logger().error(f"Service '{srv_addr}' call failed after {num_retries} attempts")
-        print(f"Service '{srv_addr}' call failed after {num_retries} attempts")
-        
-        print("callService in SAR_Base_Interface.py is completed")
+            start_time = time.time()
+
+            while time.time() - start_time < call_timeout:
+                # 핵심: future completion을 위해 spin_once 수행
+                try:
+                    rclpy.spin_once(self, timeout_sec=0.05)
+                except Exception as e:
+                    self.get_logger().warn(
+                        f"spin_once failed while waiting for service '{srv_addr}' "
+                        f"({retry+1}/{num_retries}): {e}"
+                    )
+                    break
+
+                if future.done():
+                    try:
+                        return future.result()
+                    except Exception as e:
+                        self.get_logger().warn(
+                            f"Service call failed for '{srv_addr}' "
+                            f"({retry+1}/{num_retries}): {e}"
+                        )
+                        break
+
+            self.get_logger().warn(
+                f"Timeout waiting for service '{srv_addr}' response "
+                f"({retry+1}/{num_retries})"
+            )
+
+        self.get_logger().warn(
+            f"Service call to '{srv_addr}' failed after {num_retries} retries."
+        )
         return None
 
-        # print("callService in SAR_Base_Interface.py is started")
-        # cli = self.create_client(srv_type, srv_addr)
+    def getServiceClient(self, srv_type, srv_addr, creation_timeout=3.0):
+        """
+        Return cached service client.
+        If client does not exist, create it once and wait for service only once.
+        """
+        key = (srv_addr, srv_type)
 
-        # # CHECK THAT SERVICE IS AVAILABLE
-        # while not cli.wait_for_service(timeout_sec=1.0):
-        #     self.get_logger().info(f"[WARNING] Service '{srv_addr}' not available, waiting...")
+        if key not in self.service_clients:
+            self.get_logger().info(f"Creating new service client for '{srv_addr}'")
+            client = self.create_client(srv_type, srv_addr)
 
-        # for retry in range(num_retries):
-        #     self.future = cli.call_async(srv_msg)
+            if not client.wait_for_service(timeout_sec=creation_timeout):
+                self.get_logger().error(
+                    f"Service '{srv_addr}' not available at creation "
+                    f"(waited {creation_timeout:.1f}s)."
+                )
+                # 그래도 cache에는 넣어둔다.
+                # 나중에 service가 살아나면 재사용 가능함.
+            else:
+                self.get_logger().info(
+                    f"Service '{srv_addr}' is available and client is ready."
+                )
 
-        #     try:
-        #         # Create an event loop if it doesn't exist in the current thread.
-        #         loop = asyncio.new_event_loop()
-        #         asyncio.set_event_loop(loop)
-        #         loop.run_until_complete(self.future)
+            self.service_clients[key] = client
 
-        #         if self.future.result() is not None:
-        #             return self.future.result()
-        #         else:
-        #             self.get_logger().warn(f"[WARNING] Attempt {retry + 1} to call service '{srv_addr}' failed: {self.future.exception()}")
-        #     except RuntimeError as e:
-        #         self.get_logger().error(f"[ERROR] Runtime error: {e}")
+        return self.service_clients[key]
 
-        # # IF SERVICE CALL FAILS THEN MARK SIM EPISODE AS DONE AND RETURN ERROR
-        # self.Done = True
-        # self.get_logger().error(f"Service '{srv_addr}' call failed after {num_retries} attempts")
-        # print("callService in SAR_Base_Interface.py is completed")
-        # return None
+    #Previous
+    # def callService(self, srv_addr, srv_msg, srv_type, num_retries=5):
+    #     print("callService in SAR_Base_Interface.py is started")
+    #     cli = self.create_client(srv_type, srv_addr)
+
+    #     # CHECK THAT SERVICE IS AVAILABLE
+    #     while not cli.wait_for_service(timeout_sec=1.0):
+    #         self.get_logger().info(f"[WARNING] Service '{srv_addr}' not available, waiting...")
+
+    #     for retry in range(num_retries):
+    #         try:
+    #             #rclpy.spin_once(self) # need to check
+    #             loop = asyncio.new_event_loop()
+    #             asyncio.set_event_loop(loop)
+    #             print(f"Attempting to call service '{srv_addr}', attempt {retry + 1}")
+    #             future = cli.call_async(srv_msg)
+    #             loop.run_until_complete(future)
+
+    #             if future.result() is not None:
+    #                 print(f"Service call to '{srv_addr}' succeeded on attempt {retry + 1}")
+    #                 print(f"Service response: {future.result()}")
+    #                 loop.close()
+    #                 return future.result()
+    #             else:
+    #                 self.get_logger().warn(f"[WARNING] Attempt {retry + 1} to call service '{srv_addr}' failed: {future.exception()}")
+    #                 print(f"[WARNING] Attempt {retry + 1} to call service '{srv_addr}' failed: {future.exception()}")
+    #         except RuntimeError as e:
+    #             self.get_logger().error(f"[ERROR] Runtime error on attempt {retry + 1}: {e}")
+    #             print(f"Runtime error on attempt {retry + 1}: {e}")
+    #         except Exception as e:
+    #             self.get_logger().error(f"[ERROR] Unexpected error on attempt {retry + 1}: {e}")
+    #             print(f"Unexpected error on attempt {retry + 1}: {e}")
+    #         finally:
+    #             loop.close()
+
+    #     self.Done = True
+    #     self.get_logger().error(f"Service '{srv_addr}' call failed after {num_retries} attempts")
+    #     print(f"Service '{srv_addr}' call failed after {num_retries} attempts")
+        
+    #     print("callService in SAR_Base_Interface.py is completed")
+    #     return None
+
 
 
     def setAngAcc_range(self, Ang_Acc_range):
@@ -420,8 +485,8 @@ class SAR_Base_Interface(Node):
         #result same with Sim_Settings.yaml
 
         ##DH
-        #r_P_O = (3.0,0.0,2.5) #simulation
-        #r_P_O = (4.15,0.0,2.7) #experiment
+        r_P_O = (3.0,0.0,2.75) #simulation
+        # r_P_O = (5.6,0.0,2.77) #experiment
         #print("@self.r_P_O :",self.r_P_O)
         #result same with Sim_Settings.yaml
         print("@r_P_O :",r_P_O)
@@ -460,7 +525,7 @@ class SAR_Base_Interface(Node):
         return [x_0,y_0,z_0]
 
     def _setPlanePose(self,Position=[0,0,2.0],Plane_Angle=180):
-        print()
+        self.sendCmd("Plane_Pose",Position,Plane_Angle)
 
     def _sampleFlightConditions(self,V_mag_range=[0.5,1.5],V_angle_range=[0,180]):
         ## SAMPLE V_MAG FROM UNIFORM DISTRIBUTION IN MAGNITUDE RANGE
@@ -577,13 +642,50 @@ class SAR_Base_Interface(Node):
         self._setPlanePose(cmd_vals,cmd_flag)
 
     ## ========== TRAJECTORY FUNCTIONS ==========
-        
+    # Previous
     def handle_P2P_traj(self):
-        x_d = self.userInput("Desired position (x,y,z):",float)
-        self.sendCmd('P2P_traj',cmd_vals=[np.nan,x_d[0],0.5],cmd_flag=0.0)
-        self.sendCmd('P2P_traj',cmd_vals=[np.nan,x_d[1],0.5],cmd_flag=1.0)
-        self.sendCmd('P2P_traj',cmd_vals=[np.nan,x_d[2],0.5],cmd_flag=2.0)
-        self.sendCmd('Activate_traj',cmd_vals=[1.0,1.0,1.0])
+        while True:
+            x_d = self.userInput("Desired position (x,y,z):", float)
+
+
+            if x_d[2] >= 2.0:
+                print("[ERROR] z value must be less than 2.0 m. Please enter again.")
+                continue
+
+            break
+
+        self.sendCmd('P2P_traj', cmd_vals=[np.nan, x_d[0], 0.5], cmd_flag=0.0)
+        self.sendCmd('P2P_traj', cmd_vals=[np.nan, x_d[1], 0.5], cmd_flag=1.0)
+        self.sendCmd('P2P_traj', cmd_vals=[np.nan, x_d[2], 0.5], cmd_flag=2.0)
+        self.sendCmd('Activate_traj', cmd_vals=[1.0, 1.0, 1.0])
+
+
+    # New(Failed)
+    # def handle_P2P_traj(self):
+    #     x_d = self.userInput("Desired position (x,y,z): ", float)
+
+    #     if not isinstance(x_d, list) or len(x_d) != 3:
+    #         self.get_logger().warn("Please enter exactly 3 values: x,y,z")
+    #         return
+
+    #     if any(np.isnan(v) for v in x_d):
+    #         self.get_logger().warn("Desired position contains NaN")
+    #         return
+
+    #     traj_accel = 0.5
+
+    #     ok = self.sendCmd(
+    #         'P2P_traj',
+    #         cmd_vals=[x_d[0], x_d[1], x_d[2]],
+    #         cmd_flag=traj_accel
+    #     )
+    #     if not ok:
+    #         self.get_logger().warn("P2P_traj command failed")
+    #         return
+
+    #     self.get_logger().info(
+    #         f"P2P trajectory uploaded: target=({x_d[0]:.3f}, {x_d[1]:.3f}, {x_d[2]:.3f}), accel={traj_accel:.3f}"
+    #     )
 
     def handle_Global_Vel_traj(self):
 
@@ -675,6 +777,68 @@ class SAR_Base_Interface(Node):
             self.sendCmd('Activate_traj',cmd_vals=[1.0,0.0,1.0])
         else:
             raise Exception("Flight not approved")
+
+    # New Failed
+    # def handle_Impact_traj(self):
+
+    #     ## GET RELATIVE VEL CONDITIONS 
+    #     V_mag,V_angle = self.userInput("Flight Velocity (V_mag,V_angle):",float)
+
+    #     #print("V_mag value : ", V_mag)
+    #     #print("V_angle value : ", V_angle)
+
+    #     ## CALC RELATIVE VELOCITIES
+    #     V_x = V_mag*np.cos(np.radians(V_angle))
+    #     #print("V_tx value : ", V_tx)
+    #     V_y = 0
+    #     V_z = V_mag*np.sin(np.radians(V_angle))
+    #     #print("V_perp value : ", V_perp)
+    #     V_B_O = np.array([V_x,V_y,V_z])
+    #     #print("V_B_O value : ", V_B_O)
+
+    #     self.Plane_Angle_rad = 0.0
+
+    #     ## CALCULATE GLOBAL VELOCITIES
+    #     V_B_P = self.R_WP(V_B_O,self.Plane_Angle_rad)
+    #     #print("V_B_P value : ", V_B_P)
+    #     #print("Plane_Angle_rad value : ", self.Plane_Angle_rad)
+        
+
+    #     ## POS VELOCITY CONDITIONS MET
+    #     r_B_O = self.startPos_ImpactTraj(V_B_P,Acc=None)
+
+    #     #print("Plane_Angle_rad valuew : ", self.Plane_Angle_rad)
+    #     print("Final : r_B_O :",r_B_O)
+    #     #result same with Sim_Settings.yaml
+
+    #     ## APPROVE START POSITION
+    #     print(YELLOW,f"Start Position: ({r_B_O[0]:.2f},{r_B_O[1]:.2f},{r_B_O[2]:.2f})",RESET)
+    #     str_input = self.userInput("Approve start position (y/n): ",str)
+    #     if str_input == 'y':
+    #         traj_accel = 0.5
+    #         ok = self.sendCmd(
+    #             'P2P_traj',
+    #             cmd_vals=[r_B_O[0], r_B_O[1], r_B_O[2]],
+    #             cmd_flag=traj_accel
+    #         )
+    #         if not ok:
+    #             raise Exception("Failed to send P2P_traj command")
+    #     else:
+    #         raise Exception("Start position not approved")
+
+    #     ## POLICY SENDING
+    #     cmd_vals = self.userInput("Set desired (Tau,AngAcc) Policy: ",float)
+    #     cmd_vals.append(-100.0) # Append extra value to match framework
+    #     self.sendCmd('Policy',cmd_vals,cmd_flag=0.0)
+
+    #     ## APPROVE FLIGHT
+    #     str_input = self.userInput("Approve flight (y/n): ",str)
+    #     if str_input == 'y':
+    #         self.sendCmd('Const_Vel_traj',cmd_vals=[V_B_O[0],self.TrajAcc_Max[0],self.TrajJerk_Max[0]],cmd_flag=0.0)
+    #         self.sendCmd('Const_Vel_traj',cmd_vals=[V_B_O[2],self.TrajAcc_Max[2],self.TrajJerk_Max[2]],cmd_flag=2.0)
+    #         self.sendCmd('Activate_traj',cmd_vals=[1.0,0.0,1.0])
+    #     else:
+    #         raise Exception("Flight not approved")
             
 
     ## ========== SYSTEM FUNCTIONS ========== 
@@ -789,6 +953,7 @@ class SAR_Base_Interface(Node):
     ##   Publishers/Subscribers 
     # ============================
     def _preInit(self):
+        self.service_clients = {}
 
         ## COMMAND DICT
         self.cmd_dict = {
@@ -898,6 +1063,8 @@ class SAR_Base_Interface(Node):
         self.Tau_CR_trg = np.nan
         self.Tau_CM_trg = np.nan
         self.Tau_DH_trg = np.nan
+        self.Tau_Cam_GT_trg = np.nan
+        self.Theta_x_Cam_GT_trg = np.nan
 
         self.Vel_mag_B_O_trg = np.nan
         self.Vel_angle_B_O_trg = np.nan
@@ -951,9 +1118,10 @@ class SAR_Base_Interface(Node):
         self.Plane_Angle_rad = np.nan
         self.r_P_O = np.full([3],np.nan)
 
-    def _clockCallback(self,msg):
-        
+    def _clockCallback(self, msg):
         self.t = msg.clock.sec + msg.clock.nanosec * 1e-9
+        self.last_clock_time = self.t
+        self.clock_msg_count += 1
 
 
 #!!!! time need to solve
@@ -1019,6 +1187,10 @@ class SAR_Base_Interface(Node):
 
         #print("_SAR_StateDataCallback is run")
 
+        ##For checking Sim Status
+        self.state_msg_count += 1
+        self.last_state_wall_time = time.time()
+
 
 
 #!!!!! Time and NNoutput need to solve
@@ -1074,6 +1246,8 @@ class SAR_Base_Interface(Node):
         self.Tau_CR_trg = np.round(TriggerData_msg.tau_cr_trg,3)
         self.Tau_CM_trg = np.round(TriggerData_msg.tau_cm_trg,3)
         self.Tau_DH_trg = np.round(TriggerData_msg.tau_dh_trg,3)
+        self.Tau_Cam_GT_trg = np.round(TriggerData_msg.tau_cam_gt_trg,3)
+        self.Theta_x_Cam_GT_trg = np.round(TriggerData_msg.theta_x_cam_gt_trg,3)
         self.Theta_x_CM_trg = np.round(TriggerData_msg.theta_x_cm_trg,3)
         
         self.Vel_mag_B_O_trg = np.round(TriggerData_msg.vel_mag_b_o_trg,3)

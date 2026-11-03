@@ -3,11 +3,15 @@
 <package format="3">
   <name>sar_data_converter</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>Data converter package for SAR project</description>
   <maintainer email="thakd037@gmail.com">dlee</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>sar_msgs</depend>
+  <depend>crazyflie_interfaces</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

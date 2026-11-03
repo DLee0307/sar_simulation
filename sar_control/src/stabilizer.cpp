@@ -58,10 +58,7 @@ bool Controller::Get_Obs_Resp(sar_msgs::CTRL_Get_Obs::Request &req, sar_msgs::CT
 //From : SAR_DataConverter.h TO : CTRL_Command(&CTRL_Cmd);
 void Controller::CMD_Service_Resp(const sar_msgs::srv::CTRLCmdSrv::Request::SharedPtr request,
                      sar_msgs::srv::CTRLCmdSrv::Response::SharedPtr response) {
-    std::cout << "service is requested in controller : " <<  std::endl;
-
-    // RESPOND THE SRV WAS RECIEVED
-    response->srv_success = true;
+    // std::cout << "service is requested in controller : " <<  std::endl;
 
     // UPDATE CTRL_Cmd STRUCT VALUES
     CTRL_Cmd.cmd_type = request->cmd_type;
@@ -71,15 +68,16 @@ void Controller::CMD_Service_Resp(const sar_msgs::srv::CTRLCmdSrv::Request::Shar
     CTRL_Cmd.cmd_flag = request->cmd_flag;
     CTRL_Cmd.cmd_rx = request->cmd_rx;
 /**/
-    std::cout << request->cmd_type <<  std::endl;
-    std::cout << "cmd_type: " << request->cmd_type <<  std::endl;
-    std::cout << "cmd_val1: " << request->cmd_vals.x <<  std::endl;
-    std::cout << "cmd_val2: " << request->cmd_vals.y <<  std::endl;
-    std::cout << "cmd_val3: " << request->cmd_vals.z <<  std::endl;
-    std::cout << "cmd_flag: " << request->cmd_flag <<  std::endl;
-    std::cout << "cmd_rx: " << request->cmd_rx <<  std::endl;
+    // std::cout << request->cmd_type <<  std::endl;
+    // std::cout << "cmd_type: " << request->cmd_type <<  std::endl;
+    // std::cout << "cmd_val1: " << request->cmd_vals.x <<  std::endl;
+    // std::cout << "cmd_val2: " << request->cmd_vals.y <<  std::endl;
+    // std::cout << "cmd_val3: " << request->cmd_vals.z <<  std::endl;
+    // std::cout << "cmd_flag: " << request->cmd_flag <<  std::endl;
+    // std::cout << "cmd_rx: " << request->cmd_rx <<  std::endl;
 
-
+    // RESPOND THE SRV WAS RECIEVED
+    response->srv_success = true;
 }
 
 void Controller::Get_Obs_Resp(const sar_msgs::srv::CTRLGetObs::Request::SharedPtr request,
@@ -90,12 +88,17 @@ void Controller::Get_Obs_Resp(const sar_msgs::srv::CTRLGetObs::Request::SharedPt
     response->tau_cr = Tau_CR;
     response->tau_dh = Tau_DH;
     response->tau_cm = Tau_CM;
+    response->tau_cam_gt = Tau_Cam_GT;
+
     response->theta_x = Theta_x;
     response->theta_x_dh = Theta_x_DH;
     response->theta_y_dh = Theta_y_DH;
     response->theta_x_cm = Theta_x_CM;
+    response->theta_x_cam_gt = Theta_x_Cam_GT;
+    
     response->d_perp = D_perp;
     response->d_perp_cr = D_perp_CR;
+    response->d_perp_cam = D_perp_Cam;
     response->plane_angle_deg = Plane_Angle_deg;
 
 }
@@ -168,26 +171,36 @@ void Controller::OpticalFlow_Update_Callback(const sar_msgs::msg::OpticalFlowDat
     Theta_y_DH = msg->theta_y;
 
     // Tau_DIFF = Tau - Tau_DH;
-    // double Tau_difference2 = Tau_CR - Tau_DH;
-    // double Theta_x_groundtruth = Vel_B_P.x/(D_perp-0.07175);
+
 
     // std::cout << "$$$$$$Vel_B_P.x : " << Vel_B_P.x << std::endl;
     // std::cout << "$$$$$$D_perp : " << D_perp << std::endl;
     // std::cout << "$$$$$$Theta_x : " << Theta_x << std::endl;
     // std::cout << "$$$$$$Theta_x_groundtruth : " << Theta_x_groundtruth << std::endl;
     // std::cout << "$$$$$$Theta_x_DH : " << Theta_x_DH << std::endl;
-    
+
+    // Active Vision
+    // double Tau_groundtruth = Tau - 0.07175/Vel_B_P.z; //camera general
+    // double Tau_difference = Tau_groundtruth - Tau_DH;
+
+    // std::cout << "$$$$$$Tau_groundtruth : " << Tau_groundtruth << std::endl;
+    // std::cout << "$$$$$$Tau_DH : " << Tau_DH << std::endl;
+    // std::cout << "$$$$$$Tau_difference : " << Tau_difference << std::endl;
+
+    // double Theta_x_groundtruth = Vel_B_P.x/(D_perp-0.07175);
+    // double Theta_x_difference = Theta_x_groundtruth - Theta_x_DH;
+
+    // std::cout << "$$$$$$Theta_x_groundtruth : " << Theta_x_groundtruth << std::endl;
+    // std::cout << "$$$$$$Theta_x_DH : " << Theta_x_DH << std::endl;
+    // std::cout << "$$$$$$Theta_x_difference : " << Theta_x_difference << std::endl;
+    // Active Vision
 
     // std::cout << "$$$$$$D_perp : " << D_perp << std::endl;
     // std::cout << "$$$$$$Vel_B_P.z : " << Vel_B_P.z << std::endl;
-    double Tau_groundtruth = Tau - 0.07175/Vel_B_P.z; //camera general
+    
     // double Tau_groundtruth = Tau - 0.20475/Vel_B_P.z; //camera up
 
 
-    //std::cout << "$$$$$$Tau : " << Tau << std::endl;
-    // std::cout << "$$$$$$Tau_groundtruth : " << Tau_groundtruth << std::endl;
-    // std::cout << "$$$$$$Tau_DH : " << Tau_DH << std::endl;
-    // std::cout << "$$$$$$Tau_DIFF : " << Tau_difference3 << std::endl;
 
 
     // std::cout << "$$$$$$Tau_DH : " << Tau_DH << std::endl;
@@ -787,6 +800,8 @@ void Controller::publishCtrlData()
     CtrlData_msg.tau_cm_trg = Tau_CM_trg;
     CtrlData_msg.theta_x_cm_trg = Theta_x_CM_trg;
     CtrlData_msg.tau_dh_trg = Tau_DH_trg;
+    CtrlData_msg.tau_cam_gt_trg = Tau_Cam_GT_trg;
+    CtrlData_msg.theta_x_cam_gt_trg = Theta_x_Cam_GT_trg;
 
     // POLICY ACTIONS (TRIGGER)
     CtrlData_msg.nn_output_trg = {tanhf(Y_output_trg[0]),tanhf(Y_output_trg[1]),Y_output_trg[2],Y_output_trg[3]};
